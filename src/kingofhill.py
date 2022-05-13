@@ -4,12 +4,16 @@ from anytree import Node, RenderTree
 import copy
 
 
+# Player-Klasse. Macht eigentlich noch nix außer klartextübersetzung 1->W, -1->B, kann auch ersetzt werden.
 class Player():
     def __init__(self):
+        # weiß beginnt
         self.current = 1
     def __switch__(self):
+        # wechselt die Spieler ab
         self.current *= -1
     def __set__(self, color_code):
+        # setzt aktuellen Spieler -> vielleicht für funktion a la: bit, player = FENtoBit(FEN)
         if color_code == 'W':
             self.current = 1
         elif color_code == 'B':
@@ -18,6 +22,7 @@ class Player():
             pass
 
     def __get__(self):
+        # extrahiert aktuellen Spieler als String
         if self.current == 1:
             return 'W'
         elif self.current == -1:
@@ -31,14 +36,16 @@ player = Player()
 
 
 def bitboard(indices=[]):
-    # defines basic bitboards of type int8/boolean
+    # defines basic bitboard of type int8/boolean
+    # gibt bitboard mit 1en für jeden index in indices und ansonsten 0en aus
     bb = np.zeros((8,8), dtype=bool)
     bb.flat[indices] = True
     return bb
 
 
 def give_bitboards():
-    # creates bitboards
+    # creates bitboards as dictionary
+    # ein gesamter Spielzustand als Spielbrett wird durch bb definiert
     bb = {
         # piece colors
         "W" : bitboard(),
@@ -56,6 +63,8 @@ def give_bitboards():
 
 def give_static_bitboards():
     # creates static bitboards
+    # bitboards für Reihen von 1en für jeweilige Reihe/Spalte
+    # Beispiel: bitboard mit 1 bei b3: b = sbb['lb'] & sbb['3']
     sbb = {
         # lines
         "la" : bitboard(),
@@ -105,8 +114,13 @@ sbb = give_static_bitboards()
 
 
 def init_game(b, player):
-    player = player.__set__('W')
     # initializes board with pieces
+    # stellt Spielfiguren auf die jeweiligen Felder auf Spielfeld
+    # -> könnte auch mit static bitboards initialisiert werden
+    
+    # weiß beginnt
+    player = player.__set__('W')
+    b = give_bitboards()
     
     # colored pieces for black/white player
     b['W'][0:2,:] = True
@@ -125,7 +139,10 @@ def init_game(b, player):
 
 def print_board(b, flip=False):
     # pretty prints board
-    # flip: white at bottom
+    # flip: white at bottom (typical orientation of board, but reverse order of array when printing (up <> down)
+
+    print(b)
+    
     board = np.empty((8,8), dtype=str)
     board[:] = '_'
     
@@ -156,6 +173,7 @@ def print_board(b, flip=False):
     return board
 
 def print_board_list(b_list, flip=False):
+    # prints a whole list of bitboard_dicts
     for b in b_list:
         if b:
             print_board(b, flip)
@@ -299,18 +317,6 @@ def split_capture_quiet(b, bb_to, player):
 
 ### https://www.chessprogramming.org/Pieces_versus_Directions
 
-'''
-
-for all pieces {
-  generateMovetargets(piece);
-  for all capture targets
-      generate captures (move or capture list)
-  for all empty square targets
-      generate quite moves (move list)
-}
-
-'''
-
 def generate_search_tree(b, player):
     # generate a searchtree and search for possible pseudolegal moves
     moves = Node('root')
@@ -320,20 +326,16 @@ def generate_search_tree(b, player):
 def generate_moves(b, player):
 
     # king moves
-
     # queen moves
-    
     # knight moves
-
     # rook moves
-    
     # bishop moves
-    
     # pawn moves
     
     
     ### erstelle Liste aller möglichen Züge durch Simulation ###
     
+    # list of list: liste mit elementen: liste mit allen zügen für jeden Figurentyp
     # add possible capture moves
     move_list_capture = []
     # add quiet moves
@@ -341,21 +343,12 @@ def generate_moves(b, player):
     
     # king
     move_list_capture_king, move_list_quiet_king = gen_moves_king(b, player)  
-    #if move_list_capture_king:
-    print(print_board_list(move_list_capture_king))
     move_list_capture.append(move_list_capture_king)
-    #if move_list_capture_king:
-    print(print_board_list(move_list_quiet_king))
     move_list_quiet.append(move_list_quiet_king)
-    
     
     # knight
     move_list_capture_knight, move_list_quiet_knight = gen_moves_knight(b, player)  
-    #if move_list_capture_knight:
-    print(print_board_list(move_list_capture_knight))
     move_list_capture.append(move_list_capture_knight)
-    #if move_list_capture_knight:
-    print(print_board_list(move_list_quiet_knight))
     move_list_quiet.append(move_list_quiet_knight)
     return move_list_capture, move_list_quiet
 
@@ -364,11 +357,7 @@ def gen_capture_quiet_lists_from_all_moves(b, bb_from_plus_all_moves_list):
     move_list_capture = []
     move_list_quiet = []
     for bb_from, bb_all_moves in bb_from_plus_all_moves_list:
-        #print('bb_from:')
-        #print(bb_from)
-        #print('bb_all_moves:')
-        #print(bb_all_moves)
-        
+   
         bb_capture, bb_quiet = split_capture_quiet(b, bb_all_moves, player)
         bb_capture_list = serialize_bb(bb_capture)
         bb_quiet_list = serialize_bb(bb_quiet)
@@ -377,19 +366,24 @@ def gen_capture_quiet_lists_from_all_moves(b, bb_from_plus_all_moves_list):
         quiet_list = [make_move(b, bb_from, bb_to) for bb_to in bb_quiet_list]
         
         
-        #if capture_list:
-        move_list_capture.append(capture_list)
-        #if quiet_list:
-        move_list_quiet.append(quiet_list)
-            
-        print('capture_list')
-        print(capture_list)
-        print(print_board_list(capture_list))
-        print('quiet_list')
-        print(quiet_list)
-        print(print_board_list(quiet_list))
+        if capture_list:
+            move_list_capture.append(capture_list)
+        if quiet_list:
+            move_list_quiet.append(quiet_list)
         
-    return move_list_capture, move_list_quiet
+        
+        
+    # flacht list of list zu liste ab [[a,b],[c,d]] -> [a,b,c,d] (zugehörigkeit für figuren geht flöten)
+    #[item for sublist in t for item in sublist]
+    move_list_capture_flat = [move for moves_per_piece_type in capture_list for move in moves_per_piece_type]
+    move_list_quiet_flat = [move for moves_per_piece_type in quiet_list for move in moves_per_piece_type]
+    
+    print('capture_list')
+    print(print_board_list(move_list_capture_flat))
+    print('quiet_list')
+    print(print_board_list(move_list_quiet_flat))
+    
+    return move_list_capture_flat, move_list_quiet_flat
 
 def gen_moves_pawn(b, player):
     pass
@@ -442,17 +436,8 @@ print(player.__get__())
 
 cap, qui = generate_moves(b2, player) # generiere alle Züge aus Position b
 print('capture:')
-for moves in cap:
-    if moves:
-        #print(moves)
-        print('possible moves')
-        for bb in moves: 
-            print('move:')
-            print(bb)
-            print(print_board(bb))
+print(cap)
+#print_board_list(cap)
 print('quiet:')
-for moves in qui:
-    if moves:
-        print('possible moves')
-        for bb in moves: 
-            print(print_board(bb))
+print(qui)
+#print_board_list(qui)
