@@ -2,6 +2,7 @@ import numpy as np
 # requires: pip install anytree
 from anytree import Node, RenderTree
 import copy
+from interface import *
 
 
 # Player-Klasse. Macht eigentlich noch nix außer klartextübersetzung 1->W, -1->B, kann auch ersetzt werden.
@@ -31,8 +32,40 @@ class Player():
             return 'error'
         
         
-player = Player()
+player = Player()  
 
+def turn(self, FEN):#ein kompletter zug der ki
+    bb=FENtoBit(FEN)
+    checkmate(FEN,player)
+    moves=player.generatemoves(bb)#liste aller moves
+    for x in moves:#outsourcen
+        tree.insertnode(x)#eine Node in Baum hinzufügen
+    tree=player.utility(tree)#bewertungsfunktion ändert knoten des baums
+    move=player.alphabetasearch(tree)
+    bb=player.make_move(move)
+    FEN=BittoFEN(bb)
+    return FEN
+def checkmate(FEN,player):
+    b=BittoFEN(FEN)
+    #TODO b-> Spiel beendet?
+    #spiel gewonnen
+    #player.win=True
+    #return True
+
+    #else:
+    return False
+def newGame():#unsere KI gegen sich selbst
+    player=[]
+    player[0]=Player()
+    player[1]=Player()
+    FEN=BittoFEN(init_game())
+    t=init_tree(FEN)#leerer baum mit FEN als root
+    x=0
+    while (not checkmate(FEN,player[x])):
+        FEN=player[x].turn(FEN)#TODO hier zeitbeschränkung z.B. per threads einbauen
+        x=(x+1)%2#wechsel zwischen 0 und 1
+        #print_bitboard(FEN)
+    print("Spieler"+x+"hat verloren!")
 
 
 def bitboard(indices=[]):
@@ -355,13 +388,13 @@ def moves_queen_B(bb_from):
     return moves_queen(bb_from) & ~( b['W'])
 
 def moves_bishop_B(bb_from):
-    return moves_bishop(bb_from,"b")
+    return moves_bishop(bb_from,"B")
 
 def moves_bishop_W(bb_from):
-    return moves_bishop(bb_from,"w")
+    return moves_bishop(bb_from,"W")
 
 def moves_rook_B(bb_from):
-    return moves_rook(bb_from,"b")
+    return moves_rook(bb_from,"B")
 
 def moves_rook_B(bb_from):
     return moves_rook(bb_from,"W")
