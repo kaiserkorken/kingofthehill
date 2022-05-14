@@ -2,7 +2,9 @@ import numpy as np
 # requires: pip install anytree
 from anytree import Node, RenderTree
 import copy
-from interface import *
+from bitboard import *
+from kingofhill import make_move
+from tree import *
 
 
 # Player-Klasse. Macht eigentlich noch nix außer klartextübersetzung 1->W, -1->B, kann auch ersetzt werden.
@@ -30,191 +32,26 @@ class Player():
             return 'B'
         else:
             return 'error'
-        
-        
+    def utility(self,tree):
+        pass
+    def alphabetasearch(self,tree):
+        #alphabetasearch
+        #Node = findNode(ergebnis)
+        #return Node - (bitboard)
+        pass
+    #TODO insert functions in class
+    
+    def generate_moves(self,b):
+        generate_moves(b,self)
+    def make_move(self,b_old,bb_from, bb_to):
+        make_move(b_old,bb_from,bb_to)
+
 player = Player()  
-
-def turn(self, FEN):#ein kompletter zug der ki
-    bb=FENtoBit(FEN)
-    checkmate(FEN,player)
-    moves=player.generatemoves(bb)#liste aller moves
-    for x in moves:#outsourcen
-        tree.insertnode(x)#eine Node in Baum hinzufügen
-    tree=player.utility(tree)#bewertungsfunktion ändert knoten des baums
-    move=player.alphabetasearch(tree)
-    bb=player.make_move(move)
-    FEN=BittoFEN(bb)
-    return FEN
-def checkmate(FEN,player):
-    b=BittoFEN(FEN)
-    #TODO b-> Spiel beendet?
-    #spiel gewonnen
-    #player.win=True
-    #return True
-
-    #else:
-    return False
-def newGame():#unsere KI gegen sich selbst
-    player=[]
-    player[0]=Player()
-    player[1]=Player()
-    FEN=BittoFEN(init_game())
-    #t=init_tree(FEN)#leerer baum mit FEN als root
-    x=0
-    while (not checkmate(FEN,player[x])):
-        FEN=player[x].turn(FEN)#TODO hier zeitbeschränkung z.B. per threads einbauen
-        x=(x+1)%2#wechsel zwischen 0 und 1
-        #print_bitboard(FEN)
-    print("Spieler"+x+"hat verloren!")
-
-
-def bitboard(indices=[]):
-    # defines basic bitboard of type int8/boolean
-    # gibt bitboard mit 1en für jeden index in indices und ansonsten 0en aus
-    bb = np.zeros((8,8), dtype=bool)
-    bb.flat[indices] = True
-    return bb
-
-
-def give_bitboards():
-    # creates bitboards as dictionary
-    # ein gesamter Spielzustand als Spielbrett wird durch bb definiert
-    bb = {
-        # piece colors
-        "W" : bitboard(),
-        "B" : bitboard(),
-        # pieces
-        "k" : bitboard(),
-        "q" : bitboard(),
-        "n" : bitboard(),
-        "r" : bitboard(),
-        "b" : bitboard(),
-        "p" : bitboard(),
-    }
-    return bb
-
-
-def give_static_bitboards():
-    # creates static bitboards
-    # bitboards für Reihen von 1en für jeweilige Reihe/Spalte
-    # Beispiel: bitboard mit 1 bei b3: b = sbb['lb'] & sbb['3']
-    sbb = {
-        # lines
-        "la" : bitboard(),
-        "lb" : bitboard(),
-        "lc" : bitboard(),
-        "ld" : bitboard(),
-        "le" : bitboard(),
-        "lf" : bitboard(),
-        "lg" : bitboard(),
-        "lh" : bitboard(),
-        # rows
-        "1" : bitboard(),
-        "2" : bitboard(),
-        "3" : bitboard(),
-        "4" : bitboard(),
-        "5" : bitboard(),
-        "6" : bitboard(),
-        "7" : bitboard(),
-        "8" : bitboard(),
-    }
-    
-    # lines
-    sbb['la'][:,0] = True
-    sbb['lb'][:,1] = True
-    sbb['lc'][:,2] = True
-    sbb['ld'][:,3] = True
-    sbb['le'][:,4] = True
-    sbb['lf'][:,5] = True
-    sbb['lg'][:,6] = True
-    sbb['lh'][:,7] = True
-    
-    # rows
-    sbb['1'][0,:] = True
-    sbb['2'][1,:] = True
-    sbb['3'][2,:] = True
-    sbb['4'][3,:] = True
-    sbb['5'][4,:] = True
-    sbb['6'][5,:] = True
-    sbb['7'][6,:] = True
-    sbb['8'][7,:] = True
-    
-    return sbb
 
 sbb = give_static_bitboards()
 bibsbbl=["la","lb","lc","ld","le","lf","lg","lh"]
 bibssbr=["1","2","3","4","5","6","7","8"]
-        
-
-
-def init_game(b, player):
-    # initializes board with pieces
-    # stellt Spielfiguren auf die jeweiligen Felder auf Spielfeld
-    # -> könnte auch mit static bitboards initialisiert werden
-    
-    # weiß beginnt
-    player = player.__set__('W')
-    b = give_bitboards()
-    
-    # colored pieces for black/white player
-    b['W'][0:2,:] = True
-    b['B'][-2:,:] = True
-    
-    # adds kings('k'), queens, knights, rooks, bishops and pawns to the board on respecting fields
-    b['k'][[0,-1],[4,4]] = True
-    b['q'][[0,-1],[3,3]] = True
-    b['n'][[0,0,-1,-1],[1,-2,1,-2]] = True
-    b['r'][[0,0,-1,-1],[0,-1,0,-1]] = True
-    b['b'][[0,0,-1,-1],[2,-3,2,-3]] = True
-    b['p'][[1,-2],:] = True
-
-    return b
-
-
-def print_board(b, flip=False):
-    # pretty prints board
-    # flip: white at bottom (typical orientation of board, but reverse order of array when printing (up <> down)
-
-    print(b)
-    
-    board = np.empty((8,8), dtype=str)
-    board[:] = '_'
-    
-    # black player: lower case, white player: UPPER CASE
-    
-    board[b['B'] & b['k']] = 'k'
-    board[b['B'] & b['q']] = 'q'
-    board[b['B'] & b['n']] = 'n'
-    board[b['B'] & b['r']] = 'r'
-    board[b['B'] & b['b']] = 'b'
-    board[b['B'] & b['p']] = 'p'
-    
-    board[b['W'] & b['k']] = 'K'
-    board[b['W'] & b['q']] = 'Q'
-    board[b['W'] & b['n']] = 'N'
-    board[b['W'] & b['r']] = 'R'
-    board[b['W'] & b['b']] = 'B'
-    board[b['W'] & b['p']] = 'P'
-
-    cols = np.reshape([['a','b','c','d','e','f','g','h'],['-','-','-','-','-','-','-','-']],(2,8))
-    rows = np.reshape([['/','-','1','2','3','4','5','6','7','8'],['|','+','|','|','|','|','|','|','|','|']],(2,10))
-    
-    board = np.concatenate((cols, board), axis=0)
-    board = np.concatenate((rows.T, board), axis=1)
-    
-    if flip == True:
-        board = np.flip(board, axis=0)
-    return board
-
-def print_board_list(b_list, flip=False):
-    # prints a whole list of bitboard_dicts
-    for b in b_list:
-        if b:
-            print_board(b, flip)
-        else:
-            print('empty board')
-            
-            
+                   
 
 ### PURE QUIET MOVES ###
 
@@ -296,15 +133,20 @@ def moves_rook(b,color):#-> bitboard aller mögl züge des Turms
                 plays[x,y-z]=1
     return plays
 
-def moves_bishop(b, color):
+def moves_bishop(b, player):
+    if player.current:
+        bb = b['W']
+        enemy= b["B"]
+    else:
+        bb = b['B']
+        enemy["W"]
     #Läufer Position mit Kreuz bitboards verunden (-> entsprechendes Kreuz auswählen)
     #idee kreuz bitboards: kreuz in der mitte implementieren und damm immer um pos(bishop) verschieben
     #-> Kreuz oder pos -> kreuz mit zügen
     #cut(Kreuz, color)
     #-> Kreuz geht nur bis dahin wo ein eigner spieler steht (<) oder ein gegnerischer spieler (<=) 
-    pos=np.where(b["b"]==1 & b[str(color)] ==1 )#position des läufers ermitteln
+    pos=np.where(b["b"]==1 & bb ==1 )#position des läufers ermitteln
     #print(pos)#[x,y]
-    enemy=kcolor(color)
 
     #iterative variante:
     plays=bitboard()
@@ -317,7 +159,7 @@ def moves_bishop(b, color):
     for z in range(7):
         if rbool and x+z<=7 and y+z<=7:#indices inbound
             s=b[enemy][x+z,y+z]
-            if (b[color][x+z,y+z]|s):#Feld besetzt
+            if (bb[x+z,y+z]|s):#Feld besetzt
                 rbool=False
                 if (s):#feld mit gegner besetzt ->schlagen
                     plays[x+z,y+z]=1
@@ -325,7 +167,7 @@ def moves_bishop(b, color):
                 plays[x+z,y]=1#mögl Zug
         if upbool and x-z>=0 and y+z<=7:
             s=b[enemy][x-z,y+z]
-            if (b[color][x-z,y+z]|s):#
+            if (bb[x-z,y+z]|s):#
                 upbool=False
                 if (s):
                     plays[x-z,y+z]=1
@@ -333,7 +175,7 @@ def moves_bishop(b, color):
                 plays[x-z,y+z]=1
         if lbool and x-z>=0 and y-z>=0:
             s=b[enemy][x-z,y-z]
-            if (b[color][x-z,y-z]|s):#
+            if (bb[x-z,y-z]|s):#
                 lbool=False
                 if (s):
                     plays[x-z,y-z]=1
@@ -341,7 +183,7 @@ def moves_bishop(b, color):
                 plays[x-1,y-z]=1
         if dobool and x+z<=7 and y-z>=0:
             s=b[enemy][x+z,y-z]
-            if (b[color][x+z,y-z]|s):#
+            if (bb[x+z,y-z]|s):#
                 dobool=False
                 if (s):
                     plays[x+z,y-z]=1
@@ -381,10 +223,10 @@ def moves_king_B(b):
 def moves_queen(b):#returns bitboard of all possible plays
     return (moves_bishop(b)|moves_rook(b))
 
-def moves_queen_W(bb_from):
+def moves_queen_W(b,bb_from):
     return moves_queen(bb_from) & ~( b['W'])
 
-def moves_queen_B(bb_from):
+def moves_queen_B(b,bb_from):
     return moves_queen(bb_from) & ~( b['W'])
 
 def moves_bishop_B(bb_from):
@@ -475,9 +317,6 @@ def make_move(b_old, bb_from, bb_to):
 
 
 
-def serialize_bb(bb):
-    # gibt einzelne bitboards für jedes True an entsprechender Stelle zurück
-    return [bitboard(index) for index in np.flatnonzero(bb)]
 
 def split_capture_quiet(b, bb_to, player):
     if player.current:
@@ -494,7 +333,11 @@ def split_capture_quiet(b, bb_to, player):
 
 ### https://www.chessprogramming.org/Pieces_versus_Directions
 
-
+def generate_search_tree(b, player):
+    # generate a searchtree and search for possible pseudolegal moves
+    moves = Node('root')
+    
+    return moves
 
 def generate_moves(b, player):
 
@@ -584,9 +427,11 @@ def gen_moves_knight(b, player):
     # zu jeder Figur capture- und quiet-listen erstellen
     move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, bb_from_plus_all_moves_list)
     return move_list_capture, move_list_quiet
-    
-    
-    
+
+"""
+        
+
+
 ### DEMO ###
     
     
@@ -614,3 +459,4 @@ print(cap)
 print('quiet:')
 print(qui)
 #print_board_list(qui)
+"""
