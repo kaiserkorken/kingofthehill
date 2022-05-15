@@ -386,8 +386,11 @@ def moves_queen(b):#returns bitboard of all possible plays
     return (moves_bishop(b)|moves_rook(b))
 
 def moves_queen_W(b, bb_from):
-    return moves_queen(b, bb_from) & ~( b['W']) # Zielfelder der gegnerischen Figur sind erlaubt (Schlagen)
-eigene Figuren sind Blockaden
+    # gibt bitboard mit allen Zügen der Dame aus
+    # b: Spielfeld-Dictionary, bb_from: 1 an Position der Dame
+    # Zielfelder der gegnerischen Figur sind erlaubt (Schlagen)
+    # eigene Figuren sind Blockaden
+    return moves_queen(b, bb_from) & ~( b['W']) 
 
 def moves_queen_B(b, bb_from):
     return moves_queen(b, bb_from) & ~( b['B'])
