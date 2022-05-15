@@ -371,6 +371,7 @@ def moves_king_W(b):
 
 
 def moves_king_B(b):
+    # bb_from nicht nötig, da Position durch Schnittmenge mit Farbe und König eindeutig bestimmt
     # king can only move up if it is not in the upper row, etc. 
     up    = np.roll((b['B'] & b['k'] & ~sbb['8']),   8) & ~( b['B'])
     down  = np.roll((b['B'] & b['k'] & ~sbb['1']),  -8) & ~( b['B'])
@@ -378,37 +379,43 @@ def moves_king_B(b):
     right = np.roll((b['B'] & b['k'] & ~sbb['lh']),  1) & ~( b['B'])
     return (up|down|left|right)
     
-# knight
 
 
+# queen moves
 def moves_queen(b):#returns bitboard of all possible plays
     return (moves_bishop(b)|moves_rook(b))
 
-def moves_queen_W(bb_from):
-    return moves_queen(bb_from) & ~( b['W'])
+def moves_queen_W(b, bb_from):
+    return moves_queen(b, bb_from) & ~( b['W']) # Zielfelder der gegnerischen Figur sind erlaubt (Schlagen)
+eigene Figuren sind Blockaden
 
-def moves_queen_B(bb_from):
-    return moves_queen(bb_from) & ~( b['W'])
+def moves_queen_B(b, bb_from):
+    return moves_queen(b, bb_from) & ~( b['B'])
 
-def moves_bishop_B(bb_from):
-    return moves_bishop(bb_from,"B")
+# bishop moves
+def moves_bishop_W(b, bb_from):
+    return moves_bishop(b, bb_from) & ~( b['W'])
 
-def moves_bishop_W(bb_from):
-    return moves_bishop(bb_from,"W")
+def moves_bishop_B(b, bb_from):
+    return moves_bishop(b, bb_from) & ~( b['B'])
+
+# rook moves
+def moves_rook_W(bb_from):
+    return moves_rook(b, bb_from) & ~( b['W'])
 
 def moves_rook_B(bb_from):
-    return moves_rook(bb_from,"B")
+    return moves_rook(b, bb_from) & ~( b['B'])
 
-def moves_rook_B(bb_from):
-    return moves_rook(bb_from,"W")
-
-def moves_knight_W(b, bb_from):
+# knight moves
+def moves_knight_W(b, bb_from): 
     return moves_knight(b, bb_from) & ~( b['W'])
     
 def moves_knight_B(b, bb_from):
     return moves_knight(b, bb_from) & ~( b['B'])
 
 def moves_knight(b, bb_from):
+    # erzeugt bb mit allen zügen von bb_from aus
+    # bb_from: True an Koordinate an der Springer steht
     # first_second -> 2 in first dir, 1 in second dir
     # up
     up_left    = np.roll((bb_from & ~sbb['6'] & ~sbb['la']),  16-1)
@@ -487,6 +494,11 @@ def split_capture_quiet(b, bb_to, player):
     
     return bb_capture, bb_quiet
 
+def flatten_list_of_list(list_of_list):
+    # flacht list of list zu liste ab [[a,b],[c,d]] -> [a,b,c,d] (zb: zugehörigkeit für figuren geht flöten)
+    #[item for sublist in t for item in sublist]
+    return [item for sublist in list_of_list for item in sublist]
+    
 
 ### ZUGGENERATOR ###
 
@@ -519,6 +531,14 @@ def generate_moves(b, player):
         move_list_capture.append(move_list_capture_king)
     if move_list_quiet_king:
         move_list_quiet.append(move_list_quiet_king)
+        
+    # queen
+#    print('queen')
+    move_list_capture_queen, move_list_quiet_queen = gen_moves_queen(b, player)
+    if move_list_capture_queen:
+        move_list_capture.append(move_list_capture_queen)
+    if move_list_quiet_queen:
+        move_list_quiet.append(move_list_quiet_queen)
     
     # knight
 #    print('knight')
@@ -529,62 +549,46 @@ def generate_moves(b, player):
         move_list_quiet.append(move_list_quiet_knight)
     
     # flacht list of list zu liste ab [[a,b],[c,d]] -> [a,b,c,d] (zugehörigkeit für figuren geht flöten)
-    #[item for sublist in t for item in sublist]
-    move_list_capture_flat = [move for moves_per_piece_type in move_list_capture for move in moves_per_piece_type]
-    move_list_quiet_flat = [move for moves_per_piece_type in move_list_quiet for move in moves_per_piece_type]
+    move_list_capture_flat = flatten_list_of_list(move_list_capture)
+    move_list_quiet_flat = flatten_list_of_list(move_list_quiet)
     
     return move_list_capture_flat, move_list_quiet_flat
 
 
+# Hilfsfunktion für figurenspezifische Zuggeneratoren
 def gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list):
+    # erstellt Listen mit Folgezuständen aus Liste in der Paare aus bb_from und bb_all_moves stehen
+    # bb_from: einzelne 1 für bewegte Figur
+    # bb_all_moves: 1en auf alle Felder die sich die Figur auf bb_from bewegen kann
     move_list_capture = []
     move_list_quiet = []
     for bb_from, bb_all_moves in bb_from_and_all_moves_list:
-        #print('bb_all_moves')
-        #print(bb_all_moves)
-   
+        # teilt Züge in capture und quiet Züge auf.
         bb_capture, bb_quiet = split_capture_quiet(b, bb_all_moves, player)
-        #print('bb_capture')
-        #print(bb_capture)
-        #print('bb_quiet')
-        #print(bb_quiet)
-        
-        
+        # erstellt für jeweils alle Züge Liste mit einzelnen Zügen
         bb_capture_list = serialize_bb(bb_capture)
         bb_quiet_list = serialize_bb(bb_quiet)
         
-        #print('cap')
-        #print(bb_capture_list)
-        #print('qui')
-        #print(bb_quiet_list)
-        
+        # simuliert Züge -> Elemente sind Dictionaries mit Folgezuständen
         capture_list = [make_move(b, bb_from, bb_to) for bb_to in bb_capture_list]
         quiet_list = [make_move(b, bb_from, bb_to) for bb_to in bb_quiet_list]
         
-        #print('capts')
-        #print(capture_list)
-        #print(print_board_list(capture_list))
-        #print('quiets')
-        #print(quiet_list)
-        #print(print_board_list(quiet_list))
-        
+        # füge keine leeren elemente ein
         if capture_list:
             move_list_capture.append(capture_list)
         if quiet_list:
             move_list_quiet.append(quiet_list)
         
-        
-    # flacht list of list zu liste ab [[a,b],[c,d]] -> [a,b,c,d] (zugehörigkeit für figuren geht flöten)
-    #[item for sublist in t for item in sublist]
-    move_list_capture_flat = [move for moves_per_piece_type in move_list_capture for move in moves_per_piece_type]
-    move_list_quiet_flat = [move for moves_per_piece_type in move_list_quiet for move in moves_per_piece_type]
-    
-#    print('capture_list')
-#    print(print_board_list(move_list_capture_flat))
-#    print('quiet_list')
-#    print(print_board_list(move_list_quiet_flat))
+    # flacht list of list zu liste ab
+    # zugehörigkeit für figuren eines Typs geht verloren
+    move_list_capture_flat = flatten_list_of_list(move_list_capture)
+    move_list_quiet_flat = faltten_list_of_list(move_list_quiet)
     
     return move_list_capture_flat, move_list_quiet_flat
+
+
+
+# Figurenspezifische Generatoren für capture und quiet Listen
 
 def gen_moves_pawn(b, player):
     pass
@@ -597,6 +601,18 @@ def gen_moves_king(b, player):
     else:
         bb_from = b['k'] & b['B']
         bb_all_moves = moves_king_B(b)
+        
+    move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, [[bb_from, bb_all_moves]])
+    return move_list_capture, move_list_quiet
+
+def gen_moves_queen(b, player):
+    # generates bb_lists with caputure and quiet moves
+    if player.current == 1:
+        bb_from = b['q'] & b['W']
+        bb_all_moves = moves_queen_W(b)
+    else:
+        bb_from = b['q'] & b['B']
+        bb_all_moves = moves_queen_B(b)
         
     move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, [[bb_from, bb_all_moves]])
     return move_list_capture, move_list_quiet
