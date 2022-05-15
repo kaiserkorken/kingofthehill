@@ -98,7 +98,7 @@ def moves_rook(b,color):#-> bitboard aller mögl züge des Turms
     dobool=True
     y=pos[1]
     x=pos[0]
-    for z in range(7):
+    for z in range(1,7):
         if rbool and x+z<=7:#indices inbound
             s=b[enemy][x+z,y]
             if (b[color][x+z,y]|s):#Feld besetzt
@@ -156,7 +156,7 @@ def moves_bishop(b, player):
     dobool=True#untenrechts
     y=pos[1]
     x=pos[0]
-    for z in range(7):
+    for z in range(1,7):
         if rbool and x+z<=7 and y+z<=7:#indices inbound
             s=b[enemy][x+z,y+z]
             if (bb[x+z,y+z]|s):#Feld besetzt
