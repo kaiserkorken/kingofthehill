@@ -428,6 +428,82 @@ def gen_moves_knight(b, player):
     move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, bb_from_plus_all_moves_list)
     return move_list_capture, move_list_quiet
 
+
+
+# erstellt ein array mit String values der position der Weißen oder Schwarzen Figuren
+def playerWert(bitbrd,player):
+
+       if player == 1:
+              farbe = 'W'
+       elif player == -1:
+              farbe = 'B'
+       somelist = []
+       for num, x in enumerate(bitbrd[farbe], start=0):
+              for sec, y in enumerate(bitbrd[farbe][num], start=0):
+                     if bitbrd[farbe][num][sec] == True:
+                            somelist.append(str(num) + ";" + str(sec))
+       return somelist
+
+# nimmt den array von playerWert und iterirt durch die verschiedenen Bitboard um nachzuprüfen um welche Figur es sich handelt
+# Wert für Q = 9 R = 5 N = 3 B = 3 P = 1 K = 1
+# Falls ein P ein ende erreicht nimmt er den Wert von 9 an
+# Falls ein K die mittelpunkte erreicht kriegt er 1000 punkte erteilt weil er schon gewonnen hat
+
+
+def calculateValue(bitbrd, listeS, player):
+       wert = 0
+
+       for x in listeS:
+              if bitbrd['q'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
+                     wert = wert + 9
+
+       for x in listeS:
+              if bitbrd['r'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
+                     wert = wert + 5
+
+       for x in listeS:
+              if bitbrd['n'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
+                     wert = wert + 3
+
+       for x in listeS:
+              if bitbrd['b'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
+                     wert = wert + 3
+
+       for x in listeS:
+              if bitbrd['p'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
+                     if int(x.split(";")[0]) == 7 and player == 1:
+                            wert = wert +9
+                     elif int(x.split(";")[0]) == 0 and player == -1:
+                            wert = wert +9
+                     elif int(x.split(";")[0]) != 0:
+                            wert = wert + 1
+
+       for x in listeS:
+              if bitbrd['k'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
+                     wert = wert + 1
+                     if int(x.split(";")[0]) == 3 and int(x.split(";")[1]) == 3:
+                            wert = wert +1000
+                     if int(x.split(";")[0]) == 3 and int(x.split(";")[1]) == 4:
+                            wert = wert +1000
+                     if int(x.split(";")[0]) == 4 and int(x.split(";")[1]) == 3:
+                            wert = wert + 1000
+                     if int(x.split(";")[0]) == 4 and int(x.split(";")[1]) == 4:
+                            wert = wert + 1000
+
+
+       return wert
+
+# Bewertungsfunktion nimmt ein Bitboard und den Player 1 wenn Weiß und -1 wenn Schwarz
+def spielBewertung(bitbrd,player):
+       wertW = calculateValue(bitbrd, playerWert(bitbrd, 1),1)
+       wertB = calculateValue(bitbrd, playerWert(bitbrd, -1),-1)
+       if player == 1:
+              return wertW-wertB
+       elif player == -1:
+              return wertB-wertW
+        
+        
+        
 """
         
 
