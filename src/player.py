@@ -32,17 +32,19 @@ class Player():
             return 'B'
         else:
             return 'error'
-    def utility(self,tree):
-        pass
+    def utility(self,node):
+        spielBewertung(node,self.current)
+
     def alphabetasearch(self,tree):
         #alphabetasearch
         #Node = findNode(ergebnis)
-        #return Node - (bitboard)
+        #return index of chosen Node
         pass
     #TODO insert functions in class
     
     def generate_moves(self,b):
         generate_moves(b,self)
+
     def make_move(self,b_old,bb_from, bb_to):
         make_move(b_old,bb_from,bb_to)
 
@@ -80,13 +82,20 @@ def kcolor(color):
         return "W"
 
 def moves_rook(b,color):#-> bitboard aller mögl züge des Turms
-    enemy=kcolor(color)
+    
     #TODO implement Pseudocode
     #Turm Reihe und Spalte zuweisen
     #z.B. mit position mit zeilen und spalten bitboard verunden
     #-> Kreuz oder pos -> kreuz mit zügen
     #cut(Kreuz,color)
     # -> Kreuz geht nur bis dahin wo ein eigner spieler steht (<) oder ein gegnerischer spieler (<=) 
+
+    if player.current:
+        enemy = b['B']
+        color= b["W"]
+    else:
+        enemy = b['W']
+        color= b["B"]
     pos=np.where(b["r"]==1 & b[str(color)] ==1 )#position des turms ermitteln
     #print(pos)#[x,y]
     #kreuz=np.roll(sbb[bibsbbl[0]] & sbb[bibssbr[1]])#kreuz je nach position ausgeben
@@ -134,17 +143,19 @@ def moves_rook(b,color):#-> bitboard aller mögl züge des Turms
     return plays
 
 def moves_bishop(b, player):
-    if player.current:
-        bb = b['W']
-        enemy= b["B"]
-    else:
-        bb = b['B']
-        enemy["W"]
+    #pseudocode:
     #Läufer Position mit Kreuz bitboards verunden (-> entsprechendes Kreuz auswählen)
     #idee kreuz bitboards: kreuz in der mitte implementieren und damm immer um pos(bishop) verschieben
     #-> Kreuz oder pos -> kreuz mit zügen
     #cut(Kreuz, color)
     #-> Kreuz geht nur bis dahin wo ein eigner spieler steht (<) oder ein gegnerischer spieler (<=) 
+
+    if player.current:
+        enemy = b['B']
+        bb= b["W"]
+    else:
+        enemy = b['W']
+        bb= b["B"]
     pos=np.where(b["b"]==1 & bb ==1 )#position des läufers ermitteln
     #print(pos)#[x,y]
 
@@ -210,6 +221,7 @@ def moves_king_W(b):
 
 
 def moves_king_B(b):
+    # bb_from nicht nötig, da Position durch Schnittmenge mit Farbe und König eindeutig bestimmt
     # king can only move up if it is not in the upper row, etc. 
     up    = np.roll((b['B'] & b['k'] & ~sbb['8']),   8) & ~( b['B'])
     down  = np.roll((b['B'] & b['k'] & ~sbb['1']),  -8) & ~( b['B'])
@@ -217,37 +229,46 @@ def moves_king_B(b):
     right = np.roll((b['B'] & b['k'] & ~sbb['lh']),  1) & ~( b['B'])
     return (up|down|left|right)
     
-# knight
 
 
+# queen moves
 def moves_queen(b):#returns bitboard of all possible plays
     return (moves_bishop(b)|moves_rook(b))
 
-def moves_queen_W(b,bb_from):
-    return moves_queen(bb_from) & ~( b['W'])
+def moves_queen_W(b, bb_from):
+    # gibt bitboard mit allen Zügen der Dame aus
+    # b: Spielfeld-Dictionary, bb_from: 1 an Position der Dame
+    # Zielfelder der gegnerischen Figur sind erlaubt (Schlagen)
+    # eigene Figuren sind Blockaden
+    return moves_queen(b, bb_from) & ~( b['W']) 
 
-def moves_queen_B(b,bb_from):
-    return moves_queen(bb_from) & ~( b['W'])
+def moves_queen_B(b, bb_from):
+    return moves_queen(b, bb_from) & ~( b['B'])
 
-def moves_bishop_B(bb_from):
-    return moves_bishop(bb_from,"B")
+# bishop moves
+def moves_bishop_W(b, bb_from):
+    return moves_bishop(b, bb_from) & ~( b['W'])
 
-def moves_bishop_W(bb_from):
-    return moves_bishop(bb_from,"W")
+def moves_bishop_B(b, bb_from):
+    return moves_bishop(b, bb_from) & ~( b['B'])
+
+# rook moves
+def moves_rook_W(bb_from):
+    return moves_rook(b, bb_from) & ~( b['W'])
 
 def moves_rook_B(bb_from):
-    return moves_rook(bb_from,"B")
+    return moves_rook(b, bb_from) & ~( b['B'])
 
-def moves_rook_B(bb_from):
-    return moves_rook(bb_from,"W")
-
-def moves_knight_W(b, bb_from):
+# knight moves
+def moves_knight_W(b, bb_from): 
     return moves_knight(b, bb_from) & ~( b['W'])
     
 def moves_knight_B(b, bb_from):
     return moves_knight(b, bb_from) & ~( b['B'])
 
 def moves_knight(b, bb_from):
+    # erzeugt bb mit allen zügen von bb_from aus
+    # bb_from: True an Koordinate an der Springer steht
     # first_second -> 2 in first dir, 1 in second dir
     # up
     up_left    = np.roll((bb_from & ~sbb['6'] & ~sbb['la']),  16-1)
@@ -293,12 +314,7 @@ def make_move_attack(b, bb_from, bb_to, bb_piece, bb_enemy_piece):
 
 
 def make_move(b_old, bb_from, bb_to):
-    #print("BB_FROM")
-    #print(bb_from)
-    #print(print_board(b_old))
-    #print("BB_To")
-    #print(bb_to)
-    
+    # Zuggenerator funktioniert!
     b_new = copy.deepcopy(b_old) # Tiefkopie wegen call-by-reference
     
     for bb_key, bb in b_old.items():
@@ -312,11 +328,14 @@ def make_move(b_old, bb_from, bb_to):
             b_new[bb_key] = (bb | bb_to) ^ bb_from # update bitboard : Feld auf bb_to entsteht, Feld auf bb_from verschwindet
         #print("TO")
         #print(b_new[bb_key])  
-    print(print_board(b_new))
+    #print(print_board(b_new))
     return b_new
 
 
 
+def serialize_bb(bb):
+    # gibt einzelne bitboards für jedes True an entsprechender Stelle zurück
+    return [bitboard(index) for index in np.flatnonzero(bb)]
 
 def split_capture_quiet(b, bb_to, player):
     if player.current:
@@ -328,16 +347,17 @@ def split_capture_quiet(b, bb_to, player):
     
     return bb_capture, bb_quiet
 
+def flatten_list_of_list(list_of_list):
+    # flacht list of list zu liste ab [[a,b],[c,d]] -> [a,b,c,d] (zb: zugehörigkeit für figuren geht flöten)
+    #[item for sublist in t for item in sublist]
+    return [item for sublist in list_of_list for item in sublist]
+    
 
 ### ZUGGENERATOR ###
 
 ### https://www.chessprogramming.org/Pieces_versus_Directions
 
-def generate_search_tree(b, player):
-    # generate a searchtree and search for possible pseudolegal moves
-    moves = Node('root')
-    
-    return moves
+
 
 def generate_moves(b, player):
 
@@ -358,48 +378,70 @@ def generate_moves(b, player):
     move_list_quiet = []
     
     # king
-    move_list_capture_king, move_list_quiet_king = gen_moves_king(b, player)  
-    move_list_capture.append(move_list_capture_king)
-    move_list_quiet.append(move_list_quiet_king)
+#    print('king')
+    move_list_capture_king, move_list_quiet_king = gen_moves_king(b, player)
+    if move_list_capture_king:
+        move_list_capture.append(move_list_capture_king)
+    if move_list_quiet_king:
+        move_list_quiet.append(move_list_quiet_king)
+        
+    # queen
+#    print('queen')
+    move_list_capture_queen, move_list_quiet_queen = gen_moves_queen(b, player)
+    if move_list_capture_queen:
+        move_list_capture.append(move_list_capture_queen)
+    if move_list_quiet_queen:
+        move_list_quiet.append(move_list_quiet_queen)
     
     # knight
-    move_list_capture_knight, move_list_quiet_knight = gen_moves_knight(b, player)  
-    move_list_capture.append(move_list_capture_knight)
-    move_list_quiet.append(move_list_quiet_knight)
-    return move_list_capture, move_list_quiet
+#    print('knight')
+    move_list_capture_knight, move_list_quiet_knight = gen_moves_knight(b, player) 
+    if move_list_capture_knight:
+        move_list_capture.append(move_list_capture_knight)
+    if move_list_quiet_knight:
+        move_list_quiet.append(move_list_quiet_knight)
+    
+    # flacht list of list zu liste ab [[a,b],[c,d]] -> [a,b,c,d] (zugehörigkeit für figuren geht flöten)
+    move_list_capture_flat = flatten_list_of_list(move_list_capture)
+    move_list_quiet_flat = flatten_list_of_list(move_list_quiet)
+    
+    return move_list_capture_flat, move_list_quiet_flat
 
 
-def gen_capture_quiet_lists_from_all_moves(b, bb_from_plus_all_moves_list):
+# Hilfsfunktion für figurenspezifische Zuggeneratoren
+def gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list):
+    # erstellt Listen mit Folgezuständen aus Liste in der Paare aus bb_from und bb_all_moves stehen
+    # bb_from: einzelne 1 für bewegte Figur
+    # bb_all_moves: 1en auf alle Felder die sich die Figur auf bb_from bewegen kann
     move_list_capture = []
     move_list_quiet = []
-    for bb_from, bb_all_moves in bb_from_plus_all_moves_list:
-   
+    for bb_from, bb_all_moves in bb_from_and_all_moves_list:
+        # teilt Züge in capture und quiet Züge auf.
         bb_capture, bb_quiet = split_capture_quiet(b, bb_all_moves, player)
+        # erstellt für jeweils alle Züge Liste mit einzelnen Zügen
         bb_capture_list = serialize_bb(bb_capture)
         bb_quiet_list = serialize_bb(bb_quiet)
         
+        # simuliert Züge -> Elemente sind Dictionaries mit Folgezuständen
         capture_list = [make_move(b, bb_from, bb_to) for bb_to in bb_capture_list]
         quiet_list = [make_move(b, bb_from, bb_to) for bb_to in bb_quiet_list]
         
-        
+        # füge keine leeren elemente ein
         if capture_list:
             move_list_capture.append(capture_list)
         if quiet_list:
             move_list_quiet.append(quiet_list)
         
-        
-        
-    # flacht list of list zu liste ab [[a,b],[c,d]] -> [a,b,c,d] (zugehörigkeit für figuren geht flöten)
-    #[item for sublist in t for item in sublist]
-    move_list_capture_flat = [move for moves_per_piece_type in capture_list for move in moves_per_piece_type]
-    move_list_quiet_flat = [move for moves_per_piece_type in quiet_list for move in moves_per_piece_type]
-    
-    print('capture_list')
-    print(print_board_list(move_list_capture_flat))
-    print('quiet_list')
-    print(print_board_list(move_list_quiet_flat))
+    # flacht list of list zu liste ab
+    # zugehörigkeit für figuren eines Typs geht verloren
+    move_list_capture_flat = flatten_list_of_list(move_list_capture)
+    move_list_quiet_flat = flatten_list_of_list(move_list_quiet)
     
     return move_list_capture_flat, move_list_quiet_flat
+
+
+
+# Figurenspezifische Generatoren für capture und quiet Listen
 
 def gen_moves_pawn(b, player):
     pass
@@ -415,18 +457,59 @@ def gen_moves_king(b, player):
         
     move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, [[bb_from, bb_all_moves]])
     return move_list_capture, move_list_quiet
+
+def gen_moves_queen(b, player):
+    # generates bb_lists with caputure and quiet moves
+    if player.current == 1:
+        bb_from = b['q'] & b['W']
+        bb_all_moves = moves_queen_W(b)
+    else:
+        bb_from = b['q'] & b['B']
+        bb_all_moves = moves_queen_B(b)
+        
+    move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, [[bb_from, bb_all_moves]])
+    return move_list_capture, move_list_quiet
     
 def gen_moves_knight(b, player):
     if player.current == 1:
         bb_knights = b['n'] & b['W']
-        bb_from_plus_all_moves_list = [[bb_from, moves_knight_W(b, bb_from)] for bb_from in serialize_bb(bb_knights)] # iteriere über alle Springer
+        bb_from_and_all_moves_list = [[bb_from, moves_knight_W(b, bb_from)] for bb_from in serialize_bb(bb_knights)] # iteriere über alle Springer
     else:
         bb_knights = b['n'] & b['B']
-        bb_from_plus_all_moves_list = [[bb_from, moves_knight_B(b, bb_from)] for bb_from in serialize_bb(bb_knights)] # iteriere über alle Springer
+        bb_from_and_all_moves_list = [[bb_from, moves_knight_B(b, bb_from)] for bb_from in serialize_bb(bb_knights)] # iteriere über alle Springer
     
     # zu jeder Figur capture- und quiet-listen erstellen
-    move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, bb_from_plus_all_moves_list)
+    move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list)
     return move_list_capture, move_list_quiet
+    
+    
+    
+### DEMO ###
+    
+    
+    
+b = init_game(give_bitboards(), player)
+sbb = give_static_bitboards()
+print(print_board(b))
+
+print(player.__get__())
+
+#b1 = make_move(b, bitboard(4), bitboard(43)) # Teststellung mit König auf d6 per illegalem zug
+b1 = make_move(b, bitboard(1), bitboard(33)) # Teststellung mit Springer auf xy per illegalem zug
+b2 = make_move(b1, bitboard(6), bitboard(37)) # Teststellung mit Springer auf xy per illegalem zug
+
+
+
+print(print_board(b2))
+print(player.__get__())
+
+cap, qui = generate_moves(b2, player) # generiere alle Züge aus Position b
+print('capture:')
+#print(cap)
+print_board_list(cap)
+print('quiet:')
+#print(qui)
+print_board_list(qui)
 
 
 

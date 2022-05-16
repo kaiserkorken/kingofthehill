@@ -1,15 +1,17 @@
 from player import *
 player = Player()  
 def turn(self, FEN):#ein kompletter zug der ki
-    t=tree(FEN)#leerer baum mit FEN als root
+    bittree=tree(FEN)#leerer baum mit FEN als root
+    tree=tree(FEN)
     bb=FENtoBit(FEN)
     checkmate(FEN,player)#Spielende überprüfen
     moves=player.generatemoves(bb)#liste aller moves
+    #utility auf root?
     for x in moves:#outsourcen
-        t.insert_node(x)#eine Node in Baum hinzufügen
-    tree=player.utility(t)#bewertungsfunktion ändert knoten des baums
+        bittree.insert_node(x)#Node mit bitboard einsetzen
+        tree.insert_node(player.utility(x))#Node mit Wertung einsetzen
     node=player.alphabetasearch(tree)
-    move=t.findNode(node)
+    move=bittree.findNode(node)
     bb=player.make_move(move)
     FEN=BittoFEN(bb)
     return FEN
