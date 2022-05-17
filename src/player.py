@@ -194,7 +194,7 @@ def moves_bishop(b, bb_from , player):
                 if (s):
                     plays[x-z,y-z]=1
             else:
-                plays[x-1,y-z]=1
+                plays[x-z,y-z]=1
         if dobool and x+z<=7 and y-z>=0:
             s=enemy[x+z,y-z]
             if (bb[x+z,y-z]|s):#
@@ -269,7 +269,7 @@ def moves_rook(b, bb_from, player):#-> bitboard aller mögl züge des Turms
                 if (s):
                     plays[x-z,y]=1
             else:
-                plays[x-1,y]=1
+                plays[x-z,y]=1
         if dobool and y-z>=0:
             s=enemy[x,y-z]
             if (color[x,y-z]|s):#
