@@ -18,3 +18,5 @@ class tree(object):
         pass
     def insert_node(self,node):
         pass
+    def delete_node(self):
+        pass
