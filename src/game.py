@@ -1,21 +1,20 @@
 from player import *
 player = Player()  
 def turn(self, FEN):#ein kompletter zug der ki
-    bittree=tree(FEN)#leerer baum mit FEN als root
-    tree=tree(FEN)
     bb=FENtoBit(FEN)
-    checkmate(FEN,player)#Spielende überprüfen
-    moves=player.generatemoves(bb)#liste aller moves
-    #utility auf root?
-    for x in moves:#outsourcen
-        bittree.insert_node(x)#Node mit bitboard einsetzen
-        tree.insert_node(player.utility(x))#Node mit Wertung einsetzen
-    node=player.alphabetasearch(tree)
-    move=bittree.findNode(node)
-    bb=player.make_move(move)
-    FEN=BittoFEN(bb)
-    return FEN
-def checkmate(FEN,player):
+    tree=tree(bb)#leerer baum mit b als root
+    if not checkmate(FEN,player):#Spielende überprüfen
+        moves=player.generatemoves(bb)#liste aller moves
+        #utility auf root?
+        for x in moves:#outsourcen
+            tree.insert_node([x,player.utility(x)])#in Node mit bitboard und wertung einsetzen
+        tree=player.alphabetasearch(tree)#indizes aktualisieren
+        index=player.best_node(tree)#besten zug auswaehlen
+        move=tree.findNode(index)
+        bb=player.make_move(move)
+        FEN=BittoFEN(bb)
+        return FEN
+def checkmate(FEN,player):#Spiel nächsten Zug beendet -> True
     b=BittoFEN(FEN)
     #TODO b-> Spiel beendet?
     #spiel gewonnen
@@ -23,7 +22,7 @@ def checkmate(FEN,player):
     #return True
 
     #else:
-    return False
+    return False#kein Schachmatt
 def newGame():#unsere KI gegen sich selbst
     player=[]
     player[0]=Player()
