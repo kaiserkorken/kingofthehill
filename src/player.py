@@ -3,7 +3,6 @@ import numpy as np
 from anytree import Node, RenderTree
 import copy
 from bitboard import *
-from kingofhill import make_move
 from tree import *
 
 
@@ -81,127 +80,6 @@ def kcolor(color):
     else:
         return "W"
 
-def moves_rook(b,color):#-> bitboard aller mögl züge des Turms
-    
-    #TODO implement Pseudocode
-    #Turm Reihe und Spalte zuweisen
-    #z.B. mit position mit zeilen und spalten bitboard verunden
-    #-> Kreuz oder pos -> kreuz mit zügen
-    #cut(Kreuz,color)
-    # -> Kreuz geht nur bis dahin wo ein eigner spieler steht (<) oder ein gegnerischer spieler (<=) 
-
-    if player.current:
-        enemy = b['B']
-        color= b["W"]
-    else:
-        enemy = b['W']
-        color= b["B"]
-    pos=np.where(b["r"]==1 & b[str(color)] ==1 )#position des turms ermitteln
-    #print(pos)#[x,y]
-    #kreuz=np.roll(sbb[bibsbbl[0]] & sbb[bibssbr[1]])#kreuz je nach position ausgeben
-    #iterative variante:
-    plays=bitboard()
-    upbool=True
-    rbool=True
-    lbool=True
-    dobool=True
-    y=pos[1]
-    x=pos[0]
-    for z in range(1,7):
-        if rbool and x+z<=7:#indices inbound
-            s=b[enemy][x+z,y]
-            if (b[color][x+z,y]|s):#Feld besetzt
-                rbool=False
-                if (s):#feld mit gegner besetzt ->schlagen
-                    plays[x+z,y]=1
-            else:#feld frei
-                plays[x+z,y]=1#mögl Zug
-        if upbool and y+z<=7:
-            s=b[enemy][x,y+z]
-            if (b[color][x,y+z]|s):#
-                upbool=False
-                if (s):
-                    plays[x,y+z]=1
-            else:
-                plays[x,y+z]=1
-        if lbool and x-z>=0:
-            s=b[enemy][x-z,y]
-            if (b[color][x-z,y]|s):#
-                lbool=False
-                if (s):
-                    plays[x-z,y]=1
-            else:
-                plays[x-1,y]=1
-        if dobool and y-z>=0:
-            s=b[enemy][x,y-z]
-            if (b[color][x,y-z]|s):#
-                dobool=False
-                if (s):
-                    plays[x,y-z]=1
-            else:
-                plays[x,y-z]=1
-    return plays
-
-def moves_bishop(b, player):
-    #pseudocode:
-    #Läufer Position mit Kreuz bitboards verunden (-> entsprechendes Kreuz auswählen)
-    #idee kreuz bitboards: kreuz in der mitte implementieren und damm immer um pos(bishop) verschieben
-    #-> Kreuz oder pos -> kreuz mit zügen
-    #cut(Kreuz, color)
-    #-> Kreuz geht nur bis dahin wo ein eigner spieler steht (<) oder ein gegnerischer spieler (<=) 
-
-    if player.current:
-        enemy = b['B']
-        bb= b["W"]
-    else:
-        enemy = b['W']
-        bb= b["B"]
-    pos=np.where(b["b"]==1 & bb ==1 )#position des läufers ermitteln
-    #print(pos)#[x,y]
-
-    #iterative variante:
-    plays=bitboard()
-    upbool=True#obenlinks
-    rbool=True#obenrechts
-    lbool=True#untenlinks
-    dobool=True#untenrechts
-    y=pos[1]
-    x=pos[0]
-    for z in range(1,7):
-        if rbool and x+z<=7 and y+z<=7:#indices inbound
-            s=b[enemy][x+z,y+z]
-            if (bb[x+z,y+z]|s):#Feld besetzt
-                rbool=False
-                if (s):#feld mit gegner besetzt ->schlagen
-                    plays[x+z,y+z]=1
-            else:#feld frei
-                plays[x+z,y]=1#mögl Zug
-        if upbool and x-z>=0 and y+z<=7:
-            s=b[enemy][x-z,y+z]
-            if (bb[x-z,y+z]|s):#
-                upbool=False
-                if (s):
-                    plays[x-z,y+z]=1
-            else:
-                plays[x-z,y+z]=1
-        if lbool and x-z>=0 and y-z>=0:
-            s=b[enemy][x-z,y-z]
-            if (bb[x-z,y-z]|s):#
-                lbool=False
-                if (s):
-                    plays[x-z,y-z]=1
-            else:
-                plays[x-1,y-z]=1
-        if dobool and x+z<=7 and y-z>=0:
-            s=b[enemy][x+z,y-z]
-            if (bb[x+z,y-z]|s):#
-                dobool=False
-                if (s):
-                    plays[x+z,y-z]=1
-            else:
-                plays[x+z,y-z]=1
-    return plays
-
 def cut(b, color):#bitboard -> gekürztes bitboard je nachdem, wo andere spielfiguren stehen
     # von pos immer dem kreuz entlang bis: (x)
     # x und color -> 0
@@ -219,7 +97,6 @@ def moves_king_W(b):
     right = np.roll((b['W'] & b['k'] & ~sbb['lh']),  1) & ~(b['W'] )
     return (up|down|left|right)
 
-
 def moves_king_B(b):
     # bb_from nicht nötig, da Position durch Schnittmenge mit Farbe und König eindeutig bestimmt
     # king can only move up if it is not in the upper row, etc. 
@@ -230,34 +107,158 @@ def moves_king_B(b):
     return (up|down|left|right)
     
 
-
 # queen moves
-def moves_queen(b):#returns bitboard of all possible plays
-    return (moves_bishop(b)|moves_rook(b))
 
-def moves_queen_W(b, bb_from):
+
+def moves_queen_W(b, bb_from, player):
     # gibt bitboard mit allen Zügen der Dame aus
     # b: Spielfeld-Dictionary, bb_from: 1 an Position der Dame
     # Zielfelder der gegnerischen Figur sind erlaubt (Schlagen)
     # eigene Figuren sind Blockaden
-    return moves_queen(b, bb_from) & ~( b['W']) 
+    return moves_queen(b, bb_from, player) & ~( b['W']) 
 
-def moves_queen_B(b, bb_from):
-    return moves_queen(b, bb_from) & ~( b['B'])
+def moves_queen_B(b, bb_from, player):
+    return moves_queen(b, bb_from, player) & ~( b['B'])
+
+def moves_queen(b, bb_from, player):#returns bitboard of all possible plays
+    return (moves_bishop(b, bb_from, player) | moves_rook(b, bb_from, player))
 
 # bishop moves
-def moves_bishop_W(b, bb_from):
+def moves_bishop_W(b, bb_from, player):
     return moves_bishop(b, bb_from) & ~( b['W'])
 
-def moves_bishop_B(b, bb_from):
+def moves_bishop_B(b, bb_from, player):
     return moves_bishop(b, bb_from) & ~( b['B'])
 
-# rook moves
-def moves_rook_W(bb_from):
-    return moves_rook(b, bb_from) & ~( b['W'])
+def moves_bishop(b, bb_from , player):
+    #pseudocode:
+    #Läufer Position mit Kreuz bitboards verunden (-> entsprechendes Kreuz auswählen)
+    #idee kreuz bitboards: kreuz in der mitte implementieren und damm immer um pos(bishop) verschieben
+    #-> Kreuz oder pos -> kreuz mit zügen
+    #cut(Kreuz, color)
+    #-> Kreuz geht nur bis dahin wo ein eigner spieler steht (<) oder ein gegnerischer spieler (<=) 
 
-def moves_rook_B(bb_from):
-    return moves_rook(b, bb_from) & ~( b['B'])
+    if player.current:
+        enemy = b['B']
+        bb= b["W"]
+    else:
+        enemy = b['W']
+        bb= b["B"]
+    pos=np.where(bb_from)#position des läufers ermitteln
+    #print(pos)#[x,y]
+
+    #iterative variante:
+    plays=bitboard()
+    upbool=True#obenlinks
+    rbool=True#obenrechts
+    lbool=True#untenlinks
+    dobool=True#untenrechts
+    y=pos[1]
+    x=pos[0]
+    for z in range(1,7):
+        if rbool and x+z<=7 and y+z<=7:#indices inbound
+            s=enemy[x+z,y+z]
+            if (bb[x+z,y+z]|s):#Feld besetzt
+                rbool=False
+                if (s):#feld mit gegner besetzt ->schlagen
+                    plays[x+z,y+z]=1
+            else:#feld frei
+                plays[x+z,y]=1#mögl Zug
+        if upbool and x-z>=0 and y+z<=7:
+            s=enemy[x-z,y+z]
+            if (bb[x-z,y+z]|s):#
+                upbool=False
+                if (s):
+                    plays[x-z,y+z]=1
+            else:
+                plays[x-z,y+z]=1
+        if lbool and x-z>=0 and y-z>=0:
+            s=enemy[x-z,y-z]
+            if (bb[x-z,y-z]|s):#
+                lbool=False
+                if (s):
+                    plays[x-z,y-z]=1
+            else:
+                plays[x-1,y-z]=1
+        if dobool and x+z<=7 and y-z>=0:
+            s=enemy[x+z,y-z]
+            if (bb[x+z,y-z]|s):#
+                dobool=False
+                if (s):
+                    plays[x+z,y-z]=1
+            else:
+                plays[x+z,y-z]=1
+    return plays
+
+# rook moves
+
+
+def moves_rook_W(b, bb_from, player):
+    return moves_rook(b, bb_from, player) & ~( b['W'])
+
+def moves_rook_B(b, bb_from, player):
+    return moves_rook(b, bb_from, player) & ~( b['B'])
+
+def moves_rook(b, bb_from, player):#-> bitboard aller mögl züge des Turms
+    
+    #TODO implement Pseudocode
+    #Turm Reihe und Spalte zuweisen
+    #z.B. mit position mit zeilen und spalten bitboard verunden
+    #-> Kreuz oder pos -> kreuz mit zügen
+    #cut(Kreuz,color)
+    # -> Kreuz geht nur bis dahin wo ein eigner spieler steht (<) oder ein gegnerischer spieler (<=) 
+
+    if player.current:
+        enemy = b['B']
+        color= b["W"]
+    else:
+        enemy = b['W']
+        color= b["B"]
+    pos=np.where(bb_from)#position des turms ermitteln
+    #print(pos)#[x,y]
+    #kreuz=np.roll(sbb[bibsbbl[0]] & sbb[bibssbr[1]])#kreuz je nach position ausgeben
+    #iterative variante:
+    plays=bitboard()
+    upbool=True
+    rbool=True
+    lbool=True
+    dobool=True
+    y=pos[1]
+    x=pos[0]
+    for z in range(1,7):
+        if rbool and x+z<=7:#indices inbound
+            s=enemy[x+z,y]
+            if (color[x+z,y]|s):#Feld besetzt
+                rbool=False
+                if (s):#feld mit gegner besetzt ->schlagen
+                    plays[x+z,y]=1
+            else:#feld frei
+                plays[x+z,y]=1#mögl Zug
+        if upbool and y+z<=7:
+            s=enemy[x,y+z]
+            if (color[x,y+z]|s):#
+                upbool=False
+                if (s):
+                    plays[x,y+z]=1
+            else:
+                plays[x,y+z]=1
+        if lbool and x-z>=0:
+            s=enemy[x-z,y]
+            if (color[x-z,y]|s):#
+                lbool=False
+                if (s):
+                    plays[x-z,y]=1
+            else:
+                plays[x-1,y]=1
+        if dobool and y-z>=0:
+            s=enemy[x,y-z]
+            if (color[x,y-z]|s):#
+                dobool=False
+                if (s):
+                    plays[x,y-z]=1
+            else:
+                plays[x,y-z]=1
+    return plays
 
 # knight moves
 def moves_knight_W(b, bb_from): 
@@ -400,7 +401,24 @@ def generate_moves(b, player):
         move_list_capture.append(move_list_capture_knight)
     if move_list_quiet_knight:
         move_list_quiet.append(move_list_quiet_knight)
-    
+        
+    # rook
+#    print('rook')
+    move_list_capture_rook, move_list_quiet_rook = gen_moves_rook(b, player) 
+    if move_list_capture_rook:
+        move_list_capture.append(move_list_capture_rook)
+    if move_list_quiet_rook:
+        move_list_quiet.append(move_list_quiet_rook)
+
+    # bishop
+#    print('bishop')
+    move_list_capture_bishop, move_list_quiet_bishop = gen_moves_knight(b, player) 
+    if move_list_capture_bishop:
+        move_list_capture.append(move_list_capture_bishop)
+    if move_list_quiet_bishop:
+        move_list_quiet.append(move_list_quiet_bishop)
+
+        
     # flacht list of list zu liste ab [[a,b],[c,d]] -> [a,b,c,d] (zugehörigkeit für figuren geht flöten)
     move_list_capture_flat = flatten_list_of_list(move_list_capture)
     move_list_quiet_flat = flatten_list_of_list(move_list_quiet)
@@ -462,10 +480,10 @@ def gen_moves_queen(b, player):
     # generates bb_lists with caputure and quiet moves
     if player.current == 1:
         bb_from = b['q'] & b['W']
-        bb_all_moves = moves_queen_W(b)
+        bb_all_moves = moves_queen_W(b, bb_from, player)
     else:
         bb_from = b['q'] & b['B']
-        bb_all_moves = moves_queen_B(b)
+        bb_all_moves = moves_queen_B(b, bb_from, player)
         
     move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, [[bb_from, bb_all_moves]])
     return move_list_capture, move_list_quiet
@@ -483,49 +501,80 @@ def gen_moves_knight(b, player):
     return move_list_capture, move_list_quiet
     
     
+def gen_moves_rook(b, player):
+    # generates bb_lists with caputure and quiet moves
+    if player.current == 1:
+        bb_rooks = b['r'] & b['W']
+        bb_from_and_all_moves_list = [[bb_from, moves_rook_W(b, bb_from, player)] for bb_from in serialize_bb(bb_rooks)] # iteriere über alle Türme
+    else:
+        bb_rooks = b['r'] & b['B']
+        bb_from_and_all_moves_list = [[bb_from, moves_rook_B(b, bb_from, player)] for bb_from in serialize_bb(bb_rooks)] # iteriere über alle Türme
     
+    # zu jeder Figur capture- und quiet-listen erstellen
+    move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list)
+    return move_list_capture, move_list_quiet
+    
+    
+    
+def gen_moves_bishop(b, player):
+    # generates bb_lists with caputure and quiet moves
+    if player.current == 1:
+        bb_bishops = b['b'] & b['W']
+        bb_from_and_all_moves_list = [[bb_from, moves_rook_W(b, bb_from, player)] for bb_from in serialize_bb(bb_bishops)] # iteriere über alle Türme
+    else:
+        bb_bishops = b['b'] & b['B']
+        bb_from_and_all_moves_list = [[bb_from, moves_rook_B(b, bb_from, player)] for bb_from in serialize_bb(bb_bishops)] # iteriere über alle Türme
+    
+    # zu jeder Figur capture- und quiet-listen erstellen
+    move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list)
+    return move_list_capture, move_list_quiet
+
+
+
+
+
 ### DEMO ###
+        
+if __name__ == "__main__":
     
-    
-    
-b = init_game(give_bitboards(), player)
-sbb = give_static_bitboards()
-print(print_board(b))
+    b = init_game(give_bitboards(), player)
+    sbb = give_static_bitboards()
+    print(print_board(b))
 
-print(player.__get__())
+    print(player.__get__())
 
-#b1 = make_move(b, bitboard(4), bitboard(43)) # Teststellung mit König auf d6 per illegalem zug
-b1 = make_move(b, bitboard(1), bitboard(33)) # Teststellung mit Springer auf xy per illegalem zug
-b2 = make_move(b1, bitboard(6), bitboard(37)) # Teststellung mit Springer auf xy per illegalem zug
+    #b1 = make_move(b, bitboard(4), bitboard(43)) # Teststellung mit König auf d6 per illegalem zug
+    b1 = make_move(b, bitboard(1), bitboard(33)) # Teststellung mit Springer auf xy per illegalem zug
+    b2 = make_move(b1, bitboard(6), bitboard(37)) # Teststellung mit Springer auf xy per illegalem zug
 
 
 
-print(print_board(b2))
-print(player.__get__())
+    print(print_board(b2))
+    print(player.__get__())
 
-cap, qui = generate_moves(b2, player) # generiere alle Züge aus Position b
-print('capture:')
-#print(cap)
-print_board_list(cap)
-print('quiet:')
-#print(qui)
-print_board_list(qui)
+    cap, qui = generate_moves(b2, player) # generiere alle Züge aus Position b
+    print('capture:')
+    #print(cap)
+    print(print_board_list(cap))
+    print('quiet:')
+    #print(qui)
+    print(print_board_list(qui))
 
-
+'''
 
 # erstellt ein array mit String values der position der Weißen oder Schwarzen Figuren
 def playerWert(bitbrd,player):
 
-       if player == 1:
-              farbe = 'W'
-       elif player == -1:
-              farbe = 'B'
-       somelist = []
-       for num, x in enumerate(bitbrd[farbe], start=0):
-              for sec, y in enumerate(bitbrd[farbe][num], start=0):
-                     if bitbrd[farbe][num][sec] == True:
-                            somelist.append(str(num) + ";" + str(sec))
-       return somelist
+   if player == 1:
+          farbe = 'W'
+   elif player == -1:
+          farbe = 'B'
+   somelist = []
+   for num, x in enumerate(bitbrd[farbe], start=0):
+          for sec, y in enumerate(bitbrd[farbe][num], start=0):
+                 if bitbrd[farbe][num][sec] == True:
+                        somelist.append(str(num) + ";" + str(sec))
+   return somelist
 
 # nimmt den array von playerWert und iterirt durch die verschiedenen Bitboard um nachzuprüfen um welche Figur es sich handelt
 # Wert für Q = 9 R = 5 N = 3 B = 3 P = 1 K = 1
@@ -585,37 +634,34 @@ def spielBewertung(bitbrd,player):
        elif player == -1:
               return wertB-wertW
         
-        
-        
-"""
-        
+ 
+    ### DEMO ###
 
 
-### DEMO ###
+
+    b = init_game(give_bitboards(), player)
+    sbb = give_static_bitboards()
+    print(print_board(b))
+
+    print(player.__get__())
+
+    print(print_board(b))
+    #b1 = make_move(b, bitboard(4), bitboard(43)) # Teststellung mit König auf d6 per illegalem zug
+    b1 = make_move(b, bitboard(1), bitboard(33)) # Teststellung mit Springer auf xy per illegalem zug
+    b2 = make_move(b1, bitboard(6), bitboard(37)) # Teststellung mit Springer auf xy per illegalem zug
+
+
+
+    print(print_board(b2))
+    print(player.__get__())
+
+    cap, qui = generate_moves(b2, player) # generiere alle Züge aus Position b
+    print('capture:')
+    print(cap)
+    #print_board_list(cap)
+    print('quiet:')
+    print(qui)
+    #print_board_list(qui)
+
     
-    
-    
-b = init_game(give_bitboards(), player)
-sbb = give_static_bitboards()
-print(print_board(b))
-
-print(player.__get__())
-
-print(print_board(b))
-#b1 = make_move(b, bitboard(4), bitboard(43)) # Teststellung mit König auf d6 per illegalem zug
-b1 = make_move(b, bitboard(1), bitboard(33)) # Teststellung mit Springer auf xy per illegalem zug
-b2 = make_move(b1, bitboard(6), bitboard(37)) # Teststellung mit Springer auf xy per illegalem zug
-
-
-
-print(print_board(b2))
-print(player.__get__())
-
-cap, qui = generate_moves(b2, player) # generiere alle Züge aus Position b
-print('capture:')
-print(cap)
-#print_board_list(cap)
-print('quiet:')
-print(qui)
-#print_board_list(qui)
-"""
+'''
