@@ -104,8 +104,6 @@ def init_game(b, player):
 def print_board(b, flip=False):
     # pretty prints board
     # flip: white at bottom (typical orientation of board, but reverse order of array when printing (up <> down)
-
-    print(b)
     
     board = np.empty((8,8), dtype=str)
     board[:] = '_'
@@ -138,11 +136,15 @@ def print_board(b, flip=False):
 
 def print_board_list(b_list, flip=False):
     # prints a whole list of bitboard_dicts
-    for b in b_list:
-        if b:
-            print_board(b, flip)
-        else:
-            print('empty board')
+    if b_list:
+        for b in b_list:
+            if b:
+                print('print:')
+                print(print_board(b, flip))
+            else:
+                print('empty board')
+    else:
+        print('empty b_list')
 
 def BittoFEN(b):#turns bitboard into FEN Strings
     if type(b)!=dict:

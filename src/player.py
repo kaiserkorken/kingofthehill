@@ -53,25 +53,40 @@ sbb = give_static_bitboards()
 bibsbbl=["la","lb","lc","ld","le","lf","lg","lh"]
 bibssbr=["1","2","3","4","5","6","7","8"]
                    
-
-### PURE QUIET MOVES ###
-
-def moves_quiet_pawns_W(b):
-    # shows possible normal moves of Black pawns
-    return np.roll((b['W'] & b['p']), 8) & ~(b['W'] | b['B'])
-
-def moves_quiet_pawns_B(b):
-    # shows possible normal moves of Black pawns
-    
-    #((B & SCH) >> 8) & ~(WEI | SCH)
-    return np.roll((b['B'] & b['p']), -8) & ~(b['W'] | b['B'])
-
-### PURE ATTACK MOVES ###
-
-def moves_attack_pawns_W(b):
-    pass
-
 ### AMBIGUOS MOVES ###
+
+
+def moves_pawn_W(b, bb_from):
+    quiet = moves_quiet_pawn_W(b, bb_from)
+    attack = moves_attack_pawn_W(b, bb_from)
+    return (attack | quiet)
+
+def moves_pawn_B(b, bb_from):
+    quiet = moves_quiet_pawn_B(b, bb_from)
+    attack = moves_attack_pawn_B(b, bb_from)
+    return (attack | quiet)
+
+def moves_quiet_pawn_W(b, bb_from):
+    # shows possible normal moves of Black pawns
+    one_step = np.roll(bb_from, 8) & ~(b['W'] | b['B'])
+    two_step = np.roll(bb_from & sbb['2'], 16) & ~(b['W'] | b['B'])
+    return (one_step | two_step)
+
+def moves_quiet_pawn_B(b, bb_from):
+    # shows possible normal moves of Black pawns
+    one_step = np.roll(bb_from, -8)  & ~(b['W'] | b['B'])
+    two_step = np.roll(bb_from & sbb['7'], -16) & ~(b['W'] | b['B'])
+    return (one_step | two_step)
+
+def moves_attack_pawn_W(b, bb_from):
+    left_attack  = np.roll(bb_from & ~sbb['la'], 7) & b['B']
+    right_attack = np.roll(bb_from & ~sbb['lh'], 9) & b['B']
+    return (left_attack | right_attack)
+
+def moves_attack_pawn_B(b, bb_from):
+    left_attack  = np.roll(bb_from & ~sbb['la'], -9) & b['W']
+    right_attack = np.roll(bb_from & ~sbb['lh'], -7) & b['W']
+    return (left_attack | right_attack)
 
 # king
 def kcolor(color):
@@ -125,10 +140,10 @@ def moves_queen(b, bb_from, player):#returns bitboard of all possible plays
 
 # bishop moves
 def moves_bishop_W(b, bb_from, player):
-    return moves_bishop(b, bb_from) & ~( b['W'])
+    return moves_bishop(b, bb_from, player) & ~( b['W'])
 
 def moves_bishop_B(b, bb_from, player):
-    return moves_bishop(b, bb_from) & ~( b['B'])
+    return moves_bishop(b, bb_from, player) & ~( b['B'])
 
 def moves_bishop(b, bb_from , player):
     #pseudocode:
@@ -188,6 +203,11 @@ def moves_bishop(b, bb_from , player):
                     plays[x+z,y-z]=1
             else:
                 plays[x+z,y-z]=1
+#    print('plays:')
+#    print(plays)
+    plays = plays & ~(bb_from) # keine Züge auf die vorherige Person erlaubt
+#    print(plays)
+#    print('stop')
     return plays
 
 # rook moves
@@ -258,6 +278,8 @@ def moves_rook(b, bb_from, player):#-> bitboard aller mögl züge des Turms
                     plays[x,y-z]=1
             else:
                 plays[x,y-z]=1
+#    plays = plays & ~(bb_from)
+#    print(plays)
     return plays
 
 # knight moves
@@ -272,17 +294,17 @@ def moves_knight(b, bb_from):
     # bb_from: True an Koordinate an der Springer steht
     # first_second -> 2 in first dir, 1 in second dir
     # up
-    up_left    = np.roll((bb_from & ~sbb['6'] & ~sbb['la']),  16-1)
-    up_right   = np.roll((bb_from & ~sbb['6'] & ~sbb['lh']),  16+1)
+    up_left    = np.roll((bb_from & ~(sbb['7']|sbb['8']|sbb['la'])),  16-1)
+    up_right   = np.roll((bb_from & ~(sbb['7']|sbb['8']|sbb['lh'])),  16+1)
     # down
-    down_left  = np.roll((bb_from & ~sbb['2'] & ~sbb['la']), -16-1)
-    down_right = np.roll((bb_from & ~sbb['2'] & ~sbb['lh']), -16+1)
+    down_left  = np.roll((bb_from & ~(sbb['1']|sbb['2']|sbb['la'])), -16-1)
+    down_right = np.roll((bb_from & ~(sbb['1']|sbb['2']|sbb['lh'])), -16+1)
     # left
-    left_up    = np.roll((bb_from & ~sbb['7'] & ~sbb['lb']),  -2+8)
-    left_down  = np.roll((bb_from & ~sbb['1'] & ~sbb['lb']),  -2-8)
+    left_up    = np.roll((bb_from & ~(sbb['7']|sbb['la']|sbb['lb'])),  -2+8)
+    left_down  = np.roll((bb_from & ~(sbb['1']|sbb['la']|sbb['lb'])),  -2-8)
     # down
-    right_up   = np.roll((bb_from & ~sbb['7'] & ~sbb['lg']),   2+8)
-    right_down = np.roll((bb_from & ~sbb['1'] & ~sbb['lg']),   2-8)
+    right_up   = np.roll((bb_from & ~(sbb['7']|sbb['lg']|sbb['lh'])),   2+8)
+    right_down = np.roll((bb_from & ~(sbb['1']|sbb['lg']|sbb['lh'])),   2-8)
     
     up = up_left|up_right
     down = down_left|down_right
@@ -317,18 +339,18 @@ def make_move_attack(b, bb_from, bb_to, bb_piece, bb_enemy_piece):
 def make_move(b_old, bb_from, bb_to):
     # Zuggenerator funktioniert!
     b_new = copy.deepcopy(b_old) # Tiefkopie wegen call-by-reference
-    
+    #if (bb_from | bb_to).any():
     for bb_key, bb in b_old.items():
         #print(bb_key)
         #print("FROM")
         #print(b_new[bb_key])
         if (bb & bb_to).any() : # falls gegnerische figur auf ziel auf bitboard verhanden
             b_new[bb_key] = bb  ^ bb_to # update bitboard: Schlag: Feld auf bb_to verschwindet
-            
+
         if (bb & bb_from).any() : # falls eigene figur auf bitboard verhanden
             b_new[bb_key] = (bb | bb_to) ^ bb_from # update bitboard : Feld auf bb_to entsteht, Feld auf bb_from verschwindet
-        #print("TO")
-        #print(b_new[bb_key])  
+    #print("TO")
+    #print(b_new[bb_key])  
     #print(print_board(b_new))
     return b_new
 
@@ -412,11 +434,19 @@ def generate_moves(b, player):
 
     # bishop
 #    print('bishop')
-    move_list_capture_bishop, move_list_quiet_bishop = gen_moves_knight(b, player) 
+    move_list_capture_bishop, move_list_quiet_bishop = gen_moves_bishop(b, player) 
     if move_list_capture_bishop:
         move_list_capture.append(move_list_capture_bishop)
     if move_list_quiet_bishop:
         move_list_quiet.append(move_list_quiet_bishop)
+        
+    # pawn
+#    print('pawn')
+    move_list_capture_pawn, move_list_quiet_pawn = gen_moves_pawn(b, player) 
+    if move_list_capture_pawn:
+        move_list_capture.append(move_list_capture_pawn)
+    if move_list_quiet_pawn:
+        move_list_quiet.append(move_list_quiet_pawn)
 
         
     # flacht list of list zu liste ab [[a,b],[c,d]] -> [a,b,c,d] (zugehörigkeit für figuren geht flöten)
@@ -461,8 +491,16 @@ def gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list):
 
 # Figurenspezifische Generatoren für capture und quiet Listen
 
-def gen_moves_pawn(b, player):
-    pass
+    # generates bb_lists with caputure and quiet moves
+    if player.current == 1:
+        #bb_from = b['p'] & b['W']
+        bb_all_moves = moves_quiet_pawns_W(b)
+    else:
+        #bb_from = b['p'] & b['B']
+        bb_all_moves = moves_quiet_pawns_B(b)
+        
+    move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, [[bb_from, bb_all_moves]])
+    return move_list_capture, move_list_quiet
 
 def gen_moves_king(b, player):
     # generates bb_lists with caputure and quiet moves
@@ -520,14 +558,29 @@ def gen_moves_bishop(b, player):
     # generates bb_lists with caputure and quiet moves
     if player.current == 1:
         bb_bishops = b['b'] & b['W']
-        bb_from_and_all_moves_list = [[bb_from, moves_rook_W(b, bb_from, player)] for bb_from in serialize_bb(bb_bishops)] # iteriere über alle Türme
+        bb_from_and_all_moves_list = [[bb_from, moves_bishop_W(b, bb_from, player)] for bb_from in serialize_bb(bb_bishops)] # iteriere über alle Türme
     else:
         bb_bishops = b['b'] & b['B']
-        bb_from_and_all_moves_list = [[bb_from, moves_rook_B(b, bb_from, player)] for bb_from in serialize_bb(bb_bishops)] # iteriere über alle Türme
+        bb_from_and_all_moves_list = [[bb_from, moves_bishop_B(b, bb_from, player)] for bb_from in serialize_bb(bb_bishops)] # iteriere über alle Türme
     
     # zu jeder Figur capture- und quiet-listen erstellen
     move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list)
     return move_list_capture, move_list_quiet
+
+def gen_moves_pawn(b, player):
+    # generates bb_lists with caputure and quiet moves
+    if player.current == 1:
+        bb_pawns = b['p'] & b['W']
+        bb_from_and_all_moves_list = [[bb_from, moves_pawn_W(b, bb_from)] for bb_from in serialize_bb(bb_pawns)] # iteriere über alle Türme
+    else:
+        bb_pawns = b['p'] & b['B']
+        bb_from_and_all_moves_list = [[bb_from, moves_pawn_B(b, bb_from)] for bb_from in serialize_bb(bb_pawns)] # iteriere über alle Türme
+    
+    # zu jeder Figur capture- und quiet-listen erstellen
+    move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list)
+    return move_list_capture, move_list_quiet
+
+
 
 
 
@@ -542,23 +595,27 @@ if __name__ == "__main__":
     print(print_board(b))
 
     print(player.__get__())
+    
+    b_test = make_move(b, bitboard(), bitboard())
+    #b_test = make_move(b_test, bitboard(4), bitboard(43)) # Teststellung mit König auf d6 per illegalem zug
+    #b_test = make_move(b_test, bitboard(1), bitboard(33)) # Teststellung mit Springer auf xy per illegalem zug
+    #b_test = make_move(b_test, bitboard(6), bitboard(37)) # Teststellung mit Springer auf xy per illegalem zug
+    #b_test = make_move(b_test, sbb['ld']&sbb['1'], sbb['lc']&sbb['5']) # Dame
+    #b_test = make_move(b_test, sbb['lc']&sbb['1'], sbb['lf']&sbb['5']) # bishop
+    b_test = make_move(b_test, sbb['la']&sbb['1'], sbb['lf']&sbb['5']) # rook
+    #b_test = make_move(b_test, sbb['lc']&sbb['2'], sbb['lc']&sbb['4']) # pawns
+    #b_test = make_move(b_test, sbb['ld']&sbb['7'], sbb['ld']&sbb['5']) # pawns
 
-    #b1 = make_move(b, bitboard(4), bitboard(43)) # Teststellung mit König auf d6 per illegalem zug
-    b1 = make_move(b, bitboard(1), bitboard(33)) # Teststellung mit Springer auf xy per illegalem zug
-    b2 = make_move(b1, bitboard(6), bitboard(37)) # Teststellung mit Springer auf xy per illegalem zug
-
-
-
-    print(print_board(b2))
+    print(print_board(b_test))
     print(player.__get__())
 
-    cap, qui = generate_moves(b2, player) # generiere alle Züge aus Position b
+    cap, qui = generate_moves(b_test, player) # generiere alle Züge aus Position b
     print('capture:')
     #print(cap)
-    print(print_board_list(cap))
+    print_board_list(cap)
     print('quiet:')
     #print(qui)
-    print(print_board_list(qui))
+    print_board_list(qui)
 
 '''
 
