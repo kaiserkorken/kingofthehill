@@ -1,16 +1,30 @@
-## to read: https://anytree.readthedocs.io/en/latest/api/anytree.node.html#anytree.node.anynode.AnyNode
-## -> statt Node('root) -> AnyNode(id=..)
-
+from re import M
 from tkinter.messagebox import NO
-from anytree import Node, RenderTree
-# TODO: Umbenennung tree -> Tree
+from anytree import NodeMixin, RenderTree
+
+class knoten(object):  # Just an example of a base class
+    foo=0
+        
+class Node(knoten, NodeMixin):  # Add Node feature
+    def __init__(self, value, parent=None, children=None):
+        super(knoten, self).__init__()
+        self.parent = parent
+        if children:
+            self.children = children
+        self.values=value
+        self.index=value[0]
+        self.b=value[1]
+        self.value=value[2]
+        self.h=value[3]
 class tree(object):
-    def __init__(self,FEN) -> None:
-        self.index=0
+    def __init__(self,bb) -> None:
         self.nodes=[]
-        self.h=0
         self.value=None
-        self.init_tree(FEN)
+        self.root=Node([0,bb,None,0])
+        self.nodes.append(self.root)
+        self.index=1
+        self.h=1
+        print(RenderTree(self.root))
         #self.node beinhaltet festen index, value und dict
         #node.value=value
         #node.h=height
@@ -20,23 +34,28 @@ class tree(object):
         moves = Node('root')
         
         return moves
-    def init_tree(self,b):
-        #TODO implement function
-        root=Node([self.index,b,self.value,self.h])
-        self.nodes[0]=root
-        self.index+=1
-        self.h+=1
 
-    def insert_node(self,parent,input):#value=[b,value,h]
+    def insert_node(self,parent,input):#value=[index,b,value,h]
         self.h=parent.h+1#neue ebene erstellen
-        values=[self.index,parent,input[0],input[1],input[2]]
-        self.nodes.append(Node(values))
+        values=[self.index,input[0],input[1],input[2]]
+        new_node=Node(values,parent)
+        parent.children.append(new_node)
+        self.nodes.append(new_node)
         self.index+=1
 
-    def findNode(self,index):
+    def find_node(self,index):
         return self.nodes[index]
     
     def delete_node(self,node):
         node.parent=None
 
-    
+    def print_tree(self):
+        print("tree:")
+        for pre, fill, node in RenderTree(self.root):
+            print((u"%s%s"%(pre,node.index)).ljust(8))
+
+
+
+
+
+            

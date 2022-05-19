@@ -49,7 +49,7 @@ def newGame():#unsere KI gegen sich selbst
     player=[]
     player[0]=Player()
     player[1]=Player()
-    FEN=BittoFEN(init_game())
+    FEN=BittoFEN(init_game(player[0]))
     x=0
     while (not checkmate(FEN,player[x])):
         FEN=player[x].turn(FEN)#TODO hier zeitbeschränkung z.B. per threads einbauen
@@ -69,5 +69,10 @@ if __name__ == "__main__":
 
     print(player.__get__())
 
-    print(print_board(b))
-
+cap, qui = generate_moves(b2, player) # generiere alle Züge aus Position b
+print('capture:')
+print(cap)
+#print_board_list(cap)
+print('quiet:')
+print(qui)
+#print_board_list(qui)
