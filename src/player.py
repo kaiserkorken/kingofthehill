@@ -115,11 +115,11 @@ class Player():
         print("node:")
         print(node)
         while node.h==h:
-            moves=player.generate_moves(node.b)#liste aller moves von bb
+            moves=self.generate_moves(node.b)#liste aller moves von bb
             for b in moves:
                 print("b:")
                 print(b)
-                tree.insert_node(node,[index,b,player.utility(b),h])  #in Node mit bitboard und wertung einsetzen
+                tree.insert_node(node,[index,b,self.utility(b),h])  #in Node mit bitboard und wertung einsetzen
             index +=1
             node=tree.find_node(index)
         step+=index
@@ -138,7 +138,7 @@ class Player():
             arr=self.set_movetree(tree,0,0,0)#arr=[tree,h,index,step]
             while(tmove>=0):#solange zeit ist
                 for z in range(arr[3], arr[2]):#eine weitere ebene durchgehen
-                    arr=player.set_movetree(tree,arr[1],z)#ein ausgerechneter zug alle züge ausrechnen
+                    arr=self.set_movetree(tree,arr[1],z)#ein ausgerechneter zug alle züge ausrechnen
                 tmove-=0.1
                 time-=0.1
         
@@ -251,12 +251,12 @@ def spielBewertung(bitbrd,player):
  
 ### DEMO ###
         
-'''
+
 #Test tree.py
 time=2
 tmove=time/2
 p=Player()    
-bb=init_game(p, player)
+bb=init_game(p)
 tre=tree(bb)
 tre.print_tree()
 arr=p.set_movetree(tre)
@@ -268,8 +268,8 @@ while(tmove):#solange zeit ist
     tmove-=0.1
 
 
-'''
-    
+
+"""    
     
 if __name__ == "__main__":
     player = Player()
@@ -300,3 +300,4 @@ if __name__ == "__main__":
     print('quiet:')
     #print(qui)
     print_board_list(qui)
+"""
