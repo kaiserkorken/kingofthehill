@@ -1,9 +1,8 @@
 import numpy as np
 # requires: pip install anytree
-from anytree import Node, RenderTree
+from tree import *
 import copy
 from bitboard import *
-from tree import *
 
 
 # Player-Klasse. Macht eigentlich noch nix außer klartextübersetzung 1->W, -1->B, kann auch ersetzt werden.
@@ -32,7 +31,7 @@ class Player():
         else:
             return 'error'
     def utility(self,node):
-        spielBewertung(node,self.current)
+        return spielBewertung(node,self.current)
 
     def alphabetasearch(self,tree):
         #alphabetasearch
@@ -52,10 +51,59 @@ class Player():
         pass#return b
 
     def generate_moves(self,b):
-        generate_moves(b,self)
+        return generate_moves(b,self)
 
     def make_move(self,b_old,bb_from, bb_to):
-        make_move(b_old,bb_from,bb_to)
+        return make_move(b_old,bb_from,bb_to)
+
+    def set_movetree(self,tree,h=0,index=0,step=0):#added züge zum baum, solange time = True
+    #while (time-(tmax/2)>0):
+    
+        node=tree.find_node(index)
+        print("node:")
+        print(node)
+        while node.h==h:
+            moves=player.generate_moves(node.b)#liste aller moves von bb
+            for b in moves:
+                print("b:")
+                print(b)
+                tree.insert_node(node,[index,b,player.utility(b),h])  #in Node mit bitboard und wertung einsetzen
+            index +=1
+            node=tree.find_node(index)
+        step+=index
+        h+=1
+
+        
+        return tree,h,index, step
+
+    def turn(self, FEN):#ein kompletter zug der ki
+        bb=FENtoBit(FEN)
+        tree=tree(bb)#leerer baum mit b als root
+        if not checkmate(FEN,self):#Spielende überprüfen
+            arr=self.set_movetree(tree,0,0,0)#arr=[tree,h,index,step]
+            while(time):#solange zeit ist
+                for z in range(arr[3], arr[2]):#eine weitere ebene durchgehen
+                    arr=player.set_movetree(tree,arr[1],z)#ein ausgerechneter zug alle züge ausrechnen
+        
+            #utility auf root?
+            tree=self.alphabetasearch(tree)#indizes aktualisieren
+            index=self.best_node(tree)#besten zug auswaehlen
+            move=tree.findNode(index)
+            bb=self.make_move(move)
+            FEN=BittoFEN(bb)
+            return FEN
+
+
+
+def checkmate(FEN,player):#Spiel nächsten Zug beendet -> True
+    b=BittoFEN(FEN)
+    #TODO b-> Spiel beendet?
+    #spiel gewonnen
+    #player.win=True
+    #return True
+
+    #else:
+    return False#kein Schachmatt
 
 player = Player()  
 
@@ -188,7 +236,7 @@ def moves_bishop(b, bb_from , player):
                 if (s):#feld mit gegner besetzt ->schlagen
                     plays[x+z,y+z]=1
             else:#feld frei
-                plays[x+z,y]=1#mögl Zug
+                plays[x+z,y+z]=1#mögl Zug
         if upbool and x-z>=0 and y+z<=7:
             s=enemy[x-z,y+z]
             if (bb[x-z,y+z]|s):#
@@ -596,38 +644,8 @@ def gen_moves_pawn(b, player):
 
 
 
-### DEMO ###
-        
-if __name__ == "__main__":
-    
-    b = init_game(give_bitboards(), player)
-    sbb = give_static_bitboards()
-    print(print_board(b))
 
-    print(player.__get__())
-    
-    b_test = make_move(b, bitboard(), bitboard())
-    #b_test = make_move(b_test, bitboard(4), bitboard(43)) # Teststellung mit König auf d6 per illegalem zug
-    #b_test = make_move(b_test, bitboard(1), bitboard(33)) # Teststellung mit Springer auf xy per illegalem zug
-    #b_test = make_move(b_test, bitboard(6), bitboard(37)) # Teststellung mit Springer auf xy per illegalem zug
-    #b_test = make_move(b_test, sbb['ld']&sbb['1'], sbb['lc']&sbb['5']) # Dame
-    #b_test = make_move(b_test, sbb['lc']&sbb['1'], sbb['lf']&sbb['5']) # bishop
-    b_test = make_move(b_test, sbb['la']&sbb['1'], sbb['lf']&sbb['5']) # rook
-    #b_test = make_move(b_test, sbb['lc']&sbb['2'], sbb['lc']&sbb['4']) # pawns
-    #b_test = make_move(b_test, sbb['ld']&sbb['7'], sbb['ld']&sbb['5']) # pawns
 
-    print(print_board(b_test))
-    print(player.__get__())
-
-    cap, qui = generate_moves(b_test, player) # generiere alle Züge aus Position b
-    print('capture:')
-    #print(cap)
-    print_board_list(cap)
-    print('quiet:')
-    #print(qui)
-    print_board_list(qui)
-
-'''
 
 # erstellt ein array mit String values der position der Weißen oder Schwarzen Figuren
 def playerWert(bitbrd,player):
@@ -701,34 +719,81 @@ def spielBewertung(bitbrd,player):
        elif player == -1:
               return wertB-wertW
         
- 
-    ### DEMO ###
-
-
-
-    b = init_game(give_bitboards(), player)
+"""
+### DEMO ###
+        
+if __name__ == "__main__":
+    
+    b = init_game(player)
     sbb = give_static_bitboards()
     print(print_board(b))
 
     print(player.__get__())
+    
+    b_test = make_move(b, bitboard(), bitboard())
+    #b_test = make_move(b_test, bitboard(4), bitboard(43)) # Teststellung mit König auf d6 per illegalem zug
+    #b_test = make_move(b_test, bitboard(1), bitboard(33)) # Teststellung mit Springer auf xy per illegalem zug
+    #b_test = make_move(b_test, bitboard(6), bitboard(37)) # Teststellung mit Springer auf xy per illegalem zug
+    #b_test = make_move(b_test, sbb['ld']&sbb['1'], sbb['lc']&sbb['5']) # Dame
+    b_test = make_move(b_test, sbb['lc']&sbb['1'], sbb['lf']&sbb['5']) # bishop
+    #b_test = make_move(b_test, sbb['la']&sbb['1'], sbb['lf']&sbb['5']) # rook
+    #b_test = make_move(b_test, sbb['lc']&sbb['2'], sbb['lc']&sbb['4']) # pawns
+    #b_test = make_move(b_test, sbb['ld']&sbb['7'], sbb['ld']&sbb['5']) # pawns
 
-    print(print_board(b))
-    #b1 = make_move(b, bitboard(4), bitboard(43)) # Teststellung mit König auf d6 per illegalem zug
-    b1 = make_move(b, bitboard(1), bitboard(33)) # Teststellung mit Springer auf xy per illegalem zug
-    b2 = make_move(b1, bitboard(6), bitboard(37)) # Teststellung mit Springer auf xy per illegalem zug
-
-
-
-    print(print_board(b2))
+    print(print_board(b_test))
     print(player.__get__())
 
-    cap, qui = generate_moves(b2, player) # generiere alle Züge aus Position b
+    cap, qui = generate_moves(b_test, player) # generiere alle Züge aus Position b
     print('capture:')
-    print(cap)
-    #print_board_list(cap)
+    #print(cap)
+    print_board_list(cap)
     print('quiet:')
-    print(qui)
-    #print_board_list(qui)
+    #print(qui)
+    print_board_list(qui)
 
-    
-'''
+"""
+"""
+### DEMO ###
+
+
+
+b = init_game(player)
+sbb = give_static_bitboards()
+print(print_board(b))
+
+print(player.__get__())
+
+print(print_board(b))
+#b1 = make_move(b, bitboard(4), bitboard(43)) # Teststellung mit König auf d6 per illegalem zug
+b1 = make_move(b, bitboard(1), bitboard(33)) # Teststellung mit Springer auf xy per illegalem zug
+b2 = make_move(b1, bitboard(6), bitboard(37)) # Teststellung mit Springer auf xy per illegalem zug
+
+
+
+print(print_board(b2))
+print(player.__get__())
+
+cap, qui = generate_moves(b2, player) # generiere alle Züge aus Position b
+print('capture:')
+print(cap)
+#print_board_list(cap)
+print('quiet:')
+print(qui)
+#print_board_list(qui)
+
+"""
+
+#Test tree.py
+time=2
+tmove=time/2
+p=Player()    
+bb=init_game(p)
+tre=tree(bb)
+tre.print_tree()
+arr=p.set_movetree(tre)
+while(tmove):#solange zeit ist
+    for z in range(arr[3], arr[2]):#eine weitere ebene durchgehen
+        arr=p.set_movetree(tre,arr[1],z)#ein ausgerechneter zug alle züge ausrechnen
+        print("Tree"+z+":")
+        tre.print_tree()
+    tmove-=0.1

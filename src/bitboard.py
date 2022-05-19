@@ -77,7 +77,7 @@ def give_static_bitboards():
 
 
 
-def init_game(b, player):
+def init_game(player):#kein b als input(wozu?)
     # initializes board with pieces
     # stellt Spielfiguren auf die jeweiligen Felder auf Spielfeld
     # -> könnte auch mit static bitboards initialisiert werden
