@@ -1,3 +1,4 @@
+from lib2to3.pgen2.token import ISTERMINAL
 import numpy as np
 # requires: pip install anytree
 from anytree import Node, RenderTree
@@ -34,14 +35,32 @@ class Player():
         else:
             return 'error'
     def utility(self,node):
-        spielBewertung(node,self.current)
+        return spielBewertung(node,self.current)
 
-    def alphabetasearch(self,tree):
+    def alphabetasearch(self,node,depth=0,ismax=True):
+        if depth==0 or node.children==None:
+            return node.value
+        if ismax:
+            v=1000000
+            for x in node.children:
+                v=max(v,self.alphabetasearch(x,depth-1,False))
+                node.value=v
+            return v
+        else:
+            v=-1000000
+            for x in node.children:
+                v=min(v,self.alphabetasearch(x,depth-1,True))
+                node.value=v
+            return v
+
         #alphabetasearch
         #Node = findNode(ergebnis)
-       
-        pass #return tree with updated values
+        #return tree with updated values
     #TODO insert functions in class
+    
+    
+    
+    
     
     def best_node(self,tree):
         #nodes height 1 sammeln
@@ -84,11 +103,75 @@ class Player():
         
 
     def generate_moves(self,b):
-        generate_moves(b,self)
+        return generate_moves(b,self)
 
     def make_move(self,b_old,bb_from, bb_to):
-        make_move(b_old,bb_from,bb_to)
+        return make_move(b_old,bb_from,bb_to)
 
+    def set_movetree(self,tree,h=0,index=0,step=0):#added züge zum baum, solange time = True
+    #while (time-(tmax/2)>0):
+    
+        node=tree.find_node(index)
+        print("node:")
+        print(node)
+        while node.h==h:
+            moves=player.generate_moves(node.b)#liste aller moves von bb
+            for b in moves:
+                print("b:")
+                print(b)
+                tree.insert_node(node,[index,b,player.utility(b),h])  #in Node mit bitboard und wertung einsetzen
+            index +=1
+            node=tree.find_node(index)
+        step+=index
+        h+=1
+
+        
+        return tree,h,index, step
+
+    def turn(self, FEN):#ein kompletter zug der ki
+        time=2
+        tmove=time/2
+        tsearch=time/2
+        bb=FENtoBit(FEN)
+        tree=tree(bb)#leerer baum mit b als root
+        if not checkmate(FEN,self):#Spielende überprüfen
+            arr=self.set_movetree(tree,0,0,0)#arr=[tree,h,index,step]
+            while(tmove>=0):#solange zeit ist
+                for z in range(arr[3], arr[2]):#eine weitere ebene durchgehen
+                    arr=player.set_movetree(tree,arr[1],z)#ein ausgerechneter zug alle züge ausrechnen
+                tmove-=0.1
+                time-=0.1
+        
+            #utility auf root?
+            depth=1
+            while(tsearch>=0):
+                tiefe=self.alphabetasearch(tree.root,depth)#indizes aktualisieren#wertung des bestmöglichen zuges ausgeben
+                depth+=1
+                tsearch-=0.1
+                time-=0.1
+
+            index=self.best_node(tree)#besten zug auswaehlen
+            move=tree.findNode(index)
+            bb=self.make_move(move)
+            FEN=BittoFEN(bb)
+            return FEN
+
+
+
+def checkmate(FEN,player):#Spiel nächsten Zug beendet -> True
+    b=BittoFEN(FEN)
+    #TODO b-> Spiel beendet?
+    #spiel gewonnen
+    #player.win=True
+    #return True
+
+    #else:
+    return False#kein Schachmatt
+
+
+    
+        
+        
 player = Player()  
 
 
