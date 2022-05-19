@@ -52,7 +52,7 @@ class Player():
 
         #alphabetasearch
         #Node = findNode(ergebnis)
-        pass #return tree with updated values
+        #return tree with updated values
     #TODO insert functions in class
     
     def best_node(self,tree):
