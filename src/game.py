@@ -6,7 +6,7 @@ def newGame():#unsere KI gegen sich selbst
     player[1]=Player()
     FEN=BittoFEN(init_game(player[0]))
     x=0
-    while (not checkmate(FEN,player[x])):
+    while (not checkmate(FENtoBit(FEN),player[x])):
         FEN=player[x].turn(FEN)#TODO hier zeitbeschränkung z.B. per threads einbauen
         x=(x+1)%2#wechsel zwischen 0 und 1
         #print_bitboard(FEN)

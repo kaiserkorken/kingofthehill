@@ -124,7 +124,7 @@ def generate_moves(b, player):
     move_list_capture_flat = flatten_list_of_list(move_list_capture)
     move_list_quiet_flat = flatten_list_of_list(move_list_quiet)
     
-    return move_list_capture_flat, move_list_quiet_flat
+    return np.concatenate((move_list_capture_flat, move_list_quiet_flat))
 
 
 

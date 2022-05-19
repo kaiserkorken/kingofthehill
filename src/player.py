@@ -7,6 +7,11 @@ import random
 from bitboard import *
 from tree import *
 from movegen import *
+import logging
+import threading
+import time
+ 
+import concurrent.futures
 
 
 # Player-Klasse. Macht eigentlich noch nix außer klartextübersetzung 1->W, -1->B, kann auch ersetzt werden.
@@ -34,8 +39,8 @@ class Player():
             return 'B'
         else:
             return 'error'
-    def utility(self,node):
-        return spielBewertung(node,self.current)
+    def utility(self,b):
+        return spielBewertung(b,self.current)
 
     def alphabetasearch(self,node,depth=0,ismax=True):
         if depth==0 or node.children==None:
@@ -108,25 +113,33 @@ class Player():
     def make_move(self,b_old,bb_from, bb_to):
         return make_move(b_old,bb_from,bb_to)
 
-    def set_movetree(self,tree,h=0,index=0,step=0):#added züge zum baum, solange time = True
+    def set_movetree(self,tree,tmove, h=0,index=0,step=0):#added züge an node(index)
     #while (time-(tmax/2)>0):
     
         node=tree.find_node(index)
-        print("node:")
-        print(node)
-        while node.h==h:
-            moves=self.generate_moves(node.b)#liste aller moves von bb
-            for b in moves:
-                print("b:")
-                print(b)
-                tree.insert_node(node,[index,b,self.utility(b),h])  #in Node mit bitboard und wertung einsetzen
-            index +=1
-            node=tree.find_node(index)
+        #print("node:")
+        #print(node)
+        #while node.h==h:
+        moves=self.generate_moves(node.b)#liste aller moves von bb
+        #print("moves")
+        for b in moves:
+            if b:
+
+                #print("b:")
+                #print(b)
+                tree.insert_node(node,[b,self.utility(b),h])  #in Node mit bitboard und wertung einsetzen
+                print("u:")
+                print(self.utility(b))
+                #print(self.utility(b))
+                #tree.print_tree()
+        index +=1
+        node=tree.find_node(index)
+        
         step+=index
         h+=1
 
         
-        return tree,h,index, step
+        return [tree,h,index, step, tmove]
 
     def turn(self, FEN):#ein kompletter zug der ki
         time=2
@@ -134,7 +147,7 @@ class Player():
         tsearch=time/2
         bb=FENtoBit(FEN)
         tree=tree(bb)#leerer baum mit b als root
-        if not checkmate(FEN,self):#Spielende überprüfen
+        if not checkmate(bb,self):#Spielende überprüfen
             arr=self.set_movetree(tree,0,0,0)#arr=[tree,h,index,step]
             while(tmove>=0):#solange zeit ist
                 for z in range(arr[3], arr[2]):#eine weitere ebene durchgehen
@@ -176,7 +189,7 @@ def playerWert(bitbrd,player):
 
     if player == 1:
           farbe = 'W'
-    elif player == -1:
+    else:
           farbe = 'B'
     somelist = []
     for num, x in enumerate(bitbrd[farbe], start=0):
@@ -245,12 +258,46 @@ def spielBewertung(bitbrd,player):
         
 
 
+"""
+class ThreadWithReturnValue(threading):#https://stackoverflow.com/questions/6893968/how-to-get-the-return-value-from-a-thread-in-python
+    def __init__(self, group=None, target=None, name=None,
+                 args=(), kwargs={}, Verbose=None):
+        threading.__init__(self, group, target, name, args, kwargs, Verbose)
+        self._return = None
+    def run(self):
+        if self._Thread__target is not None:
+            self._return = self._Thread__target(*self._Thread__args,
+                                                **self._Thread__kwargs)
+    def join(self):
+        threading.join(self)
+        return self._return
+"""
 
 
 
- 
+
 ### DEMO ###
-        
+
+def tree_height(arr):
+    #tmove=arr[4]
+    #arr=[tree,h,index,step,tmove]
+    #logging.info("Thread1    : started")
+    #print(arr)
+    for z in range(arr[3], arr[2]):#eine weitere ebene durchgehen
+        print(arr[4])
+        logging.info("Main    : creating height"+z)
+        arr=p.set_movetree(tre,arr[4],arr[1],z)#ein ausgerechneter zug alle züge ausrechnen
+        print("Tree"+z+":")
+        tre.print_tree()
+        arr[4]-=0.1
+        if arr[4]<=0:
+            return arr
+    print(arr[4])
+    if arr[4]>=0:
+        arr[4]-=0.5
+        return tree_height(arr)
+    return False
+
 
 #Test tree.py
 time=2
@@ -258,15 +305,47 @@ tmove=time/2
 p=Player()    
 bb=init_game(p)
 tre=tree(bb)
-tre.print_tree()
-arr=p.set_movetree(tre)
-while(tmove):#solange zeit ist
-    for z in range(arr[3], arr[2]):#eine weitere ebene durchgehen
-        arr=p.set_movetree(tre,arr[1],z)#ein ausgerechneter zug alle züge ausrechnen
-        print("Tree"+z+":")
-        tre.print_tree()
-    tmove-=0.1
+format = "%(asctime)s: %(message)s"
+logging.basicConfig(format=format, level=logging.INFO,
+                            datefmt="%H:%M:%S")
+#tre.print_tree()
+arr=p.set_movetree(tre,tmove)
+save=arr[0]
 
+arr=tree_height(arr)
+if arr:
+    save=arr
+# while(arr[4]>=0):#solange zeit ist
+#     print(arr[4])
+#     arr=tree_height(arr)
+#     # logging.info("Main    : before creating thread")
+#     # e= concurrent.futures.ThreadPoolExecutor()
+#     # logging.info("Main    : thread created")
+#     # future = e.submit(tree_height, arr)
+#     # return_value = future.result()
+#     # save=return_value
+#     # logging.info("Main    : waiting for thread")
+#     # save=concurrent.futures.wait(e)
+#     # logging.info("Main    : thread finished")
+#     # logging.info("Main    : wait for the thread to finish")
+
+#     logging.info("Main    : before creating thread")
+#     x = threading.Thread(target=tree_height, args=arr)
+#     logging.info("Main    : thread created")
+
+#     logging.info("Main    : before running thread")
+#     x.start()
+#     logging.info("Main    : wait for the thread to finish")
+#     x.join()
+    
+# logging.info("Main    : all done")
+#return save
+tre.print_tree()
+print(tre)
+#return tre
+
+
+#if __name__ == "__main__":
 
 
 """    
