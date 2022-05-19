@@ -1,6 +1,6 @@
 from bitboard import *
 from player import *
- 
+import copy
 
 
 bibsbbl=["la","lb","lc","ld","le","lf","lg","lh"]

@@ -3,7 +3,7 @@ import numpy as np
 # requires: pip install anytree
 from anytree import Node, RenderTree
 import random
-import copy
+
 from bitboard import *
 from tree import *
 from movegen import *
@@ -77,14 +77,14 @@ class Player():
                 children = children.remove(possible_best_node)
                 values = [value for index,parent,b,value,h in children] 
                 
-                    if best_nodes: # falls Liste schon Element enthält
-                        if possible_best_node[3] == best_nodes[0][3] # falls ein weiterer gleichwertiger Zug existiert
-                            best_nodes.append(possible_best_node)
-                        else: # falls nächstbester Zug schlechter
-                            break # alle besten Züge gefunden
-                    else: # falls Liste noch leer
-                        if checkmate(possible_best_node[2]) == False: # erster Zug muss auf jeden Fall legal sein
-                            best_nodes.append(possible_best_node)
+                if best_nodes: # falls Liste schon Element enthält
+                    if possible_best_node[3] == best_nodes[0][3]: # falls ein weiterer gleichwertiger Zug existiert
+                        best_nodes.append(possible_best_node)
+                    else: # falls nächstbester Zug schlechter
+                        break # alle besten Züge gefunden
+                else: # falls Liste noch leer
+                    if checkmate(possible_best_node[2]) == False: # erster Zug muss auf jeden Fall legal sein
+                        best_nodes.append(possible_best_node)
             # best_nodes sollte nun mindestens einen Zug enthalten. Dieser ist immer legal
             if len(best_nodes) == 1: # falls nur ein Zug vorhanden
                 return best_nodes[0] # gib Zug zurück
