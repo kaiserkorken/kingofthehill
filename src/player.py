@@ -37,10 +37,20 @@ class Player():
     def alphabetasearch(self,tree):
         #alphabetasearch
         #Node = findNode(ergebnis)
-        #return index of chosen Node
-        pass
+       
+        pass #return tree with updated values
     #TODO insert functions in class
     
+    def best_node(self,tree):
+        #return best node of nodes of tree height 1 
+        #nodes height 1 durchiterieren->
+        # nur checkmate(b)==True in Liste nehmen
+        #mehrere gleiche wertung -> random
+
+
+        #tree.delete_node(chosen node) #bzw. aus liste löschen
+        pass#return b
+
     def generate_moves(self,b):
         generate_moves(b,self)
 
@@ -164,7 +174,7 @@ def moves_bishop(b, bb_from , player):
 
     #iterative variante:
     plays=bitboard()
-    upbool=True#obenlinks
+    upbool=True#obenlinks (leider nur oben)
     rbool=True#obenrechts
     lbool=True#untenlinks
     dobool=True#untenrechts
