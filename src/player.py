@@ -168,26 +168,22 @@ def checkmate(bitbrd,player):#Spiel nächsten Zug beendet -> True
               return True
         
         
-player = Player()  
 
 
-
-
-'''
 
 # erstellt ein array mit String values der position der Weißen oder Schwarzen Figuren
 def playerWert(bitbrd,player):
 
-   if player == 1:
+    if player == 1:
           farbe = 'W'
-   elif player == -1:
+    elif player == -1:
           farbe = 'B'
-   somelist = []
-   for num, x in enumerate(bitbrd[farbe], start=0):
+    somelist = []
+    for num, x in enumerate(bitbrd[farbe], start=0):
           for sec, y in enumerate(bitbrd[farbe][num], start=0):
                  if bitbrd[farbe][num][sec] == True:
                         somelist.append(str(num) + ";" + str(sec))
-   return somelist
+    return somelist
 
 # nimmt den array von playerWert und iterirt durch die verschiedenen Bitboard um nachzuprüfen um welche Figur es sich handelt
 # Wert für Q = 9 R = 5 N = 3 B = 3 P = 1 K = 1
@@ -196,58 +192,82 @@ def playerWert(bitbrd,player):
 
 
 def calculateValue(bitbrd, listeS, player):
-       wert = 0
+    wert = 0
 
-       for x in listeS:
-              if bitbrd['q'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
-                     wert = wert + 9
+    for x in listeS:
+          if bitbrd['q'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
+                 wert = wert + 9
 
-       for x in listeS:
-              if bitbrd['r'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
-                     wert = wert + 5
+    for x in listeS:
+          if bitbrd['r'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
+                 wert = wert + 5
 
-       for x in listeS:
-              if bitbrd['n'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
-                     wert = wert + 3
+    for x in listeS:
+          if bitbrd['n'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
+                 wert = wert + 3
 
-       for x in listeS:
-              if bitbrd['b'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
-                     wert = wert + 3
+    for x in listeS:
+          if bitbrd['b'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
+                 wert = wert + 3
 
-       for x in listeS:
-              if bitbrd['p'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
-                     if int(x.split(";")[0]) == 7 and player == 1:
-                            wert = wert +9
-                     elif int(x.split(";")[0]) == 0 and player == -1:
-                            wert = wert +9
-                     elif int(x.split(";")[0]) != 0:
-                            wert = wert + 1
+    for x in listeS:
+          if bitbrd['p'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
+                if int(x.split(";")[0]) == 7 and player == 1:
+                        wert = wert +9
+                elif int(x.split(";")[0]) == 0 and player == -1:
+                        wert = wert +9
+                elif int(x.split(";")[0]) != 0:
+                        wert = wert + 1
 
-       for x in listeS:
-              if bitbrd['k'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
-                     wert = wert + 1
-                     if int(x.split(";")[0]) == 3 and int(x.split(";")[1]) == 3:
-                            wert = wert +1000
-                     if int(x.split(";")[0]) == 3 and int(x.split(";")[1]) == 4:
-                            wert = wert +1000
-                     if int(x.split(";")[0]) == 4 and int(x.split(";")[1]) == 3:
-                            wert = wert + 1000
-                     if int(x.split(";")[0]) == 4 and int(x.split(";")[1]) == 4:
-                            wert = wert + 1000
+    for x in listeS:
+          if bitbrd['k'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
+                wert = wert + 1
+                if int(x.split(";")[0]) == 3 and int(x.split(";")[1]) == 3:
+                    wert = wert +1000
+                if int(x.split(";")[0]) == 3 and int(x.split(";")[1]) == 4:
+                    wert = wert +1000
+                if int(x.split(";")[0]) == 4 and int(x.split(";")[1]) == 3:
+                    wert = wert + 1000
+                if int(x.split(";")[0]) == 4 and int(x.split(";")[1]) == 4:
+                    wert = wert + 1000
 
 
-       return wert
+    return wert
 
 # Bewertungsfunktion nimmt ein Bitboard und den Player 1 wenn Weiß und -1 wenn Schwarz
 def spielBewertung(bitbrd,player):
-       wertW = calculateValue(bitbrd, playerWert(bitbrd, 1),1)
-       wertB = calculateValue(bitbrd, playerWert(bitbrd, -1),-1)
-       if player == 1:
-              return wertW-wertB
-       elif player == -1:
-              return wertB-wertW
+    wertW = calculateValue(bitbrd, playerWert(bitbrd, 1),1)
+    wertB = calculateValue(bitbrd, playerWert(bitbrd, -1),-1)
+    if player == 1:
+        return wertW-wertB
+    elif player == -1:
+        return wertB-wertW
         
-'''
+
+
+#Test tree.py
+time=2
+tmove=time/2
+p=Player()    
+bb=init_game(p)
+tre=tree(bb)
+tre.print_tree()
+arr=p.set_movetree(tre)
+while(tmove):#solange zeit ist
+    for z in range(arr[3], arr[2]):#eine weitere ebene durchgehen
+        arr=p.set_movetree(tre,arr[1],z)#ein ausgerechneter zug alle züge ausrechnen
+        print("Tree"+z+":")
+        tre.print_tree()
+    tmove-=0.1
+
+
+        
+        
+        
+player = Player()  
+
+
+
  
 ### DEMO ###
 
