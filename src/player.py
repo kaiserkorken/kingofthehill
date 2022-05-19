@@ -245,11 +245,18 @@ def spielBewertung(bitbrd,player):
         
 
 
+
+
+
+ 
+### DEMO ###
+        
+'''
 #Test tree.py
 time=2
 tmove=time/2
 p=Player()    
-bb=init_game(p)
+bb=init_game(p, player)
 tre=tree(bb)
 tre.print_tree()
 arr=p.set_movetree(tre)
@@ -261,21 +268,35 @@ while(tmove):#solange zeit ist
     tmove-=0.1
 
 
-        
-        
-        
-player = Player()  
-
-
-
- 
-### DEMO ###
-
-        
+'''
+    
+    
 if __name__ == "__main__":
+    player = Player()
     
     b = init_game(give_bitboards(), player)
+    sbb = give_static_bitboards()
+    print(print_board(b))
+
+    print(player.__get__())
     
-    tree = tree(BittoFEN(b))
-    
-    player.best_node(tree)
+    b_test = player.make_move(b, bitboard(), bitboard())
+    #b_test = make_move(b_test, bitboard(4), bitboard(43)) # Teststellung mit König auf d6 per illegalem zug
+    #b_test = make_move(b_test, bitboard(1), bitboard(33)) # Teststellung mit Springer auf xy per illegalem zug
+    #b_test = make_move(b_test, bitboard(6), bitboard(37)) # Teststellung mit Springer auf xy per illegalem zug
+    #b_test = make_move(b_test, sbb['ld']&sbb['1'], sbb['lc']&sbb['5']) # Dame
+    #b_test = make_move(b_test, sbb['lc']&sbb['1'], sbb['lf']&sbb['5']) # bishop
+    b_test = player.make_move(b_test, sbb['la']&sbb['1'], sbb['lf']&sbb['5']) # rook
+    #b_test = make_move(b_test, sbb['lc']&sbb['2'], sbb['lc']&sbb['4']) # pawns
+    #b_test = make_move(b_test, sbb['ld']&sbb['7'], sbb['ld']&sbb['5']) # pawns
+
+    print(print_board(b_test))
+    print(player.__get__())
+
+    cap, qui = generate_moves(b_test, player) # generiere alle Züge aus Position b
+    print('capture:')
+    #print(cap)
+    print_board_list(cap)
+    print('quiet:')
+    #print(qui)
+    print_board_list(qui)
