@@ -24,7 +24,7 @@ class tree(object):
         self.nodes.append(self.root)
         self.index=1
         self.h=1
-        print(RenderTree(self.root))
+        #print(RenderTree(self.root))
         #self.node beinhaltet festen index, value und dict
         #node.value=value
         #node.h=height
@@ -39,7 +39,8 @@ class tree(object):
         self.h=parent.h+1#neue ebene erstellen
         values=[self.index,input[0],input[1],input[2]]
         new_node=Node(values,parent)
-        parent.children.append(new_node)
+        #print(parent.children)
+        #parent.children+=(new_node,)
         self.nodes.append(new_node)
         self.index+=1
 
@@ -52,7 +53,7 @@ class tree(object):
     def print_tree(self):
         print("tree:")
         for pre, fill, node in RenderTree(self.root):
-            print((u"%s%s"%(pre,node.index)).ljust(8))
+            print((u"%s%s"%(pre,node.index)).ljust(8),node.value,node.h)
 
 
 
