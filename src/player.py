@@ -46,7 +46,7 @@ class Player():
     def best_node(self,tree):
         #nodes height 1 sammeln
         children = tree.root.children
-        if children # falls Züge vorhanden
+        if children: # falls Züge vorhanden
             values = [value for index,parent,b,value,h in children]
             #print(tree)
             #print(children)
