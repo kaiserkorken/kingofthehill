@@ -158,18 +158,14 @@ class Player():
 
 
 
-def checkmate(FEN,player):#Spiel nächsten Zug beendet -> True
-    b=BittoFEN(FEN)
-    #TODO b-> Spiel beendet?
-    #spiel gewonnen
-    #player.win=True
-    #return True
-
-    #else:
-    return False#kein Schachmatt
-
-
-    
+def checkmate(bitbrd,player):#Spiel nächsten Zug beendet -> True
+       listeS = playerWert(bitbrd,player)
+       schach = True
+       for x in listeS:
+              if bitbrd['k'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
+                     schach = False
+       if schach == True:
+              return True
         
         
 player = Player()  
