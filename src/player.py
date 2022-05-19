@@ -128,18 +128,21 @@ class Player():
                 #print("b:")
                 #print(b)
                 tree.insert_node(node,[b,self.utility(b),h])  #in Node mit bitboard und wertung einsetzen
-                print("u:")
-                print(self.utility(b))
+                # print("u:")
+                # print(self.utility(b))
                 #print(self.utility(b))
                 #tree.print_tree()
+            else:
+                moves.remove(b)
         index +=1
         node=tree.find_node(index)
         
         step+=index
-        h+=1
-
         
-        return [tree,h,index, step, tmove]
+        #print("h:",h,"moves:",len(moves))
+        h+=1
+        
+        return [tmove, len(moves)]
 
     def turn(self, FEN):#ein kompletter zug der ki
         time=2
@@ -278,41 +281,52 @@ class ThreadWithReturnValue(threading):#https://stackoverflow.com/questions/6893
 
 ### DEMO ###
 
-def tree_height(arr):
+def tree_height(player,tree,tmove,index=0,altaltstep=0,altstep=1,h=0):
     #tmove=arr[4]
     #arr=[tree,h,index,step,tmove]
     #logging.info("Thread1    : started")
     #print(arr)
-    for z in range(arr[3], arr[2]):#eine weitere ebene durchgehen
-        print(arr[4])
-        logging.info("Main    : creating height"+z)
-        arr=p.set_movetree(tre,arr[4],arr[1],z)#ein ausgerechneter zug alle züge ausrechnen
-        print("Tree"+z+":")
-        tre.print_tree()
-        arr[4]-=0.1
-        if arr[4]<=0:
-            return arr
-    print(arr[4])
-    if arr[4]>=0:
-        arr[4]-=0.5
-        return tree_height(arr)
+    # if h==0:
+    #     arr=player.set_movetree(tree,tmove,h,index)#ein ausgerechneter zug alle züge ausrechnen
+    #     print(arr)
+    arr=[tmove,altstep]
+    neustep=altstep
+    altstep+=altaltstep
+    for z in range(index, altstep):#eine weitere ebene durchgehen
+        #print(arr[0])
+        #logging.info("Main    : creating height "+str(h))
+        arr=player.set_movetree(tree,arr[0],h,z)
+        neustep+=arr[1]
+        #print("Tree "+str(z)+":")
+        #tre.print_tree()
+        arr[0]-=0.1
+        if arr[0]<=0:
+            return True
+    #print(arr[0])
+    if arr[0]>=0:
+        arr[0]-=0.5
+        altstep-=altaltstep#-=alt
+        return tree_height(player,tree,arr[0],index+altstep,altstep,neustep-altstep,h+1)
     return False
 
 
 #Test tree.py
-time=2
+time=10
 tmove=time/2
 p=Player()    
 bb=init_game(p)
+
+#bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#TODO fix fen->bit
 tre=tree(bb)
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(format=format, level=logging.INFO,
                             datefmt="%H:%M:%S")
 #tre.print_tree()
-arr=p.set_movetree(tre,tmove)
-save=arr[0]
-
-arr=tree_height(arr)
+#arr=p.set_movetree(tre,tmove)
+#save=arr[0]
+save=tre
+tre.print_tree()
+arr=tree_height(p,tre,tmove)
 if arr:
     save=arr
 # while(arr[4]>=0):#solange zeit ist
