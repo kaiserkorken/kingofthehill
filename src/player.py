@@ -1,3 +1,4 @@
+from lib2to3.pgen2.token import ISTERMINAL
 import numpy as np
 # requires: pip install anytree
 from tree import *
@@ -33,10 +34,24 @@ class Player():
     def utility(self,node):
         return spielBewertung(node,self.current)
 
-    def alphabetasearch(self,tree):
+    def alphabetasearch(self,node,depth=0,ismax=True):
+        if depth==0 or node.children==None:
+            return node.value
+        if ismax:
+            v=1000000
+            for x in node.children:
+                v=max(v,self.alphabetasearch(x,depth-1,False))
+                node.value=v
+            return v
+        else:
+            v=-1000000
+            for x in node.children:
+                v=min(v,self.alphabetasearch(x,depth-1,True))
+                node.value=v
+            return v
+
         #alphabetasearch
         #Node = findNode(ergebnis)
-       
         pass #return tree with updated values
     #TODO insert functions in class
     
@@ -77,16 +92,27 @@ class Player():
         return tree,h,index, step
 
     def turn(self, FEN):#ein kompletter zug der ki
+        time=2
+        tmove=time/2
+        tsearch=time/2
         bb=FENtoBit(FEN)
         tree=tree(bb)#leerer baum mit b als root
         if not checkmate(FEN,self):#Spielende überprüfen
             arr=self.set_movetree(tree,0,0,0)#arr=[tree,h,index,step]
-            while(time):#solange zeit ist
+            while(tmove>=0):#solange zeit ist
                 for z in range(arr[3], arr[2]):#eine weitere ebene durchgehen
                     arr=player.set_movetree(tree,arr[1],z)#ein ausgerechneter zug alle züge ausrechnen
+                tmove-=0.1
+                time-=0.1
         
             #utility auf root?
-            tree=self.alphabetasearch(tree)#indizes aktualisieren
+            depth=1
+            while(tsearch>=0):
+                tiefe=self.alphabetasearch(tree.root,depth)#indizes aktualisieren#wertung des bestmöglichen zuges ausgeben
+                depth+=1
+                tsearch-=0.1
+                time-=0.1
+
             index=self.best_node(tree)#besten zug auswaehlen
             move=tree.findNode(index)
             bb=self.make_move(move)
