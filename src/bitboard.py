@@ -76,6 +76,8 @@ def give_static_bitboards():
     return sbb
 
 
+sbb = give_static_bitboards()
+
 
 def init_game(b, player):
     # initializes board with pieces
@@ -202,6 +204,12 @@ def BittoFEN(b):#turns bitboard into FEN Strings
 def serialize_bb(bb):
     # gibt einzelne bitboards für jedes True an entsprechender Stelle zurück
     return [bitboard(index) for index in np.flatnonzero(bb)]
+
+def flatten_list_of_list(list_of_list):
+    # flacht list of list zu liste ab [[a,b],[c,d]] -> [a,b,c,d] (zb: zugehörigkeit für figuren geht flöten)
+    #[item for sublist in t for item in sublist]
+    return [item for sublist in list_of_list for item in sublist]
+    
 
 
 def FENtoBit(fen):

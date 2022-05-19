@@ -1,5 +1,9 @@
+## to read: https://anytree.readthedocs.io/en/latest/api/anytree.node.html#anytree.node.anynode.AnyNode
+## -> statt Node('root) -> AnyNode(id=..)
+
 from tkinter.messagebox import NO
 from anytree import Node, RenderTree
+# TODO: Umbenennung tree -> Tree
 class tree(object):
     def __init__(self,FEN) -> None:
         self.index=0
@@ -36,4 +40,3 @@ class tree(object):
         node.parent=None
 
     
-
