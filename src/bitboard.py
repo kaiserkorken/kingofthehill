@@ -225,21 +225,22 @@ def FENtoBit(fen):
         for x in range(8):  # a field in a row
             #"".lower()
             #print(board[y][x])
+            if ver+x>=8:#zeile fertig
+                     break
             try:#int ->skip
                 z=int(board[y][x])
                 # ver+=int(board[y][x])# field is a character
                 if z>=0:
                     ver+=z-1
-                if ver+x>=8:#zeile fertig
-                     ver=0
-                     break
+                
+                
             except:#string
-                print(x,y)
                 if (board[y][x]).islower():
                     b["B"][y,x+ver] = True
                 else:
                     b["W"][y,x+ver] = True
                 b[board[y][x].lower()][y,x+ver] = True#adding specific character
+            print(x,y,": ",board[y][x])
             print(ver)
     # TODO
     # using the other values in FEN string

@@ -315,8 +315,7 @@ time=10
 tmove=time/2
 p=Player()    
 bb=init_game(p)
-
-#bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#TODO fix fen->bit
+bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#TODO fix fen->bit
 tre=tree(bb)
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(format=format, level=logging.INFO,
