@@ -1,8 +1,11 @@
 from lib2to3.pgen2.token import ISTERMINAL
+from tkinter.font import families
 import numpy as np
 # requires: pip install anytree
 from anytree import Node, RenderTree
 import random
+
+from sqlalchemy import values
 from bitboard import *
 from tree import *
 from movegen import *
@@ -125,7 +128,7 @@ class Player():
     def make_move(self,b_old,bb_from, bb_to):
         return make_move(b_old,bb_from,bb_to)
 
-    def set_movetree(self,tree,tmove, h=0,index=0,step=0):#added züge an node(index)
+    def set_movetree(self,tree,tmove,h=0,index=0,step=0):#added züge an node(index)
     #while (time-(tmax/2)>0):
     
         node=tree.find_node(index)
@@ -145,6 +148,7 @@ class Player():
                 #print(b)
                 #tree.insert_node(node,[bb,self.utility(b),h,name])
                 tree.insert_node(node,[b,self.utility(b),h])  #in Node mit bitboard und wertung einsetzen
+                
                 #TODO auch in insert node auskommentieren! (tree.py)
                 # print("u:")
                 # print(self.utility(b))
@@ -161,8 +165,44 @@ class Player():
         h+=1
         
         return [tmove, len(moves),h]
+def set_test_movetree(self,tree,tmove,h=0,index=0,step=0):#added züge an node(index) mit nodes.value=None
+#while (time-(tmax/2)>0):
 
-    def tree_height(self,player,tree,tmove,index=0,altaltstep=0,altstep=1,h=0):
+    node=tree.find_node(index)
+    #print("node:")
+    #print(node)
+    #while node.h==h:
+    moves=self.generate_moves(node.b)#liste aller moves von bb
+    #moves=[["a1a2",move(b)],["a2a4",b],...]
+    #print("moves")
+    for b in moves:
+    #for b in range (len(moves)):
+        if b:
+        #if b[0] and b[1]:
+            #name=b[0]
+            #bb=b[1]
+            #print("b:")
+            #print(b)
+            #tree.insert_node(node,[bb,self.utility(b),h,name])
+            tree.insert_node(node,[b,None,h])
+            #TODO auch in insert node auskommentieren! (tree.py)
+            # print("u:")
+            # print(self.utility(b))
+            #print(self.utility(b))
+            #tree.print_tree()
+        else:
+            moves.remove(b)
+    index +=1
+    node=tree.find_node(index)
+    
+    step+=index
+    
+    #print("h:",h,"moves:",len(moves))
+    h+=1
+    
+    return [tmove, len(moves),h]
+
+def d_tree_height(self,tree,depth,value=False,index=0,altaltstep=0,altstep=1,h=0):#tree ebenen erstellen bis tiefe d
         #tmove=arr[4]
         #arr=[tree,h,index,step,tmove]
         #logging.info("Thread1    : started")
@@ -170,75 +210,104 @@ class Player():
         # if h==0:
         #     arr=player.set_movetree(tree,tmove,h,index)#ein ausgerechneter zug alle züge ausrechnen
         #     print(arr)
-        arr=[tmove,altstep]
+        arr=[depth,altstep]
         neustep=altstep
         altstep+=altaltstep
         for z in range(index, altstep):#eine weitere ebene durchgehen
             #print(arr[0])
             #logging.info("Main    : creating height "+str(h))
-            arr=(self.set_movetree(tree,arr[0],h,z))
+            if value:
+                arr=(self.set_movetree(tree,arr[0],h,z))
+            arr=(self.set_test_movetree(tree,arr[0],h,z))
             neustep+=arr[1]
             #print("Tree "+str(z)+":")
             #tre.print_tree()
-            arr[0]-=0.1
-            if arr[0]<=0:
-                return arr
         #print(arr[0])
         if arr[0]>=0:
-            arr[0]-=0.5
+            arr[0]-=1
             altstep-=altaltstep#-=alt
-            return self.tree_height(player,tree,arr[0],index+altstep,altstep,neustep-altstep,h+1)
+            return self.d_tree_height(tree,arr[0],index+altstep,altstep,neustep-altstep,h+1)
         return arr
 
-    def turn(self, FEN,time=2):#ein kompletter zug der ki
 
-        format = "%(asctime)s: %(message)s"
-        logging.basicConfig(format=format, level=logging.INFO,
-                                        datefmt="%H:%M:%S")
-        logging.info("Main    : start turn "+str(time))
 
-        tmove=time/2
-        tsearch=time/2
-        bb=FENtoBit(FEN)
-        #bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#testFEN
-        tree=Tree(bb)#leerer baum mit b als root
-        tmove=time/2
-        if not checkmate(bb,self):#Spielende überprüfen
-            #tre.print_tree()
-            #arr=p.set_movetree(tre,tmove)
-            #save=arr[0]
-            save=tree
-            #tree.print_tree()
-            logging.info("Main    : building movetree "+str(time))
-            arr=self.tree_height(self,tree,tmove)#time bzw. depth
-            if arr:
-                time-=(tmove-arr[0])
-                save=arr
-            logging.info("Main    : movetree finished with height:"+str(arr[2])+" "+str(time))
-            
-            
-            #tree.print_tree()
-            #print(tree)  
-            #utility auf root?
-            depth=1
-            logging.info("Main    : doing minimax "+str(time))
-            savetree=tree
-            while(tsearch>=0 and depth<=arr[2]):#noch zeit und noch nicht so tief wie baumhöhe
-                tree=savetree
-                tiefe=self.alphabetasearch(tree.root,depth)#indizes aktualisieren#wertung des bestmöglichen zuges ausgeben
-                children = np.asarray(tree.root.children,Node)
-                print("search:",depth,children[0])
-                depth+=1
-                tsearch-=0.1
-                time-=0.1
-            logging.info("Main    : minimax finished with depth:"+str(depth-1)+" "+str(time))
-            logging.info("Main    : choosing good move "+str(time))
+def tree_height(self,tree,tmove,index=0,altaltstep=0,altstep=1,h=0):#tree ebenen erstellen bis time t=0
+    #tmove=arr[4]
+    #arr=[tree,h,index,step,tmove]
+    #logging.info("Thread1    : started")
+    #print(arr)
+    # if h==0:
+    #     arr=player.set_movetree(tree,tmove,h,index)#ein ausgerechneter zug alle züge ausrechnen
+    #     print(arr)
+    arr=[tmove,altstep]
+    neustep=altstep
+    altstep+=altaltstep
+    for z in range(index, altstep):#eine weitere ebene durchgehen
+        #print(arr[0])
+        #logging.info("Main    : creating height "+str(h))
+        arr=(self.set_movetree(tree,arr[0],h,z))
+        neustep+=arr[1]
+        #print("Tree "+str(z)+":")
+        #tre.print_tree()
+        arr[0]-=0.1
+        if arr[0]<=0:
+            return arr
+    #print(arr[0])
+    if arr[0]>=0:
+        arr[0]-=0.5
+        altstep-=altaltstep#-=alt
+        return self.tree_height(tree,arr[0],index+altstep,altstep,neustep-altstep,h+1)
+    return arr
 
-            node=self.best_node(tree)#besten zug auswaehlen
-            #move=tree.find_node(node.index)
-            logging.info("Main    : finished turn "+str(time))
-            FEN=BittoFEN(node.b,self.current)
-            return FEN
+def turn(self, FEN,time=2):#ein kompletter zug der ki
+
+    format = "%(asctime)s: %(message)s"
+    logging.basicConfig(format=format, level=logging.INFO,
+                                    datefmt="%H:%M:%S")
+    logging.info("Main    : start turn "+str(time))
+
+    tmove=time/2
+    tsearch=time/2
+    bb=FENtoBit(FEN)
+    #bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#testFEN
+    tree=Tree(bb)#leerer baum mit b als root
+    tmove=time/2
+    if not checkmate(bb,self):#Spielende überprüfen
+        #tre.print_tree()
+        #arr=p.set_movetree(tre,tmove)
+        #save=arr[0]
+        save=tree
+        #tree.print_tree()
+        logging.info("Main    : building movetree "+str(time))
+        arr=self.tree_height(self,tree,tmove)#time bzw. depth
+        if arr:
+            time-=(tmove-arr[0])
+            save=arr
+        logging.info("Main    : movetree finished with height:"+str(arr[2])+" "+str(time))
+        
+        
+        #tree.print_tree()
+        #print(tree)  
+        #utility auf root?
+        depth=1
+        logging.info("Main    : doing minimax "+str(time))
+        savetree=tree
+        while(tsearch>=0 and depth<=arr[2]):#noch zeit und noch nicht so tief wie baumhöhe
+            tree=savetree
+            tiefe=self.alphabetasearch(tree.root,depth)#indizes aktualisieren#wertung des bestmöglichen zuges ausgeben
+            children = np.asarray(tree.root.children,Node)
+            print("search:",depth,children[0])
+            depth+=1
+            tsearch-=0.1
+            time-=0.1
+        logging.info("Main    : minimax finished with depth:"+str(depth-1)+" "+str(time))
+        logging.info("Main    : choosing good move "+str(time))
+
+        node=self.best_node(tree)#besten zug auswaehlen
+        #move=tree.find_node(node.index)
+        logging.info("Main    : finished turn "+str(time))
+        FEN=BittoFEN(node.b,self.current)
+        return FEN
 
 
 
@@ -436,9 +505,90 @@ if __name__ == "__main__":
     #print(qui)
     print_board_list(qui)
 """
-## DEMO ##
-#kompletten zug ausführen
-p=Player()
-FEN=p.turn("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w",10)
-print(FEN)
-print_board(FENtoBit(FEN))
+
+
+def teste(FEN,value=0,search=False,zug=False,utility=False,tree=False,tiefe=False,turn=False):
+    # value depends on what you want to do:
+    # eingabe -> prozess: datatype(value) -> return
+
+    # zug-> player.turn(): int(time) -> str(FEN)
+    # search -> alphabetasearch zeit messen für tiefe: int(tiefe) -> int(time)
+    # zug -> zuggenerator: int(wdh.) -> int(time)
+    # utility (einzeln) -> utility: int(wdh) -> int(time)
+    #         sonst -> Funktion ohne utility ausführen: -
+    # tree -> baumspeichern: tiefe or time
+    # tiefe -> baumspeichern bis tiefe value: int(tiefe) -> int(time)
+    # not tiefe -> baumspeichern bis time=0: int(time) -> int(tiefe)
+    
+
+    p=Player()
+    if search:#alphabetasearch zeit messen für tiefe
+        tree, tiefe, utility=True
+        turn=False
+    elif zug:#zuggenerator only
+        time=0
+        for i in range (value):
+            moves=p.generate_moves(FENtoBit(FEN))
+            time+=0.1
+        time=time/value
+        #print(moves)
+        return time
+    elif utility and not tree:#utility only
+        time=0
+        for i in range (value):
+            wert=p.utility(FENtoBit(FEN))
+            time+=0.1
+        time=time/value
+        #print(wert)
+        return time
+
+    elif tree:#baumseichern
+        tree=Tree()
+        if tiefe:#baumspeicher bis tiefe mit/ohne utility
+            depth=value
+            time=0
+            arr=p.d_tree_height(tree,depth,utility)#timer einbauen
+            return time
+        else:#baumspeichern bis time mit utility (Standard)
+            zeit=value
+            p.tree_height(tree,zeit)
+            return tree.nodes[len(tree.nodes)-1].h
+    if search:#alphabetasearch zeit messen für tiefe
+        #if value>=0:
+        searchtime=0
+        tiefe=value
+        depth=0
+        while(depth<=arr[2] and tiefe>=depth):#noch zeit und noch nicht so tief wie baumhöhe
+                    p.alphabetasearch(tree.root,depth)#indizes aktualisieren#wertung des bestmöglichen zuges ausgeben
+                    children = np.asarray(tree.root.children,Node)
+                    print("search:",depth,children[0].value)
+                    depth+=1
+                    searchtime-=0.1
+        return searchtime
+    elif turn:#normaler zug #und alphabetasearch bis zeit um
+        FEN=p.turn(FEN,value)
+        print(FEN)
+        return(FEN)
+        # print_board(FENtoBit(FEN))
+
+## DEMO ## TODO andere Demos auf aktualität überprüfen ung ggf. removen
+
+#inputs:#
+
+# p=Player()
+# FEN="r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w"
+# zeit=10
+# depth=5
+# wdh=1000
+
+
+### Unit/Benchmark Tests ###
+
+
+# teste(FEN,zeit,turn=True)#turn ausführen
+# searchtime=teste(FEN,depth,search=True)#alphabetasearch zeit messen für tiefe
+# t=teste(FEN,wdh,zug=True)#zuggenerator only 1000 mal durchschnitt
+# t=teste(FEN,wdh,utility=True)#utility only
+# t=teste(FEN,zeit,tree=True,tiefe=True)#baumspeicher bis tiefe ohne utility
+# t=teste(FEN,zeit,tree=True,tiefe=True,utility=True)#baumspeicher bis tiefe mit utility
+# tiefe=teste(FEN,zeit,tree=True)#baumspeichern bis time mit utility (Standard)

@@ -58,6 +58,11 @@ class Tree(object):
         for pre, fill, node in RenderTree(self.root):
             print((u"%s%s"%(pre,node.index)).ljust(8),node.value,node.h)
             # print((u"%s%s"%(pre,node.name)).ljust(8),node.value,node.h)
+    def print_node(self,node):
+        print("node",node.index,": ")
+        for pre, fill, n in RenderTree(node):
+            print((u"%s%s"%(pre,n.index)).ljust(8),n.value,n.h)
+            # print((u"%s%s"%(pre,node.name)).ljust(8),node.value,node.h)
 
 
 
