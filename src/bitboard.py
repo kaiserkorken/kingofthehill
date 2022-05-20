@@ -148,7 +148,7 @@ def print_board_list(b_list, flip=False):
     else:
         print('empty b_list')
 
-def BittoFEN(b):#turns bitboard into FEN Strings
+def BittoFEN(b,player=False):#turns bitboard into FEN Strings
     if type(b)!=dict:
         error("BittoFEN only takes one argument of type dict and not" +str(type(b)))
     # FENboard=np.zeros((8,8))
@@ -199,6 +199,11 @@ def BittoFEN(b):#turns bitboard into FEN Strings
         if x!=7:
             FEN+="/"
     #print(FEN)
+    if player==-1:
+        player="W"
+    elif player==1:
+        player="B"
+        FEN+=" "+str(player) 
     return FEN
 
 def serialize_bb(bb):
@@ -212,7 +217,7 @@ def flatten_list_of_list(list_of_list):
     
 
 
-def FENtoBit(fen):
+def FENtoBit(fen,player=False):
     if type(fen)!=str:
         error("FENtoBit only takes one argument of type str and not" +str(type(fen)))
     info = fen.split(" ")
@@ -249,7 +254,14 @@ def FENtoBit(fen):
     #bit[7] == bottom right
     #bit[63]== upper right
     #player=info[1]
-    return b#,player
+    if player:
+        if info[1]=="W":
+            player=1
+        else:
+            player=-1
+        return [b,player]#gib player mit aus
+    else:
+        return b#,player
 #test str:
 #bench
 # rnbq1bnr/pppQkpp1/3p3p/8/3p4/2P5/PP2PPPP/RNB1KBNR

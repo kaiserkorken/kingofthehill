@@ -3,14 +3,12 @@ import numpy as np
 # requires: pip install anytree
 from anytree import Node, RenderTree
 import random
-
 from bitboard import *
 from tree import *
 from movegen import *
 import logging
 import threading
 import time
- 
 import concurrent.futures
 
 
@@ -28,8 +26,11 @@ class Player():
             self.current = 1
         elif color_code == 'B':
             self.current = -1
+        elif color_code=="win":
+            print("Du hast gewonnen!")
         else:
-            pass
+            print("Du hast verloren!")
+            #TODO remis implement
 
     def __get__(self):
         # extrahiert aktuellen Spieler als String
@@ -63,48 +64,58 @@ class Player():
         #return tree with updated values
     #TODO insert functions in class
     
-    
-    
-    
-    
+
     def best_node(self,tree):
         #nodes height 1 sammeln
-        children = tree.root.children
-        print(children)
-        if children: # falls Züge vorhanden
-            values = [value for index,parent,b,value,h in children]
+        children = np.asarray(tree.root.children,Node)
+        #print(children)
+        if len(children)>0: # falls Züge vorhanden
+            values=[]
+            for x in children:
+                values.append(x.value)
+            #values = [value for index,parent,b,value,h in children]
             #print(tree)
             #print(children)
 
             #return best node of nodes of tree height 1 
             best_nodes = []
-            while True:
+            #print(children)
+            while len(children)>0:
                 possible_best_node = children[np.argmax(values)]
-                children = children.remove(possible_best_node)
-                values = [value for index,parent,b,value,h in children] 
+                children = np.delete(children,np.argmax(values))#bzw. values.remove(node.index)
+                #print(children)
+                for x in children:
+                    values.append(x.value)  
                 
                 if best_nodes: # falls Liste schon Element enthält
-                    if possible_best_node[3] == best_nodes[0][3]: # falls ein weiterer gleichwertiger Zug existiert
+                    if possible_best_node.value == best_nodes.value: # falls ein weiterer gleichwertiger Zug existiert
                         best_nodes.append(possible_best_node)
                     else: # falls nächstbester Zug schlechter
                         break # alle besten Züge gefunden
                 else: # falls Liste noch leer
-                    if checkmate(possible_best_node[2]) == False: # erster Zug muss auf jeden Fall legal sein
-                        best_nodes.append(possible_best_node)
+                    if checkmate(possible_best_node.b,(-1)**possible_best_node.h) == False: # erster Zug muss auf jeden Fall legal sein
+                        best_nodes.append(possible_best_node)#  ,player)=(-1)^höhe
             # best_nodes sollte nun mindestens einen Zug enthalten. Dieser ist immer legal
             if len(best_nodes) == 1: # falls nur ein Zug vorhanden
+                print("best0:",best_nodes[0])
                 return best_nodes[0] # gib Zug zurück
-            else:
-                while True: # entferne Züge von Liste bis zufälliger legaler Zug gefunden
+            elif len(best_nodes)>1:
+                while len(best_nodes)>0: # entferne Züge von Liste bis zufälliger legaler Zug gefunden
                     best_node = random.choice(best_nodes) # wähle zufällig besten Zug
-                    if checkmate(best_node) == False: # falls Zug legal
+                    if checkmate(best_node,(-1)**best_node.h) == False: # falls Zug legal
+                        print("best:",best_node)
                         return best_node # gib Zug zurück
                     else:
                         best_nodes.remove(best_node) 
+            print('kein guter Zug vorhanden!')
+            children = np.asarray(tree.root.children,Node)
+            print("doof: ",children[0])
+            return children[0]
              
         else:
             print('kein Zug vorhanden!')
-            pass # kein Zug vorhanden
+            print("else: ",children[0])
+            return children[0]
 
         
 
@@ -122,13 +133,19 @@ class Player():
         #print(node)
         #while node.h==h:
         moves=self.generate_moves(node.b)#liste aller moves von bb
+        #moves=[["a1a2",move(b)],["a2a4",b],...]
         #print("moves")
         for b in moves:
+        #for b in range (len(moves)):
             if b:
-
+            #if b[0] and b[1]:
+                #name=b[0]
+                #bb=b[1]
                 #print("b:")
                 #print(b)
+                #tree.insert_node(node,[bb,self.utility(b),h,name])
                 tree.insert_node(node,[b,self.utility(b),h])  #in Node mit bitboard und wertung einsetzen
+                #TODO auch in insert node auskommentieren! (tree.py)
                 # print("u:")
                 # print(self.utility(b))
                 #print(self.utility(b))
@@ -143,9 +160,38 @@ class Player():
         #print("h:",h,"moves:",len(moves))
         h+=1
         
-        return [tmove, len(moves)]
+        return [tmove, len(moves),h]
+
+    def tree_height(self,player,tree,tmove,index=0,altaltstep=0,altstep=1,h=0):
+        #tmove=arr[4]
+        #arr=[tree,h,index,step,tmove]
+        #logging.info("Thread1    : started")
+        #print(arr)
+        # if h==0:
+        #     arr=player.set_movetree(tree,tmove,h,index)#ein ausgerechneter zug alle züge ausrechnen
+        #     print(arr)
+        arr=[tmove,altstep]
+        neustep=altstep
+        altstep+=altaltstep
+        for z in range(index, altstep):#eine weitere ebene durchgehen
+            #print(arr[0])
+            #logging.info("Main    : creating height "+str(h))
+            arr=(self.set_movetree(tree,arr[0],h,z))
+            neustep+=arr[1]
+            #print("Tree "+str(z)+":")
+            #tre.print_tree()
+            arr[0]-=0.1
+            if arr[0]<=0:
+                return arr
+        #print(arr[0])
+        if arr[0]>=0:
+            arr[0]-=0.5
+            altstep-=altaltstep#-=alt
+            return self.tree_height(player,tree,arr[0],index+altstep,altstep,neustep-altstep,h+1)
+        return arr
 
     def turn(self, FEN,time=2):#ein kompletter zug der ki
+
         format = "%(asctime)s: %(message)s"
         logging.basicConfig(format=format, level=logging.INFO,
                                         datefmt="%H:%M:%S")
@@ -164,33 +210,34 @@ class Player():
             save=tree
             #tree.print_tree()
             logging.info("Main    : building movetree "+str(time))
-            arr=tree_height(self,tree,tmove)#time bzw. depth
-            logging.info("Main    : movetree finished "+str(time))
+            arr=self.tree_height(self,tree,tmove)#time bzw. depth
             if arr:
                 time-=(tmove-arr[0])
                 save=arr
+            logging.info("Main    : movetree finished with height:"+str(arr[2])+" "+str(time))
+            
             
             #tree.print_tree()
             #print(tree)  
             #utility auf root?
             depth=1
             logging.info("Main    : doing minimax "+str(time))
-
-            while(tsearch>=0):
+            savetree=tree
+            while(tsearch>=0 and depth<=arr[2]):#noch zeit und noch nicht so tief wie baumhöhe
+                tree=savetree
                 tiefe=self.alphabetasearch(tree.root,depth)#indizes aktualisieren#wertung des bestmöglichen zuges ausgeben
+                children = np.asarray(tree.root.children,Node)
+                print("search:",depth,children[0])
                 depth+=1
                 tsearch-=0.1
                 time-=0.1
-            logging.info("Main    : minimax finished "+str(time))
+            logging.info("Main    : minimax finished with depth:"+str(depth-1)+" "+str(time))
             logging.info("Main    : choosing good move "+str(time))
 
-            index=self.best_node(tree)#besten zug auswaehlen
-            move=tree.findNode(index)
-            logging.info("Main    : do the move "+time)
-
-            bb=self.make_move(move)
-            FEN=BittoFEN(bb)
-            logging.info("Main    : finished turn "+time)
+            node=self.best_node(tree)#besten zug auswaehlen
+            #move=tree.find_node(node.index)
+            logging.info("Main    : finished turn "+str(time))
+            FEN=BittoFEN(node.b,self.current)
             return FEN
 
 
@@ -298,37 +345,9 @@ class ThreadWithReturnValue(threading):#https://stackoverflow.com/questions/6893
 """
 
 
-
-
 ### DEMO ###
 
-def tree_height(player,tree,tmove,index=0,altaltstep=0,altstep=1,h=0):
-    #tmove=arr[4]
-    #arr=[tree,h,index,step,tmove]
-    #logging.info("Thread1    : started")
-    #print(arr)
-    # if h==0:
-    #     arr=player.set_movetree(tree,tmove,h,index)#ein ausgerechneter zug alle züge ausrechnen
-    #     print(arr)
-    arr=[tmove,altstep]
-    neustep=altstep
-    altstep+=altaltstep
-    for z in range(index, altstep):#eine weitere ebene durchgehen
-        #print(arr[0])
-        #logging.info("Main    : creating height "+str(h))
-        arr=player.set_movetree(tree,arr[0],h,z)
-        neustep+=arr[1]
-        #print("Tree "+str(z)+":")
-        #tre.print_tree()
-        arr[0]-=0.1
-        if arr[0]<=0:
-            return arr
-    #print(arr[0])
-    if arr[0]>=0:
-        arr[0]-=0.5
-        altstep-=altaltstep#-=alt
-        return tree_height(player,tree,arr[0],index+altstep,altstep,neustep-altstep,h+1)
-    return arr
+
 
 
 #Test tree.py
@@ -417,6 +436,8 @@ if __name__ == "__main__":
     #print(qui)
     print_board_list(qui)
 """
+## DEMO ##
+#kompletten zug ausführen
 p=Player()
 FEN=p.turn("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w",10)
 print(FEN)
