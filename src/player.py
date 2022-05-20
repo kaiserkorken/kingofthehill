@@ -70,6 +70,7 @@ class Player():
     def best_node(self,tree):
         #nodes height 1 sammeln
         children = tree.root.children
+        print(children)
         if children: # falls Züge vorhanden
             values = [value for index,parent,b,value,h in children]
             #print(tree)
@@ -144,32 +145,52 @@ class Player():
         
         return [tmove, len(moves)]
 
-    def turn(self, FEN):#ein kompletter zug der ki
-        time=2
+    def turn(self, FEN,time=2):#ein kompletter zug der ki
+        format = "%(asctime)s: %(message)s"
+        logging.basicConfig(format=format, level=logging.INFO,
+                                        datefmt="%H:%M:%S")
+        logging.info("Main    : start turn "+str(time))
+
         tmove=time/2
         tsearch=time/2
         bb=FENtoBit(FEN)
-        tree=tree(bb)#leerer baum mit b als root
+        #bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#testFEN
+        tree=Tree(bb)#leerer baum mit b als root
+        tmove=time/2
         if not checkmate(bb,self):#Spielende überprüfen
-            arr=self.set_movetree(tree,0,0,0)#arr=[tree,h,index,step]
-            while(tmove>=0):#solange zeit ist
-                for z in range(arr[3], arr[2]):#eine weitere ebene durchgehen
-                    arr=self.set_movetree(tree,arr[1],z)#ein ausgerechneter zug alle züge ausrechnen
-                tmove-=0.1
-                time-=0.1
-        
+            #tre.print_tree()
+            #arr=p.set_movetree(tre,tmove)
+            #save=arr[0]
+            save=tree
+            #tree.print_tree()
+            logging.info("Main    : building movetree "+str(time))
+            arr=tree_height(self,tree,tmove)#time bzw. depth
+            logging.info("Main    : movetree finished "+str(time))
+            if arr:
+                time-=(tmove-arr[0])
+                save=arr
+            
+            #tree.print_tree()
+            #print(tree)  
             #utility auf root?
             depth=1
+            logging.info("Main    : doing minimax "+str(time))
+
             while(tsearch>=0):
                 tiefe=self.alphabetasearch(tree.root,depth)#indizes aktualisieren#wertung des bestmöglichen zuges ausgeben
                 depth+=1
                 tsearch-=0.1
                 time-=0.1
+            logging.info("Main    : minimax finished "+str(time))
+            logging.info("Main    : choosing good move "+str(time))
 
             index=self.best_node(tree)#besten zug auswaehlen
             move=tree.findNode(index)
+            logging.info("Main    : do the move "+time)
+
             bb=self.make_move(move)
             FEN=BittoFEN(bb)
+            logging.info("Main    : finished turn "+time)
             return FEN
 
 
@@ -301,22 +322,23 @@ def tree_height(player,tree,tmove,index=0,altaltstep=0,altstep=1,h=0):
         #tre.print_tree()
         arr[0]-=0.1
         if arr[0]<=0:
-            return True
+            return arr
     #print(arr[0])
     if arr[0]>=0:
         arr[0]-=0.5
         altstep-=altaltstep#-=alt
         return tree_height(player,tree,arr[0],index+altstep,altstep,neustep-altstep,h+1)
-    return False
+    return arr
 
 
 #Test tree.py
+"""
 time=10
 tmove=time/2
 p=Player()    
 bb=init_game(p)
 bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#TODO fix fen->bit
-tre=tree(bb)
+tre=Tree(bb)
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(format=format, level=logging.INFO,
                             datefmt="%H:%M:%S")
@@ -328,6 +350,9 @@ tre.print_tree()
 arr=tree_height(p,tre,tmove)
 if arr:
     save=arr
+tre.print_tree()
+print(tre)  
+"""  
 # while(arr[4]>=0):#solange zeit ist
 #     print(arr[4])
 #     arr=tree_height(arr)
@@ -353,8 +378,7 @@ if arr:
     
 # logging.info("Main    : all done")
 #return save
-tre.print_tree()
-print(tre)
+
 #return tre
 
 
@@ -393,3 +417,7 @@ if __name__ == "__main__":
     #print(qui)
     print_board_list(qui)
 """
+p=Player()
+FEN=p.turn("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w",10)
+print(FEN)
+print_board(FENtoBit(FEN))

@@ -16,7 +16,7 @@ class Node(knoten, NodeMixin):  # Add Node feature
         self.b=value[1]
         self.value=value[2]
         self.h=value[3]
-class tree(object):
+class Tree(object):
     def __init__(self,bb) -> None:
         self.nodes=[]
         self.value=None

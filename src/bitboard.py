@@ -240,8 +240,8 @@ def FENtoBit(fen):
                 else:
                     b["W"][y,x+ver] = True
                 b[board[y][x].lower()][y,x+ver] = True#adding specific character
-            print(x,y,": ",board[y][x])
-            print(ver)
+            #print(x,y,": ",board[y][x])
+            #print(ver)
     # TODO
     # using the other values in FEN string
     #bitboard: 
