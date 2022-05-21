@@ -574,26 +574,28 @@ if __name__ == "__main__":
 """
 
 
-## DEMO ## TODO andere Demos auf aktualität überprüfen ung ggf. removen
-#                   ich brauch davon nichts mehr
+if __name__ == "__main__":
 
-#inputs:#
+    ## DEMO ## TODO andere Demos auf aktualität überprüfen ung ggf. removen
+    #                   ich brauch davon nichts mehr
 
-p=Player()
-FEN="r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR W"
-zeit=10
-# depth=5
-# wdh=1000
+    #inputs:#
+
+    p=Player()
+    FEN="r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR W"
+    zeit=10
+    # depth=5
+    # wdh=1000
 
 
-### Unit/Benchmark Tests ###
+    ### Unit/Benchmark Tests ###
 
 
-p.teste(FEN,zeit,turn=True)#turn ausführen
-# searchtime=p.teste(FEN,depth,search=True)#alphabetasearch zeit messen für tiefe
-# t=p.teste(FEN,wdh,zug=True)#zuggenerator only 1000 mal durchschnitt
-# t=p.teste(FEN,wdh,utility=True)#utility only
-# t=p.teste(FEN,zeit,tree=True,tiefe=True)#baumspeicher bis tiefe ohne utility
-# t=p.teste(FEN,zeit,tree=True,tiefe=True,utility=True)#baumspeicher bis tiefe mit utility
-# tiefe=p.teste(FEN,zeit,tree=True)#baumspeichern bis time mit utility (Standard)
-#p.teste(FEN,zeit,baum=True)#baum ergebnis printen
+    p.teste(FEN,zeit,turn=True)#turn ausführen
+    # searchtime=p.teste(FEN,depth,search=True)#alphabetasearch zeit messen für tiefe
+    # t=p.teste(FEN,wdh,zug=True)#zuggenerator only 1000 mal durchschnitt
+    # t=p.teste(FEN,wdh,utility=True)#utility only
+    # t=p.teste(FEN,zeit,tree=True,tiefe=True)#baumspeicher bis tiefe ohne utility
+    # t=p.teste(FEN,zeit,tree=True,tiefe=True,utility=True)#baumspeicher bis tiefe mit utility
+    # tiefe=p.teste(FEN,zeit,tree=True)#baumspeichern bis time mit utility (Standard)
+    #p.teste(FEN,zeit,baum=True)#baum ergebnis printen

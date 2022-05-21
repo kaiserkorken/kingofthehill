@@ -138,10 +138,10 @@ def print_board(b, flip=False):
 
 def print_board_list(b_list, flip=False):
     # prints a whole list of bitboard_dicts
-    if b_list:
+    if len(b_list) > 0:
         for b in b_list:
-            if b:
-                print('print:')
+            if len(b) > 0:
+                #print('print:')
                 print(print_board(b, flip))
             else:
                 print('empty board')
@@ -226,6 +226,9 @@ def FENtoBit(fen,player=False):
     b = give_bitboards()
     ver=0
     for y in range(8):  # a row
+        #print(y)
+        #y = 7-y
+        #print(y)
         ver=0#versatz, falls int index verschiebt
         for x in range(8):  # a field in a row
             #"".lower()
@@ -241,10 +244,10 @@ def FENtoBit(fen,player=False):
                 
             except:#string
                 if (board[y][x]).islower():
-                    b["B"][y,x+ver] = True
+                    b["B"][7-y,x+ver] = True
                 else:
-                    b["W"][y,x+ver] = True
-                b[board[y][x].lower()][y,x+ver] = True#adding specific character
+                    b["W"][7-y,x+ver] = True
+                b[board[y][x].lower()][7-y,x+ver] = True#adding specific character
             #print(x,y,": ",board[y][x])
             #print(ver)
     # TODO
@@ -255,7 +258,7 @@ def FENtoBit(fen,player=False):
     #bit[63]== upper right
     #player=info[1]
     if player:
-        if info[1]=="W":
+        if (info[1]=="W" or info[1]=="w"):
             player=1
         else:
             player=-1

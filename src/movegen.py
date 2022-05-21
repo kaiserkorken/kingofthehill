@@ -9,22 +9,6 @@ bibssbr=["1","2","3","4","5","6","7","8"]
 
 
 
-#ziehende Figur: BB(From) OR BB(To) XOR BB(gezogene Figur)
-#geschlagene Figur: bb(geschlagene Figur) XOR BB(To) -> (Figur)
-'''
-def make_move_quiet(b, bb_from, bb_to, bb_piece):
-    for bb in b:
-        b[bb] = (bb_from | bb_to) ^ bb_piece
-    return b
-
-def make_move_attack(b, bb_from, bb_to, bb_piece, bb_enemy_piece):
-    for bb in b:
-        b[bb] = (bb_from | bb_to) ^ bb_piece
-        b[bb] = (bb_enemy_piece ^ bb_to) ^ bb_piece
-    return b
-'''
-
-
 def make_move(b_old, bb_from, bb_to):
     # Zuggenerator funktioniert!
     b_new = copy.deepcopy(b_old) # Tiefkopie wegen call-by-reference

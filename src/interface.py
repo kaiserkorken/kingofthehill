@@ -82,6 +82,9 @@ def FENtoBit(fen):
     b = giveBitboards()
     ver=0
     for y in range(8):  # a row
+        print(y)
+        y = 8-y
+        print(y)
         ver=0#versatz, falls int index verschiebt
         for x in range(8):  # a field in a row
             #"".lower()
