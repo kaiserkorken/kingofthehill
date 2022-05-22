@@ -239,7 +239,7 @@ class Player():
 
 
 
-    def tree_height(self,tree,tmove,index=0,altaltstep=0,altstep=1,h=0):#tree ebenen erstellen bis time t=0
+    def tree_height(self,tree,tmove,index=0,altaltstep=0,altstep=1,h=1):#tree ebenen erstellen bis time t=0
         #tmove=arr[4]
         #arr=[tree,h,index,step,tmove]
         #logging.info("Thread1    : started")
@@ -597,15 +597,14 @@ if __name__ == "__main__":
     # depth=5
     # wdh=1000
 
-
     ### Unit/Benchmark Tests ###
 
 
-    p.teste(FEN,zeit,turn=True)#turn ausführen
+    #p.teste(FEN,zeit,turn=True)#turn ausführen
     # searchtime=p.teste(FEN,depth,search=True)#alphabetasearch zeit messen für tiefe
-    # t=p.teste(FEN,wdh,zug=True)#zuggenerator only 1000 mal durchschnitt
+    #t=p.teste(FEN,wdh,zug=True)#zuggenerator only 1000 mal durchschnitt
     # t=p.teste(FEN,wdh,utility=True)#utility only
     # t=p.teste(FEN,zeit,tree=True,tiefe=True)#baumspeicher bis tiefe ohne utility
     # t=p.teste(FEN,zeit,tree=True,tiefe=True,utility=True)#baumspeicher bis tiefe mit utility
-    # tiefe=p.teste(FEN,zeit,tree=True)#baumspeichern bis time mit utility (Standard)
+    #tiefe=p.teste(FEN,zeit,tree=True)#baumspeichern bis time mit utility (Standard)
     #p.teste(FEN,zeit,baum=True)#baum ergebnis printen
