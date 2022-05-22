@@ -228,10 +228,12 @@ def FENtoBit(fen,player=False):
     #print(fen)
     info = fen.split(" ")
     board = info[0].split("/")
-    if len(board)<7:
+    if len(info)<1:
+        return False
+    if len(board)<8:
         return False
     for w in board:
-        if len(w)<0 or len(w)>=8:
+        if len(w)<1 or len(w)>8:
             return False
     #print(board)
     b = give_bitboards()
@@ -268,11 +270,14 @@ def FENtoBit(fen,player=False):
                     wh+=1
                 #print(x,y,": ",board[y][x])    
                 b[board[y][x].lower()][7-y,x+ver] = True#adding specific character
-                save=figures.replace(board[y][x],"")
-                if save==figures:#eine figur zu viel
+                #try: 
+                i=figures.find(board[y][x])
+                if i==-1:
                     return False
                 else:
-                    save=figures
+                    save=figures.replace(board[y][x],"",1)
+                #except:
+                figures=save
                 
                 #print(x,y,": ",board[y][x])
             #print(ver)
@@ -305,4 +310,4 @@ def FENtoBit(fen,player=False):
 # print("Bitboard in FEN\n"+y)
 # #print(printBoard(FENtoBit(y)))
 
- 
+print(FENtoBit("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"))
