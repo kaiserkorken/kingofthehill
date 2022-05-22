@@ -56,8 +56,11 @@ def receive():
         client.send('you are now connected!'.encode('utf-8'))
         thread = threading.Thread(target=handle_client, args=(client,))
         thread.start()
+        if len(clients) == 1:
+            clients[0].send("1".encode("utf-8"))
         if len(clients) == 2:
             plays=1
+            clients[1].send("-1".encode("utf-8"))
             broadcast("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
             print("startet Runde "+str(plays))
             plays+=1

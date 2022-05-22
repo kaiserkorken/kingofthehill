@@ -25,7 +25,7 @@ def client_receive():
                 player.current=-1
             elif FENtoBit(str(message)):
                 if not checkmate(FENtoBit(message),player):
-                    turn = player.turn(message,2)
+                    turn = player.turn(message,3)
                     print("Turn:"+str(turn))
                     client.send(turn.encode('utf-8'))
                 else:
