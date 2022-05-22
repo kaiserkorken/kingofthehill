@@ -43,13 +43,13 @@ def receive():
         alias = client.recv(1024)
         aliases.append(alias)
         clients.append(client)
-        if len(clients) == 2:
-            broadcast("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1".encode('utf-8'))
         print(f'The alias of this client is {alias}'.encode('utf-8'))
-        broadcast(f'{alias} has connected to the game;'.encode('utf-8'))
+        broadcast(f'{alias} has connected to the game, '.encode('utf-8'))
         client.send('you are now connected!'.encode('utf-8'))
         thread = threading.Thread(target=handle_client, args=(client,))
         thread.start()
+        if len(clients) == 2:
+            broadcast("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1".encode('utf-8'))
 
 
 if __name__ == "__main__":

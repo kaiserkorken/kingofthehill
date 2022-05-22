@@ -225,7 +225,7 @@ def FENtoBit(fen,player=False):
     if type(fen)!=str:
         #error("FENtoBit only takes one argument of type str and not" +str(type(fen)))
         return False
-    print(fen)
+    #print(fen)
     info = fen.split(" ")
     board = info[0].split("/")
     if len(board)<7:
