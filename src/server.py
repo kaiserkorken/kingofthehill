@@ -1,31 +1,58 @@
 import socket 
 import threading
 from player import *
-
-HEADER = 64
-PORT = 5050
-SERVER = socket.gethostbyname(socket.gethostname())
-ADDR = (SERVER, PORT)
-FORMAT = 'utf-8'
-DISCONNECT_MESSAGE = "!DISCONNECT"
-
+host = '127.0.0.1'
+port = 59455
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(ADDR)
+server.bind((host, port))
+server.listen()
+clients = []
+aliases = []
 
-def handle_client(conn, addr):
-    print(f"[NEW CONNECTION] {addr} connected.")
 
-    connected = True
-    while connected:
-        msg_length = conn.recv(HEADER).decode(FORMAT)
-        if msg_length:
-            msg_length = int(msg_length)
-            msg = conn.recv(msg_length).decode(FORMAT)
-            if msg == DISCONNECT_MESSAGE:
-                connected = False
+def broadcast(message):
+    for client in clients:
+        client.send(message)
 
-            print(f"[{addr}] {msg}")
-            #aktueller spieler: player[x] # x ist 0 or 1
+# Funktion für die Clients Connection
+
+
+def handle_client(client):
+    while True:
+        try:
+            message = client.recv(1024)
+            broadcast(message)
+        except:
+            index = clients.index(client)
+            clients.remove(client)
+            client.close()
+            alias = aliases[index]
+            broadcast(f'{alias} has left the game!'.encode('utf-8'))
+            aliases.remove(alias)
+            break
+# Funktion um die Nachrichten der Clients zu empfangen
+
+
+def receive():
+    while True:
+        print('Server is running and listening ...')
+        client, address = server.accept()
+        print(f'connection is established with {str(address)}')
+        client.send('alias?'.encode('utf-8'))
+        alias = client.recv(1024)
+        aliases.append(alias)
+        clients.append(client)
+        print(f'The alias of this client is {alias}'.encode('utf-8'))
+        broadcast(f'{alias} has connected to the game'.encode('utf-8'))
+        client.send('you are now connected!'.encode('utf-8'))
+        thread = threading.Thread(target=handle_client, args=(client,))
+        thread.start()
+
+
+if __name__ == "__main__":
+    receive()
+
+  #aktueller spieler: player[x] # x ist 0 or 1
             #if msg is FEN and player[x] =player[x].current: #FEN ist angekommen von Spieler der dran war
             #FEN=FENtoBit(msg)
             #   if checkmate(FEN,player):#spiel beendet
@@ -40,24 +67,3 @@ def handle_client(conn, addr):
             #   elif FENtoBit(msg,True)[1]==player[x].current:
             #       FEN=player[x].turn()
             #       conn.send(FEN.encode(FORMAT))
-            conn.send("Msg received".encode(FORMAT))
-
-    conn.close()
-        
-
-def start():
-    server.listen()
-    print(f"[LISTENING] Server is listening on {SERVER}")
-    #player=[]
-    while True:
-        conn, addr = server.accept()
-
-        thread = threading.Thread(target=handle_client, args=(conn, addr))
-        thread.start()
-        #player.append(Player())
-        #jeder connection einen player() zuweisen
-        print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
-
-
-print("[STARTING] server is starting...")
-start()
