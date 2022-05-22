@@ -1,8 +1,7 @@
-import socket 
 import threading
-from player import *
+import socket
 host = '127.0.0.1'
-port = 59455
+port = 59566
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((host, port))
 server.listen()
@@ -14,7 +13,7 @@ def broadcast(message):
     for client in clients:
         client.send(message)
 
-# Funktion für die Clients Connection
+# Function to handle clients'connections
 
 
 def handle_client(client):
@@ -30,7 +29,7 @@ def handle_client(client):
             broadcast(f'{alias} has left the game!'.encode('utf-8'))
             aliases.remove(alias)
             break
-# Funktion um die Nachrichten der Clients zu empfangen
+# Main function to receive the clients connection
 
 
 def receive():
@@ -51,6 +50,7 @@ def receive():
 
 if __name__ == "__main__":
     receive()
+
 
   #aktueller spieler: player[x] # x ist 0 or 1
             #if msg is FEN and player[x] =player[x].current: #FEN ist angekommen von Spieler der dran war
