@@ -1,29 +1,43 @@
+import threading
 import socket
+import time
 
-HEADER = 64
-PORT = 5050
-FORMAT = 'utf-8'
-DISCONNECT_MESSAGE = "!DISCONNECT"
-SERVER = "192.168.101.118"
-ADDR = (SERVER, PORT)
-
+alias = input('Choose an alias >>> ')
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(ADDR)
+client.connect(('127.0.0.1', 59455))
 
-def send(msg):
-    message = msg.encode(FORMAT)
-    msg_length = len(message)
-    send_length = str(msg_length).encode(FORMAT)
-    send_length += b' ' * (HEADER - len(send_length))
-    client.send(send_length)
-    client.send(message)
-    print(client.recv(2048).decode(FORMAT))
+#Mögliche Lösung, rückgabewert zu speichern
+def client_receive():
+    while True:
+        try:
+            message = client.recv(1024).decode('utf-8')
+            counter = int(message)+1
+            if message == "alias?":
+                client.send(alias.encode('utf-8'))
+            else:
+                print(message)
+                return message
+        except:
+            print('Error!')
+            client.close()
+            break
 
-send("Hello World!")
-input()
-send("Starting Chessboard!!")
-input()
-send("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-input()
-send(DISCONNECT_MESSAGE)
+
+def client_send():
+    while True:
+        msg = alias +" says: Test1"
+        message = msg.encode('utf-8')
+        msg_length = len(message)
+        send_length = str(msg_length).encode('utf-8')
+        send_length += b' ' * (1024 - len(send_length))
+        client.send(send_length)
+        client.send(message)
+        time.sleep(1)
+
+
+receive_thread = threading.Thread(target=client_receive)
+receive_thread.start()
+
+send_thread = threading.Thread(target=client_send)
+send_thread.start()
 
