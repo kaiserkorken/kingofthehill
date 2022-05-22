@@ -310,4 +310,4 @@ def FENtoBit(fen,player=False):
 # print("Bitboard in FEN\n"+y)
 # #print(printBoard(FENtoBit(y)))
 
-print(FENtoBit("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"))
+#print(FENtoBit("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"))

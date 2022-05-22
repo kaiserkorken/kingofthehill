@@ -57,6 +57,7 @@ def receive():
         thread = threading.Thread(target=handle_client, args=(client,))
         thread.start()
         if len(clients) == 2:
+            plays=1
             broadcast("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
             print("startet Runde "+str(plays))
             plays+=1
