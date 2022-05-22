@@ -221,24 +221,35 @@ def flatten_list_of_list(list_of_list):
     #[item for sublist in t for item in sublist]
     return [item for sublist in list_of_list for item in sublist]
     
-
 def FENtoBit(fen,player=False):
     if type(fen)!=str:
         #error("FENtoBit only takes one argument of type str and not" +str(type(fen)))
         return False
+    print(fen)
     info = fen.split(" ")
     board = info[0].split("/")
+    if len(board)<7:
+        return False
+    for w in board:
+        if len(w)<0 or len(w)>=8:
+            return False
     #print(board)
     b = give_bitboards()
     ver=0
+    wh=0
+    bl=0
+    figures="rnbqkbnrppppppppPPPPPPPPRNBQKBNR"
+    save=figures
     for y in range(8):  # a row
         #print(y)
         #y = 7-y
         #print(y)
+        
         ver=0#versatz, falls int index verschiebt
         for x in range(8):  # a field in a row
             #"".lower()
             #print(board[y][x])
+            
             if ver+x>=8:#zeile fertig
                      break
             try:#int ->skip
@@ -251,10 +262,19 @@ def FENtoBit(fen,player=False):
             except:#string
                 if (board[y][x]).islower():
                     b["B"][7-y,x+ver] = True
+                    bl+=1
                 else:
                     b["W"][7-y,x+ver] = True
+                    wh+=1
+                #print(x,y,": ",board[y][x])    
                 b[board[y][x].lower()][7-y,x+ver] = True#adding specific character
-            #print(x,y,": ",board[y][x])
+                save=figures.replace(board[y][x],"")
+                if save==figures:#eine figur zu viel
+                    return False
+                else:
+                    save=figures
+                
+                #print(x,y,": ",board[y][x])
             #print(ver)
     # TODO
     # using the other values in FEN string
@@ -279,8 +299,8 @@ def FENtoBit(fen,player=False):
 # zugg: rnb1kbnr/p4ppp/1p1pp3/2p3q1/3P4/NQP1PNPB/PP3P1P/R1B1K2R #
 #try
 # print("FEN in Bitboard:\n")
-# x=FENtoBit("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-# print(printBoard(x))
+# x=FENtoBit("rnbqkbnr/ppppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+# print(print_board(x))
 # y=BittoFEN(x)
 # print("Bitboard in FEN\n"+y)
 # #print(printBoard(FENtoBit(y)))
