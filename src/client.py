@@ -12,6 +12,7 @@ def client_receive():
     while True:
         #try:
             message = client.recv(1024).decode('utf-8')
+            print("receive:"+str(message))
             if message == "alias?":
                 client.send(alias.encode('utf-8'))
             elif message =="1":
@@ -22,11 +23,11 @@ def client_receive():
                 print("Sie spielen Schwarz!")
                 player.current=-1
             elif FENtoBit(str(message)):
-                if not checkmate(message,player):
+                if not checkmate(FENtoBit(message),player):
                     turn = player.turn(message)
                     print("Turn:"+str(turn))
                     client.send(turn.encode('utf-8'))
-                elif checkmate(message,player):
+                else:
                     win = False
                     client.send(f'{alias}: has lost the game!!'.encode('utf-8'))
                     client.close()

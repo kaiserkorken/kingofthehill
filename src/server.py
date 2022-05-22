@@ -14,7 +14,7 @@ plays=1
 
 def broadcast(message):
     for client in clients:
-        client.sendall(message.encode("utf-8"))
+        client.send(message.encode("utf-8"))
     print("message:"+str(message))
 # Function to handle clients'connections
 
