@@ -9,6 +9,7 @@ player = Player()
 win = True
 
 def client_receive():
+    global win
     while True:
         #try:
             message = client.recv(1024).decode('utf-8')
@@ -24,16 +25,17 @@ def client_receive():
                 player.current=-1
             elif FENtoBit(str(message)):
                 if not checkmate(FENtoBit(message),player):
-                    turn = player.turn(message)
+                    turn = player.turn(message,2)
                     print("Turn:"+str(turn))
                     client.send(turn.encode('utf-8'))
                 else:
                     win = False
                     client.send(f'{alias}: has lost the game!!'.encode('utf-8'))
                     client.close()
-            elif message.split(" ")[2] == "lost":
-                if win:
-                    print(f'{alias}: has won the game!!')
+            elif len(message.split(" "))>2:#genug leerzeichen
+                if message.split(" ")[2] == "lost":
+                    if win:
+                        print(f'{alias}: has won the game!!')
             else:
                 print("else: "+str(message))
 
