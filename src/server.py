@@ -20,7 +20,9 @@ def handle_client(client):
     while True:
         try:
             message = client.recv(1024)
-            broadcast(message)
+            if message != "False":
+                broadcast(message)
+
         except:
             index = clients.index(client)
             clients.remove(client)
@@ -41,8 +43,10 @@ def receive():
         alias = client.recv(1024)
         aliases.append(alias)
         clients.append(client)
+        if len(clients) == 2:
+            broadcast("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1".encode('utf-8'))
         print(f'The alias of this client is {alias}'.encode('utf-8'))
-        broadcast(f'{alias} has connected to the game'.encode('utf-8'))
+        broadcast(f'{alias} has connected to the game;'.encode('utf-8'))
         client.send('you are now connected!'.encode('utf-8'))
         thread = threading.Thread(target=handle_client, args=(client,))
         thread.start()
@@ -51,19 +55,3 @@ def receive():
 if __name__ == "__main__":
     receive()
 
-
-  #aktueller spieler: player[x] # x ist 0 or 1
-            #if msg is FEN and player[x] =player[x].current: #FEN ist angekommen von Spieler der dran war
-            #FEN=FENtoBit(msg)
-            #   if checkmate(FEN,player):#spiel beendet
-            #       -->player.current bzw. anderer hat verloren
-            #       -->print("Player "+player.index(player[x])+" hat gewonnen!")
-            #       -->for z in player:
-            #           if z==x:
-            #               z.__set__("win")
-            #           else:
-            #               z.__set__("lose")
-            #           player.remove(z)
-            #   elif FENtoBit(msg,True)[1]==player[x].current:
-            #       FEN=player[x].turn()
-            #       conn.send(FEN.encode(FORMAT))
