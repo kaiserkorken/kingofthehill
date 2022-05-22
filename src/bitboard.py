@@ -151,6 +151,7 @@ def print_board_list(b_list, flip=False):
 def BittoFEN(b,player=False):#turns bitboard into FEN Strings
     if type(b)!=dict:
         error("BittoFEN only takes one argument of type dict and not" +str(type(b)))
+        return False
     # FENboard=np.zeros((8,8))
     # check=["k","q","n","r","b","p"]
     # for z in check:
@@ -176,6 +177,8 @@ def BittoFEN(b,player=False):#turns bitboard into FEN Strings
     board[b['W'] & b['b']] = 'B'
     board[b['W'] & b['p']] = 'P'
     #print(board)
+    figures="rnbqkbnrppppppppPPPPPPPPRNBQKBNR"
+    save=figures
     remember=0
     nothing=False
     FEN=""
@@ -189,6 +192,9 @@ def BittoFEN(b,player=False):#turns bitboard into FEN Strings
                     remember=0#reset nothing streak
                     nothing=False
                 FEN+=str(t)
+                save=figures.replace(str(t),"",1)
+                if save==figures:#mehr spielfiguren, als erlaubt
+                    return False
             else:#freies feld
                 remember+=1#ein weiteres Feld isz frei
                 nothing=True
@@ -216,10 +222,10 @@ def flatten_list_of_list(list_of_list):
     return [item for sublist in list_of_list for item in sublist]
     
 
-
 def FENtoBit(fen,player=False):
     if type(fen)!=str:
-        error("FENtoBit only takes one argument of type str and not" +str(type(fen)))
+        #error("FENtoBit only takes one argument of type str and not" +str(type(fen)))
+        return False
     info = fen.split(" ")
     board = info[0].split("/")
     #print(board)

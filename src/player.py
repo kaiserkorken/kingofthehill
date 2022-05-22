@@ -14,6 +14,7 @@ import threading
 import time
 import concurrent.futures
 
+
 def timer(function):
     start_time = time.time()
     function()
@@ -278,45 +279,49 @@ class Player():
         tmove=(t/10)*9#seconds
         tsearch=t/10
         [bb,play]=FENtoBit(FEN,True)
-        self.current=play
-        #bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#testFEN
-        tree=Tree(bb)#leerer baum mit b als root
-        if not checkmate(bb,self):#Spielende überprüfen
-            #tre.print_tree()
-            #arr=p.set_movetree(tre,tmove)
-            #tree.print_tree()
-            logging.info("Main    : building movetree "+str(time.time()-start))
-            arr=self.tree_height(tree,(start+tmove-time.time()))#time bzw. depth
-            #arr[1]=tree.h
-            tleft=time.time()-start
-            logging.info("Main    : movetree finished with height: "+str(arr[1])+" "+str(tleft))
-            logging.info("Main    : tree build finished in:"+str(time.time()-start)+"s")
-            
-            
-            #tree.print_tree()
-            #print(tree)  
-            #utility auf root?
-            depth=1
-            logging.info("Main    : doing minimax "+str(tleft))
-            savetree=tree
-            sstart=time.time()
-            while(time.time()-start+tsearch>=0 and depth<=arr[1]):#noch zeit und noch nicht so tief wie baumhöhe
-                tree=savetree
-                tiefe=self.alphabetasearch(tree.root,depth)#indizes aktualisieren#wertung des bestmöglichen zuges ausgeben
-                #children = np.asarray(tree.root.children,Node)
-                #print("search:",depth,children[0])
-                depth+=1
-            #tree.print_node(tree.nodes[2])#teste tree nach search
-            tleft=time.time()-start
-            logging.info("Main    : minimax finished with depth: "+str(depth-1)+" in "+str(time.time()-sstart)+"s")
-            logging.info("Main    : choosing good move "+str(tleft))
-            node=self.best_node(tree)#besten zug auswaehlen
-            #move=tree.find_node(node.index)
-            #logging.info("Main    : finished turn "+str(start+t))
-            finish=time.time()
-            FEN=BittoFEN(node.b,self.current)
-            logging.info("Main    : finished turn in "+str(finish-start)+"s")
-            logging.info("Main    : time remaining: "+str(start+t-time.time()))
+        if self.current==play:#spieler am zug
+
+            #bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#testFEN
+            tree=Tree(bb)#leerer baum mit b als root
+            if not checkmate(bb,self):#Spielende überprüfen
+                #tre.print_tree()
+                #arr=p.set_movetree(tre,tmove)
+                #tree.print_tree()
+                logging.info("Main    : building movetree "+str(time.time()-start))
+                arr=self.tree_height(tree,(start+tmove-time.time()))#time bzw. depth
+                #arr[1]=tree.h
+                tleft=time.time()-start
+                logging.info("Main    : movetree finished with height: "+str(arr[1])+" "+str(tleft))
+                logging.info("Main    : tree build finished in:"+str(time.time()-start)+"s")
+                
+                
+                #tree.print_tree()
+                #print(tree)  
+                #utility auf root?
+                depth=1
+                logging.info("Main    : doing minimax "+str(tleft))
+                savetree=tree
+                sstart=time.time()
+                while(time.time()-start+tsearch>=0 and depth<=arr[1]):#noch zeit und noch nicht so tief wie baumhöhe
+                    tree=savetree
+                    tiefe=self.alphabetasearch(tree.root,depth)#indizes aktualisieren#wertung des bestmöglichen zuges ausgeben
+                    #children = np.asarray(tree.root.children,Node)
+                    #print("search:",depth,children[0])
+                    depth+=1
+                #tree.print_node(tree.nodes[2])#teste tree nach search
+                tleft=time.time()-start
+                logging.info("Main    : minimax finished with depth: "+str(depth-1)+" in "+str(time.time()-sstart)+"s")
+                logging.info("Main    : choosing good move "+str(tleft))
+                node=self.best_node(tree)#besten zug auswaehlen
+                #move=tree.find_node(node.index)
+                #logging.info("Main    : finished turn "+str(start+t))
+                finish=time.time()
+                FEN=BittoFEN(node.b,self.current)
+                logging.info("Main    : finished turn in "+str(finish-start)+"s")
+                logging.info("Main    : time remaining: "+str(start+t-time.time()))
+            else:#Spieler nicht dran
+                FEN=False
+            self.__switch__()#Spieler wechseln (egal ob zug gemacht odeer nicht
             return FEN
             
     def teste(self,FEN,value=0,search=False,zug=False,utility=False,tree=False,tiefe=False,turn=False,baum=False):
