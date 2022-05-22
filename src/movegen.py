@@ -364,7 +364,7 @@ def moves_bishop(b, bb_from , player):
                 if (s):#feld mit gegner besetzt ->schlagen
                     plays[x+z,y+z]=1
             else:#feld frei
-                plays[x+z,y]=1#mögl Zug
+                plays[x+z,y+z]=1#mögl Zug
         if upbool and x-z>=0 and y+z<=7:
             s=enemy[x-z,y+z]
             if (bb[x-z,y+z]|s):#
