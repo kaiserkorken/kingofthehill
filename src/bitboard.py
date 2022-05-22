@@ -192,9 +192,13 @@ def BittoFEN(b,player=False):#turns bitboard into FEN Strings
                     remember=0#reset nothing streak
                     nothing=False
                 FEN+=str(t)
-                save=figures.replace(str(t),"",1)
-                if save==figures:#mehr spielfiguren, als erlaubt
+                i=figures.find(board[y][x])
+                if i==-1:
                     return False
+                else:
+                    save=figures.replace(board[y][x],"",1)
+                #except:
+                figures=save
             else:#freies feld
                 remember+=1#ein weiteres Feld isz frei
                 nothing=True

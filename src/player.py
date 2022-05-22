@@ -270,7 +270,7 @@ class Player():
         return arr
 
     def turn(self, FEN,t=20):#ein kompletter zug der ki
-        print(FEN)
+        #print(FEN)
         start=time.time()
         format = "%(asctime)s: %(message)s"
         logging.basicConfig(format=format, level=logging.INFO,
@@ -316,12 +316,14 @@ class Player():
                 #move=tree.find_node(node.index)
                 #logging.info("Main    : finished turn "+str(start+t))
                 finish=time.time()
+                self.__switch()
                 FEN=BittoFEN(node.b,self.current)
+                self.__switch__()
                 logging.info("Main    : finished turn in "+str(finish-start)+"s")
                 logging.info("Main    : time remaining: "+str(start+t-time.time()))
             else:#Spieler nicht dran
                 FEN=False
-            self.__switch__()#Spieler wechseln (egal ob zug gemacht odeer nicht
+            #self.__switch__()#Spieler wechseln (egal ob zug gemacht odeer nicht
             return FEN
             
     def teste(self,FEN,value=0,search=False,zug=False,utility=False,tree=False,tiefe=False,turn=False,baum=False):
