@@ -1,29 +1,58 @@
+import threading
 import socket
-
-HEADER = 64
-PORT = 5050
-FORMAT = 'utf-8'
-DISCONNECT_MESSAGE = "!DISCONNECT"
-SERVER = "192.168.101.118"
-ADDR = (SERVER, PORT)
-
+alias = input('Choose an alias >>> ')
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(ADDR)
+client.connect(('127.0.0.1', 59566))
 
-def send(msg):
-    message = msg.encode(FORMAT)
-    msg_length = len(message)
-    send_length = str(msg_length).encode(FORMAT)
-    send_length += b' ' * (HEADER - len(send_length))
-    client.send(send_length)
-    client.send(message)
-    print(client.recv(2048).decode(FORMAT))
 
-send("Hello World!")
-input()
-send("Starting Chessboard!!")
-input()
-send("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-input()
-send(DISCONNECT_MESSAGE)
 
+def client_receive():
+    while True:
+        try:
+            message = client.recv(1024).decode('utf-8')
+            if message == "alias?":
+                client.send(alias.encode('utf-8'))
+            elif message =="1":
+                print("Sie spielen Weiß!")
+                est = "etwas"
+                client.send(est.encode('utf-8'))
+            elif message == "-1":
+                print("Sie spielen Schwarz!")
+                est = "etwas"
+                client.send(est.encode('utf-8'))
+                #client send
+    #        elif message == "Checkmate!":
+    #            print("You have won the game")
+    #            client.close()
+    #        elif message.split(" "[0]=="FEN"):
+    #            sgh = neuerMove(message.split(" ")[1],message.split(" ")[2])
+    #            client.send(sgh.encode('utf-8'))
+    #        elif checkmate(message.split(" ")[1],message.split(" ")[2]):
+    #            client.send(f'{alias}: has won the game!!')
+    #            client.close()
+            else:
+                print(message)
+
+        except:
+            print('Error!')
+            client.close()
+            break
+
+
+def client_send():
+    while True:
+        message = input("")
+        client.send(message.encode('utf-8'))
+
+
+receive_thread = threading.Thread(target=client_receive)
+receive_thread.start()
+
+send_thread = threading.Thread(target=client_send)
+send_thread.start()
+
+def neuerMove(bitbrd,player):
+    pass
+
+def checkmate():
+    pass
