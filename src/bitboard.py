@@ -149,9 +149,11 @@ def print_board_list(b_list, flip=False):
         print('empty b_list')
 
 def BittoFEN(b,player=False):#turns bitboard into FEN Strings
+    #if len(b)!=8:
     if type(b)!=dict:
         error("BittoFEN only takes one argument of type dict and not" +str(type(b)))
         return False
+    #b=b[0]#name=b[1]
     # FENboard=np.zeros((8,8))
     # check=["k","q","n","r","b","p"]
     # for z in check:
@@ -182,36 +184,37 @@ def BittoFEN(b,player=False):#turns bitboard into FEN Strings
     remember=0
     nothing=False
     FEN=""
-    for x in range(8):
+    for y in range(8):
         nothing=False
-        for y in range(8):
-            t=board[x,y]
+        for x in range(8):
+            t=board[7-y][x]
             if t!="":#Spielfigur auf dem Feld
                 if nothing:#wenn vorheriges Feld frei war
                     FEN+=str(remember)
                     remember=0#reset nothing streak
                     nothing=False
                 FEN+=str(t)
-                i=figures.find(board[y][x])
+                i=figures.find(board[7-x][y])
                 if i==-1:
                     return False
                 else:
-                    save=figures.replace(board[y][x],"",1)
+                    save=figures.replace(board[7-x][y],"",1)
                 #except:
                 figures=save
             else:#freies feld
-                remember+=1#ein weiteres Feld isz frei
+                remember+=1#ein weiteres Feld ist frei
                 nothing=True
             #add missing arguments to FEN
-        if remember==8:#ganze reihe leer
-            FEN+=str(8)
+        if remember>0:#ganze reihe leer
+            FEN+=str(remember)
             remember=0
-        if x!=7:
+        if y!=7:
             FEN+="/"
     #print(FEN)
-    if player==-1:
+    if player==1:
         player="W"
-    elif player==1:
+        FEN+=" "+str(player) 
+    elif player==-1:
         player="B"
         FEN+=" "+str(player) 
     return FEN
@@ -232,7 +235,7 @@ def FENtoBit(fen,player=False):
     #print(fen)
     info = fen.split(" ")
     board = info[0].split("/")
-    if len(info)<1:
+    if len(info)<=0:
         return False
     if len(board)<8:
         return False
@@ -292,6 +295,7 @@ def FENtoBit(fen,player=False):
     #bit[7] == bottom right
     #bit[63]== upper right
     #player=info[1]
+    #if wh>=20 or bl>= 20:#damenumwandlung beachten
     if player:
         if (info[1]=="W" or info[1]=="w"):
             player=1
@@ -313,5 +317,7 @@ def FENtoBit(fen,player=False):
 # y=BittoFEN(x)
 # print("Bitboard in FEN\n"+y)
 # #print(printBoard(FENtoBit(y)))
-
-#print(FENtoBit("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"))
+#FEN=FENtoBit("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",True)
+#print(FEN)
+# FEN=BittoFEN(FEN,-1)
+# print(FEN)

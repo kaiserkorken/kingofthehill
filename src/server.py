@@ -25,10 +25,14 @@ def handle_client(client):
         try:
             message = client.recv(1024).decode("utf-8")
             if message != "False":
-                broadcast(message)
                 if (FENtoBit(message)):
                     plays+=1
-                    print("Starte Runde"+str(plays))
+                    print("Starte Runde "+str(plays))
+                    if plays>=80:
+                        message="remis"
+
+                broadcast(message)
+                
 
         except:
             index = clients.index(client)

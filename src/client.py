@@ -27,7 +27,7 @@ def client_receive():
                 if not checkmate(FENtoBit(message),player):
                     turn = player.turn(message,3)
                     print("Turn:"+str(turn))
-                    client.send(turn.encode('utf-8'))
+                    client.send(str(turn).encode('utf-8'))
                 else:
                     win = False
                     client.send(f'{alias}: has lost the game!!'.encode('utf-8'))
@@ -36,8 +36,13 @@ def client_receive():
                 if message.split(" ")[2] == "lost":
                     if win:
                         print(f'{alias}: has won the game!!')
+            elif message=="remis":
+                print("Unentschieden!")
+                win=False
+                client.send(f'{alias}: has lost the game!!'.encode('utf-8'))
+                client.close()
             else:
-                print("else: "+str(message))
+                print("else:"+str(message))
 
         # except:
         #      print('Error!')

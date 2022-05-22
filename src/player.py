@@ -14,7 +14,6 @@ import threading
 import time
 import concurrent.futures
 
-
 def timer(function):
     start_time = time.time()
     function()
@@ -120,9 +119,10 @@ class Player():
                     else:
                         best_nodes.remove(best_node) 
             print('kein guter Zug vorhanden!')
-            children = np.asarray(tree.root.children,Node)
-            print("doof: ",children[0])
-            return children[0]
+            children = list(tree.root.children)
+            #print("doof: ",children[0])
+            node=random.choice(children)
+            return node
              
         else:
             print('kein Zug vorhanden!')
@@ -251,6 +251,7 @@ class Player():
         arr=[tmove,altstep]
         neustep=altstep
         altstep+=altaltstep
+        
         for z in range(index, altstep):#eine weitere ebene durchgehen
             #print(arr[0])
             #logging.info("Main    : creating height "+str(h))
@@ -265,6 +266,7 @@ class Player():
         #print(arr[0])
         if tmove>=time.time()-start:
             altstep-=altaltstep#-=alt
+            self.__switch__()#neue ebene für gegner
             return self.tree_height(tree,tmove,index+altstep,altstep,neustep-altstep,h+1)
         print("finish")
         return arr
@@ -290,6 +292,7 @@ class Player():
                 logging.info("Main    : building movetree "+str(time.time()-start))
                 arr=self.tree_height(tree,(start+tmove-time.time()))#time bzw. depth
                 #arr[1]=tree.h
+                self.current=play
                 tleft=time.time()-start
                 logging.info("Main    : movetree finished with height: "+str(arr[1])+" "+str(tleft))
                 logging.info("Main    : tree build finished in:"+str(time.time()-start)+"s")
@@ -316,15 +319,15 @@ class Player():
                 #move=tree.find_node(node.index)
                 #logging.info("Main    : finished turn "+str(start+t))
                 finish=time.time()
-                self.__switch()
+                self.__switch__()
                 FEN=BittoFEN(node.b,self.current)
                 self.__switch__()
                 logging.info("Main    : finished turn in "+str(finish-start)+"s")
                 logging.info("Main    : time remaining: "+str(start+t-time.time()))
-            else:#Spieler nicht dran
+        else:#Spieler nicht dran
                 FEN=False
             #self.__switch__()#Spieler wechseln (egal ob zug gemacht odeer nicht
-            return FEN
+        return FEN
             
     def teste(self,FEN,value=0,search=False,zug=False,utility=False,tree=False,tiefe=False,turn=False,baum=False):
         # value depends on what you want to do:
