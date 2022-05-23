@@ -1,0 +1,92 @@
+graph:{
+  title:"packages"
+  layoutalgorithm:dfs
+  late_edge_labels:yes
+  port_sharing:no
+  manhattan_edges:yes
+  node: {title:"bitboard"  label:"\fbbitboard\fn"
+  shape:box
+  }
+  node: {title:"client"  label:"\fbclient\fn"
+  shape:box
+  }
+  node: {title:"game"  label:"\fbgame\fn"
+  shape:box
+  }
+  node: {title:"interface"  label:"\fbinterface\fn"
+  shape:box
+  }
+  node: {title:"movegen"  label:"\fbmovegen\fn"
+  shape:box
+  }
+  node: {title:"movegen_test"  label:"\fbmovegen_test\fn"
+  shape:box
+  }
+  node: {title:"movegen_verbose"  label:"\fbmovegen_verbose\fn"
+  shape:box
+  }
+  node: {title:"player"  label:"\fbplayer\fn"
+  shape:box
+  }
+  node: {title:"server"  label:"\fbserver\fn"
+  shape:box
+  }
+  node: {title:"test"  label:"\fbtest\fn"
+  shape:box
+  }
+  node: {title:"tree"  label:"\fbtree\fn"
+  shape:box
+  }
+  edge: {sourcename:"client" targetname:"player"  arrowstyle:solid
+  backarrowstyle:none
+  backarrowsize:0
+  }
+  edge: {sourcename:"game" targetname:"player"  arrowstyle:solid
+  backarrowstyle:none
+  backarrowsize:0
+  }
+  edge: {sourcename:"movegen" targetname:"bitboard"  arrowstyle:solid
+  backarrowstyle:none
+  backarrowsize:0
+  }
+  edge: {sourcename:"movegen_test" targetname:"movegen_verbose"  arrowstyle:solid
+  backarrowstyle:none
+  backarrowsize:0
+  }
+  edge: {sourcename:"movegen_test" targetname:"player"  arrowstyle:solid
+  backarrowstyle:none
+  backarrowsize:0
+  }
+  edge: {sourcename:"movegen_verbose" targetname:"bitboard"  arrowstyle:solid
+  backarrowstyle:none
+  backarrowsize:0
+  }
+  edge: {sourcename:"movegen_verbose" targetname:"movegen"  arrowstyle:solid
+  backarrowstyle:none
+  backarrowsize:0
+  }
+  edge: {sourcename:"player" targetname:"bitboard"  arrowstyle:solid
+  backarrowstyle:none
+  backarrowsize:0
+  }
+  edge: {sourcename:"player" targetname:"movegen"  arrowstyle:solid
+  backarrowstyle:none
+  backarrowsize:0
+  }
+  edge: {sourcename:"player" targetname:"tree"  arrowstyle:solid
+  backarrowstyle:none
+  backarrowsize:0
+  }
+  edge: {sourcename:"server" targetname:"bitboard"  arrowstyle:solid
+  backarrowstyle:none
+  backarrowsize:0
+  }
+  edge: {sourcename:"test" targetname:"movegen_test"  arrowstyle:solid
+  backarrowstyle:none
+  backarrowsize:0
+  }
+  edge: {sourcename:"test" targetname:"player"  arrowstyle:solid
+  backarrowstyle:none
+  backarrowsize:0
+  }
+}

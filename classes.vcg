@@ -1,0 +1,10 @@
+graph:{
+  title:"classes"
+  layoutalgorithm:dfs
+  late_edge_labels:yes
+  port_sharing:no
+  manhattan_edges:yes
+  node: {title:"player.Player"  label:"\fbPlayer\fn\n\f___________________\n\f08current : int\n\f___________________\n\f10alphabetasearch()\n\f10best_node()\n\f10d_tree_height()\n\f10generate_moves()\n\f10make_move()\n\f10set_movetree()\n\f10set_test_movetree()\n\f10teste()\n\f10tree_height()\n\f10turn()\n\f10utility()"
+  shape:box
+  }
+}

@@ -1,0 +1,5 @@
+digraph "classes" {
+rankdir=BT
+charset="utf-8"
+"player.Player" [color="black", fontcolor="black", label="{Player|current : int\l|alphabetasearch(node, depth, ismax)\lbest_node(tree)\ld_tree_height(tree, depth, value, index, altaltstep, altstep, h)\lgenerate_moves(b)\lmake_move(b_old, bb_from, bb_to)\lset_movetree(tree, h, index, step)\lset_test_movetree(tree, h, index, step)\lteste(FEN, value, search, zug, utility, tree, tiefe, turn, baum)\ltree_height(tree, tmove, index, altaltstep, altstep, h)\lturn(FEN, t)\lutility(b)\l}", shape="record", style="solid"];
+}
