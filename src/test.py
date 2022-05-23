@@ -4,23 +4,33 @@ from movegen_test import unit_test
 
 
 # Stellung 1: 
-FEN_1 = 'rnb1kbnr/p4ppp/1p1pp3/2p3q1/3P4/NQP1PNPB/PP3P1P/R1B1K2R b'
-possible_moves_1 = 'a7a6, b8a6, b8c6, b8d7, c8b7, c8d7, e8d8, e8d7, e8e7, f8e7, g8e7, g8f6, g8h6, a7a5, b6b5, c5c4, c5d4, d6d5, e6e5, f7f6, f7f5, g7g6, h7h6, h7h5, g5f6, g5e7, g5d8, g5h6, g5f4, g5h4, g5e3'
-
+FEN_1 = 'rnbqkbnr/p4ppp/1p1pp3/2p5/3P4/NQP1PNPB/PP3P1P/R1B1K2R b'
+possible_moves_1 = ['ke8-e7', 'qd8-h4', 'qd8-g5', 'qd8-f6', 'qd8-c7', 'qd8-d7', 'qd8-e7', 'nb8-d1',
+ 'nb8-a6', 'nb8-c6', 'nb8-d7', 'ng8xe1', 'ng8-f6', 'ng8-h6', 'ng8-e7', 'bc8-a6',
+ 'bc8-b7', 'bc8-d7', 'bf8-e7', 'c5-c4', 'c5xd4', 'b6-b5', 'd6-d5', 'e6-e5',
+ 'a7-a5', 'a7-a6', 'f7-f5', 'f7-f6', 'g7-g5', 'g7-g6', 'h7-h5', 'h7-h6']
 # Stellung 2: 
 FEN_2 = 'r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w'
-possible_moves_2 = 'A1b1, c1d2, c1e3, c1f4, c1g5, e1d1, e1e1, e1d2, e1f1, g1e2, g1f3, g1h3, h1h2, h1h3, a2a3, a2a4, b2b3, b2b4, d4d5, f2f3, f2f4, g2g3, g2g4, h4g5, c6c7, b7d8, b7d6, b7c5, b7a5'
+possible_moves_2 = ['Bc1xg5', 'h4xg5', 'Ke1-d1', 'Ke1-f1', 'Ke1-e2', 'Ng1-e2', 'Ng1-f3', 'Ng1-h3',
+ 'Nb7-a5', 'Nb7-c5', 'Nb7-d6', 'Ra1-b1', 'Rh1-h2', 'Rh1-h3', 'Bc1-d2', 'Bc1-e3',
+ 'Bc1-f4', 'a2-a3', 'a2-a4', 'b2-b3', 'b2-b4', 'f2-f3', 'f2-f4', 'g2-g3', 'g2-g4',
+ 'c3-c4', 'd4-d5', 'c6-c7']
 
 
 if __name__ == "__main__":
     
     print('Unit Test 1:')
-    print('Moves to find:')
+    print('Moves to find: ' + str(len(possible_moves_1)) + ' move(s) possible')
     print(possible_moves_1)
-    unit_test(FEN_1)
+    passed = unit_test(FEN_1, possible_moves_1)
+    print('Unit test passed?: ' + str(passed))
     
+    print('------------------')
+    print('------------------')
+    print('------------------')
     
     print('Unit Test 2:')
-    print('Moves to find:')
+    print('Moves to find: ' + str(len(possible_moves_2)) + ' move(s) possible')
     print(possible_moves_2)
-    unit_test(FEN_2)
+    passed = unit_test(FEN_2, possible_moves_2)
+    print('Unit test passed?: ' + str(passed))

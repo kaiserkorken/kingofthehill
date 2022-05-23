@@ -3,7 +3,7 @@ from player import *
 from movegen_verbose import make_move_name, generate_moves_verbose
 
 
-def unit_test(FEN):
+def unit_test(FEN, all_moves):
     player = Player()
     
     b, pl = FENtoBit(FEN, True)
@@ -11,19 +11,36 @@ def unit_test(FEN):
     
     moves, names = generate_moves_verbose(b, player) # generiere alle Züge aus Position b
     
-    print('FEN loaded: ' + str(FEN))
-    print('Player: ' + player.__get__())
+    print('FEN loaded: ' + str(FEN)) # zeige genutzte FEN
+    print('Player: ' + player.__get__()) # Spieler am Zug
     print(print_board(b, True))
     print('Number of moves found: ' + str(len(moves)))
     print(names)
     
+    # veranschauliche alle Züge
     for i in range(len(moves)):
         print('Move #'+str(i))
         print(names[i])
         print(print_board(moves[i], True))
+      
+    # falls sortierte Zuglisten identisch -> Unit-Test bestanden
+    return sorted(all_moves) == sorted(names)
+
+    
     
     
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 if __name__ == "__main__":
     player = Player()
     
