@@ -156,7 +156,7 @@ class Player():
                 #print("b:")
                 #print(b)
                 #tree.insert_node(node,[bb,self.utility(b),h,name])
-                tree.insert_node(node,[b,self.utility(b),h+1])  #in Node mit bitboard und wertung einsetzen
+                tree.insert_node(node,[b,self.utility(b),h])  #in Node mit bitboard und wertung einsetzen
                 
                 #TODO auch in insert node auskommentieren! (tree.py)
                 # print("u:")
@@ -164,12 +164,13 @@ class Player():
                 #print(self.utility(b))
                 #tree.print_tree()
             else:
+                print("leerer move")
                 moves.remove(b)
-        index +=1
-        node=tree.find_node(index)
+        #index +=1
+        #node=tree.find_node(index)
         
-        step+=index
-        h+=1
+        #step+=index
+        #h+=1
         #print("h:",h,"moves:",len(moves))
         
         
@@ -211,7 +212,7 @@ class Player():
         
         return [len(moves),h]#h nötig?
 
-    def d_tree_height(self,tree,depth,value=False,index=0,altaltstep=0,altstep=1,h=1):#tree ebenen erstellen bis tiefe d
+    def c_tree_height(self,tree,depth,value=False,index=0,altaltstep=0,altstep=1,h=1):#tree ebenen erstellen bis tiefe d
             #tmove=arr[4]
             #arr=[tree,h,index,step,tmove]
             #logging.info("Thread1    : started")
@@ -226,8 +227,9 @@ class Player():
                 #print(arr[0])
                 #logging.info("Main    : creating height "+str(h))
                 if value:
-                    arr=(self.set_movetree(tree,h,z))
-                arr=(self.set_test_movetree(tree,h,z))
+                    arr=(self.set_movetree(tree,h,z))#setze alle moves unter parent index=z
+                else:
+                    arr=(self.set_test_movetree(tree,h,z))
                 neustep+=arr[0]
                 #print("Tree "+str(z)+":")
                 #tre.print_tree()
@@ -236,10 +238,37 @@ class Player():
                 altstep-=altaltstep#-=alt
                 return self.d_tree_height(tree,depth,value,index+altstep,altstep,neustep-altstep,h+1)
             return arr
+    def d_tree_height(self,tree,depth,value=False,index=0,altstep=1,h=0):#tree ebenen erstellen bis tiefe d
+                #tmove=arr[4]
+            #arr=[tree,h,index,step,tmove]
+            #logging.info("Thread1    : started")
+            #print(arr)
+            # if h==0:
+            #     arr=player.set_movetree(tree,tmove,h,index)#ein ausgerechneter zug alle züge ausrechnen
+            #     print(arr)
+            arr=[altstep,depth]#auskommentieren?
+            altstep=len(tree.nodes)
+            for z in range(index, altstep):#eine weitere ebene durchgehen
+                #print(arr[0])
+                #logging.info("Main    : creating height "+str(h))
+                if value:
+                    arr=(self.set_movetree(tree,h+1,z))
+                else:
+                    arr=(self.set_test_movetree(tree,h+1,z))
+                #neustep+=arr[0]
+                #print("Tree "+str(z)+":")
+                #tre.print_tree()
+                #print(arr[0])
+            depth-=1
+            if depth>0:
+                index =altstep
+                #altstep-=altaltstep#-=alt
+                self.__switch__()#neue ebene für gegner
+                return self.d_tree_height(tree,depth,value,index,altstep,h+1)
+            return arr
 
 
-
-    def tree_height(self,tree,tmove,index=0,altaltstep=0,altstep=1,h=1):#tree ebenen erstellen bis time t=0
+    def tree_height(self,tree,tmove,index=0,altstep=1,h=0):#tree ebenen erstellen bis time t=0
         #tmove=arr[4]
         #arr=[tree,h,index,step,tmove]
         #logging.info("Thread1    : started")
@@ -249,25 +278,23 @@ class Player():
         #     print(arr)
         start=time.time()
         arr=[tmove,altstep]
-        neustep=altstep
-        altstep+=altaltstep
-        
+        altstep=len(tree.nodes)
         for z in range(index, altstep):#eine weitere ebene durchgehen
             #print(arr[0])
             #logging.info("Main    : creating height "+str(h))
-            arr=(self.set_movetree(tree,h,z))
-            neustep+=arr[0]
+            arr=(self.set_movetree(tree,h+1,z))
+            #neustep+=arr[0]
             #print("Tree "+str(z)+":")
             #tre.print_tree()
             if start+tmove<=time.time():#zeitlimit überschritten
-                print("short")
+                print("ebene" +(h+1)+" not finished")
                 arr[1]-=1#letzte ebene nicht fertig geworden
                 return arr
         #print(arr[0])
         if tmove>=time.time()-start:
-            altstep-=altaltstep#-=alt
+            index=altstep
             self.__switch__()#neue ebene für gegner
-            return self.tree_height(tree,tmove,index+altstep,altstep,neustep-altstep,h+1)
+            return self.tree_height(tree,tmove,index,altstep,h+1)
         print("finish")
         return arr
 
@@ -367,11 +394,13 @@ class Player():
             return zeit
 
         elif tree:#baumseichern
-            t=Tree()
+            bb=FENtoBit(FEN)
+            t=Tree(bb)
             if tiefe:#baumspeicher bis tiefe mit/ohne utility
                 depth=value
                 zeit=time.time()
                 arr=self.d_tree_height(t,depth,utility)#timer einbauen
+                #t.print_tree()
                 return time.time()-zeit
             else:#baumspeichern bis time mit utility (Standard)
                 zeit=value
@@ -407,7 +436,7 @@ class Player():
             tmove=zeit/2 
             #bb=init_game(p)
             #bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#TODO fix fen->bit
-            bb=FENtoBit(FEN)()
+            bb=FENtoBit(FEN)
             tre=Tree(bb)
             # format = "%(asctime)s: %(message)s"
             # logging.basicConfig(format=format, level=logging.INFO,
@@ -418,7 +447,11 @@ class Player():
             tre.print_tree()
             arr=self.tree_height(tre,tmove)
             tre.print_tree()
-            print(tre)  
+            #print(tre)
+            # for x in tre.nodes:
+            #     if x.h==4:
+            #         tre.print_node(x)  
+            #         break
 
 
 
@@ -606,25 +639,26 @@ if __name__ == "__main__":
     #inputs:#
 
     p=Player()
-    FEN="r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR W"
+    #FEN="r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR W"
     #FEN="rnb1kbnr/p4ppp/1p1pp3/2p3q1/3P4/NQP1PNPB/PP3P1P/R1B1K2R w"
     #FEN="3q3r/1pp2pb1/3pkn2/1B6/3P4/4PN1P/5K1P/7R b"
     #FEN="rnbqkbnr/pp1p1ppp/4p3/1Pp5/8/2N5/P1PPPPPP/R1BQKBNR w"
+    FEN="8/4k3/8/8/8/8/3K4/8"
 
-    #zeit=10
-    depth=3
+    zeit=10
+    depth=4
     wdh=1000
 
     ### Unit/Benchmark Tests ###
 
 
     #p.teste(FEN,zeit,turn=True)#turn ausführen
-    searchtime=p.teste(FEN,depth,search=True)#alphabetasearch zeit messen für tiefe
+    #searchtime=p.teste(FEN,depth,search=True)#alphabetasearch zeit messen für tiefe
     #t=p.teste(FEN,wdh,zug=True)#zuggenerator only 1000 mal durchschnitt
     #t=p.teste(FEN,wdh,utility=True)#utility only
-    # t=p.teste(FEN,zeit,tree=True,tiefe=True)#baumspeicher bis tiefe ohne utility
-    # t=p.teste(FEN,zeit,tree=True,tiefe=True,utility=True)#baumspeicher bis tiefe mit utility
+    #t=p.teste(FEN,depth,tree=True,tiefe=True)#baumspeicher bis tiefe ohne utility
+    t=p.teste(FEN,depth,tree=True,tiefe=True,utility=True)#baumspeicher bis tiefe mit utility
     #tiefe=p.teste(FEN,zeit,tree=True)#baumspeichern bis time mit utility (Standard)
     #p.teste(FEN,zeit,baum=True)#baum ergebnis printen
 
-    print(searchtime)
+    #print(searchtime)
