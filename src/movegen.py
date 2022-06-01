@@ -166,13 +166,13 @@ def gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player
         bb_capture_list = serialize_bb(bb_capture)
         bb_quiet_list = serialize_bb(bb_quiet)
         
-        if pawn_to_queen:
+        if pawn_to_queen: # spezieller Zugsimulator für Damenumwandlung
             capture_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_capture_list]
             quiet_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_quiet_list]
         else:
             # simuliert Züge -> Elemente sind Dictionaries mit Folgezuständen
-            capture_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_capture_list]
-            quiet_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_quiet_list]
+            capture_list = [make_move(b, bb_from, bb_to) for bb_to in bb_capture_list]
+            quiet_list = [make_move(b, bb_from, bb_to) for bb_to in bb_quiet_list]
         
         # füge keine leeren elemente ein
         if capture_list:
@@ -372,16 +372,34 @@ def moves_king_W(b):
     down  = np.roll((b['W'] & b['k'] & ~sbb['1']),  -8) & ~(b['W'] )
     left  = np.roll((b['W'] & b['k'] & ~sbb['la']), -1) & ~(b['W'] )
     right = np.roll((b['W'] & b['k'] & ~sbb['lh']),  1) & ~(b['W'] )
-    return (up|down|left|right)
+    
+    straight = (up|down|left|right)
+    
+    up_left    = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['la'])),   8-1) & ~(b['W'] )
+    up_right   = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['lh'])),   8+1) & ~(b['W'] )
+    down_left  = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['la'])),  -8-1) & ~(b['W'] )
+    down_left  = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['lh'])),  -8+1) & ~(b['W'] )
+
+    diagonal = (up_left|up_right|down_left|down_right)
+    return (straight | diagonal)
 
 def moves_king_B(b):
     # bb_from nicht nötig, da Position durch Schnittmenge mit Farbe und König eindeutig bestimmt
     # king can only move up if it is not in the upper row, etc. 
-    up    = np.roll((b['B'] & b['k'] & ~sbb['8']),   8) & ~( b['B'])
-    down  = np.roll((b['B'] & b['k'] & ~sbb['1']),  -8) & ~( b['B'])
-    left  = np.roll((b['B'] & b['k'] & ~sbb['la']), -1) & ~( b['B'])
-    right = np.roll((b['B'] & b['k'] & ~sbb['lh']),  1) & ~( b['B'])
-    return (up|down|left|right)
+    up    = np.roll((b['W'] & b['k'] & ~sbb['8']),   8) & ~(b['B'] )
+    down  = np.roll((b['W'] & b['k'] & ~sbb['1']),  -8) & ~(b['B'] )
+    left  = np.roll((b['W'] & b['k'] & ~sbb['la']), -1) & ~(b['B'] )
+    right = np.roll((b['W'] & b['k'] & ~sbb['lh']),  1) & ~(b['B'] )
+    
+    straight = (up|down|left|right)
+    
+    up_left    = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['la'])),   8-1) & ~(b['B'] )
+    up_right   = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['lh'])),   8+1) & ~(b['B'] )
+    down_left  = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['la'])),  -8-1) & ~(b['B'] )
+    down_left  = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['lh'])),  -8+1) & ~(b['B'] )
+
+    diagonal = (up_left|up_right|down_left|down_right)
+    return (straight | diagonal)
     
 
 # queen moves
