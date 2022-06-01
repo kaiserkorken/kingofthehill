@@ -28,6 +28,26 @@ def make_move(b_old, bb_from, bb_to):
     return b_new
 
 
+def make_move_pawn_to_queen(b_old, bb_from, bb_to):
+    # Zuggenerator funktioniert!
+    b_new = copy.deepcopy(b_old) # Tiefkopie wegen call-by-reference
+    #if (bb_from | bb_to).any():
+    for bb_key, bb in b_old.items():
+        #print(bb_key)
+        #print("FROM")
+        #print(b_new[bb_key])
+        if (bb & bb_to).any() : # falls gegnerische figur auf ziel auf bitboard verhanden
+            b_new[bb_key] = bb  ^ bb_to # update bitboard: Schlag: Feld auf bb_to verschwindet
+
+
+    b_new['p'] = b_new['p'] ^ bb_to # entferne Bauern nachträglich wieder
+    b_new['q'] = b_new['q'] ^ bb_to # setze Dame
+    #print("TO")
+    #print(b_new[bb_key])  
+    #print(print_board(b_new))
+    return b_new
+
+
 
 
 
@@ -54,6 +74,14 @@ def generate_moves(b, player):
     move_list_capture = []
     # add quiet moves
     move_list_quiet = []
+    
+    # pawn to queen
+#    print('pawn to queen')
+    move_list_capture_pawn_to_queen, move_list_quiet_pawn_to_queen = gen_moves_pawn_to_queen(b, player) 
+    if move_list_capture_pawn_to_queen:
+        move_list_capture.append(move_list_capture_pawn_to_queen)
+    if move_list_quiet_pawn_to_queen:
+        move_list_quiet.append(move_list_quiet_pawn_to_queen)
     
     # king
 #    print('king')
@@ -125,7 +153,7 @@ def split_capture_quiet(b, bb_to, player):
 
 
 # Hilfsfunktion für figurenspezifische Zuggeneratoren
-def gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player):
+def gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player, pawn_to_queen=False):
     # erstellt Listen mit Folgezuständen aus Liste in der Paare aus bb_from und bb_all_moves stehen
     # bb_from: einzelne 1 für bewegte Figur
     # bb_all_moves: 1en auf alle Felder die sich die Figur auf bb_from bewegen kann
@@ -138,9 +166,13 @@ def gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player
         bb_capture_list = serialize_bb(bb_capture)
         bb_quiet_list = serialize_bb(bb_quiet)
         
-        # simuliert Züge -> Elemente sind Dictionaries mit Folgezuständen
-        capture_list = [make_move(b, bb_from, bb_to) for bb_to in bb_capture_list]
-        quiet_list = [make_move(b, bb_from, bb_to) for bb_to in bb_quiet_list]
+        if pawn_to_queen:
+            capture_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_capture_list]
+            quiet_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_quiet_list]
+        else:
+            # simuliert Züge -> Elemente sind Dictionaries mit Folgezuständen
+            capture_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_capture_list]
+            quiet_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_quiet_list]
         
         # füge keine leeren elemente ein
         if capture_list:
@@ -158,6 +190,7 @@ def gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player
 
 
 # Figurenspezifische Generatoren für capture und quiet Listen
+
 
 def gen_moves_king(b, player):
     # generates bb_lists with caputure and quiet moves
@@ -237,9 +270,52 @@ def gen_moves_pawn(b, player):
     move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player)
     return move_list_capture, move_list_quiet
 
+def gen_moves_pawn_to_queen(b, player):
+    # generates bb_lists with caputure and quiet moves
+    if player.current == 1:
+        bb_pawns = b['p'] & b['W']
+        bb_from_and_all_moves_list = [[bb_from, moves_pawn_to_queen_W(b, bb_from)] for bb_from in serialize_bb(bb_pawns)] # iteriere über alle Türme
+    else:
+        bb_pawns = b['p'] & b['B']
+        bb_from_and_all_moves_list = [[bb_from, moves_pawn_to_queen_B(b, bb_from)] for bb_from in serialize_bb(bb_pawns)] # iteriere über alle Türme
+    
+    # zu jeder Figur capture- und quiet-listen erstellen
+    move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player, pawn_to_queen=True)
+    return move_list_capture, move_list_quiet
 
     
 ### POSSIBLE MOVES LOGIC ###
+
+def moves_pawn_to_queen_W(b, bb_from):
+    quiet = moves_quiet_pawn_to_queen_W(b, bb_from)
+    attack = moves_attack_pawn_to_queen_W(b, bb_from)
+    return (attack | quiet)
+
+def moves_pawn_to_queen_B(b, bb_from):
+    quiet = moves_quiet_pawn_to_queen_B(b, bb_from)
+    attack = moves_attack_pawn_to_queen_B(b, bb_from)
+    return (attack | quiet)
+
+def moves_quiet_pawn_to_queen_W(b, bb_from):
+    # shows possible normal moves of Black pawns
+    one_step = np.roll(bb_from & sbb['7'], 8) & ~(b['W'] | b['B']) # last row: queen
+    return (one_step)
+
+def moves_quiet_pawn_to_queen_B(b, bb_from):
+    # shows possible normal moves of Black pawns
+    one_step = np.roll(bb_from & sbb['2'], -8)  & ~(b['W'] | b['B']) # last row: queen
+    return (one_step)
+
+def moves_attack_pawn_to_queen_W(b, bb_from):
+    left_attack  = np.roll(bb_from & ~sbb['la'] & sbb['7'], 7) & b['B']
+    right_attack = np.roll(bb_from & ~sbb['lh'] & sbb['7'], 9) & b['B']
+    return (left_attack | right_attack)
+
+def moves_attack_paw_to_queen_B(b, bb_from):
+    left_attack  = np.roll(bb_from & ~sbb['la'] & sbb['2'], -9) & b['W']
+    right_attack = np.roll(bb_from & ~sbb['lh'] & sbb['2'], -7) & b['W']
+    return (left_attack | right_attack)
+
 
 
 def moves_pawn_W(b, bb_from):
@@ -254,24 +330,24 @@ def moves_pawn_B(b, bb_from):
 
 def moves_quiet_pawn_W(b, bb_from):
     # shows possible normal moves of Black pawns
-    one_step = np.roll(bb_from, 8) & ~(b['W'] | b['B'])
+    one_step = np.roll(bb_from &~sbb['7'], 8) & ~(b['W'] | b['B']) # last row: queen
     two_step = np.roll(bb_from & sbb['2'], 16) & ~(b['W'] | b['B'])
     return (one_step | two_step)
 
 def moves_quiet_pawn_B(b, bb_from):
     # shows possible normal moves of Black pawns
-    one_step = np.roll(bb_from, -8)  & ~(b['W'] | b['B'])
+    one_step = np.roll(bb_from &~sbb['2'], -8)  & ~(b['W'] | b['B']) # last row: queen
     two_step = np.roll(bb_from & sbb['7'], -16) & ~(b['W'] | b['B'])
     return (one_step | two_step)
 
 def moves_attack_pawn_W(b, bb_from):
-    left_attack  = np.roll(bb_from & ~sbb['la'], 7) & b['B']
-    right_attack = np.roll(bb_from & ~sbb['lh'], 9) & b['B']
+    left_attack  = np.roll(bb_from & ~sbb['la'] &~sbb['7'], 7) & b['B']
+    right_attack = np.roll(bb_from & ~sbb['lh'] &~sbb['7'], 9) & b['B']
     return (left_attack | right_attack)
 
 def moves_attack_pawn_B(b, bb_from):
-    left_attack  = np.roll(bb_from & ~sbb['la'], -9) & b['W']
-    right_attack = np.roll(bb_from & ~sbb['lh'], -7) & b['W']
+    left_attack  = np.roll(bb_from & ~sbb['la'] &~sbb['2'], -9) & b['W']
+    right_attack = np.roll(bb_from & ~sbb['lh'] &~sbb['2'], -7) & b['W']
     return (left_attack | right_attack)
 
 # king

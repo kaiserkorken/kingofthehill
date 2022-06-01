@@ -18,17 +18,3 @@ def newGame():#unsere KI gegen sich selbst
     
 
 if __name__ == "__main__":
-
-    b = init_game(give_bitboards(), player)
-
-    print(print_board(b))
-
-    print(player.__get__())
-
-    cap, qui = generate_moves(b, player) # generiere alle Züge aus Position b
-    print('capture:')
-    print(cap)
-    #print_board_list(cap)
-    print('quiet:')
-    print(qui)
-    #print_board_list(qui)
