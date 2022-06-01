@@ -208,10 +208,10 @@ def gen_moves_queen(b, player):
     # generates bb_lists with caputure and quiet moves
     if player.current == 1:
         bb_from = b['q'] & b['W']
-        bb_all_moves = moves_queen_W(b, bb_from, player)
+        bb_all_moves = moves_queen_W(b, bb_from)
     else:
         bb_from = b['q'] & b['B']
-        bb_all_moves = moves_queen_B(b, bb_from, player)
+        bb_all_moves = moves_queen_B(b, bb_from)
         
     move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, [[bb_from, bb_all_moves]], player)
     return move_list_capture, move_list_quiet
@@ -233,10 +233,10 @@ def gen_moves_rook(b, player):
     # generates bb_lists with caputure and quiet moves
     if player.current == 1:
         bb_rooks = b['r'] & b['W']
-        bb_from_and_all_moves_list = [[bb_from, moves_rook_W(b, bb_from, player)] for bb_from in serialize_bb(bb_rooks)] # iteriere über alle Türme
+        bb_from_and_all_moves_list = [[bb_from, moves_rook_W(b, bb_from)] for bb_from in serialize_bb(bb_rooks)] # iteriere über alle Türme
     else:
         bb_rooks = b['r'] & b['B']
-        bb_from_and_all_moves_list = [[bb_from, moves_rook_B(b, bb_from, player)] for bb_from in serialize_bb(bb_rooks)] # iteriere über alle Türme
+        bb_from_and_all_moves_list = [[bb_from, moves_rook_B(b, bb_from)] for bb_from in serialize_bb(bb_rooks)] # iteriere über alle Türme
     
     # zu jeder Figur capture- und quiet-listen erstellen
     move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player)
@@ -248,10 +248,10 @@ def gen_moves_bishop(b, player):
     # generates bb_lists with caputure and quiet moves
     if player.current == 1:
         bb_bishops = b['b'] & b['W']
-        bb_from_and_all_moves_list = [[bb_from, moves_bishop_W(b, bb_from, player)] for bb_from in serialize_bb(bb_bishops)] # iteriere über alle Türme
+        bb_from_and_all_moves_list = [[bb_from, moves_bishop_W(b, bb_from)] for bb_from in serialize_bb(bb_bishops)] # iteriere über alle Türme
     else:
         bb_bishops = b['b'] & b['B']
-        bb_from_and_all_moves_list = [[bb_from, moves_bishop_B(b, bb_from, player)] for bb_from in serialize_bb(bb_bishops)] # iteriere über alle Türme
+        bb_from_and_all_moves_list = [[bb_from, moves_bishop_B(b, bb_from)] for bb_from in serialize_bb(bb_bishops)] # iteriere über alle Türme
     
     # zu jeder Figur capture- und quiet-listen erstellen
     move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player)
@@ -351,20 +351,6 @@ def moves_attack_pawn_B(b, bb_from):
     return (left_attack | right_attack)
 
 # king
-def kcolor(color):
-    if color=="W":
-        return "b"
-    else:
-        return "W"
-
-def cut(b, color):#bitboard -> gekürztes bitboard je nachdem, wo andere spielfiguren stehen
-    # von pos immer dem kreuz entlang bis: (x)
-    # x und color -> 0
-    # x und !color -> 1 
-    # danach stopp
-    # rest bleibt
-    #return kreuz
-    pass
 
 def moves_king_W(b):
     # king can only move up if it is not in the upper row, etc. 
@@ -405,27 +391,27 @@ def moves_king_B(b):
 # queen moves
 
 
-def moves_queen_W(b, bb_from, player):
+def moves_queen_W(b, bb_from):
     # gibt bitboard mit allen Zügen der Dame aus
     # b: Spielfeld-Dictionary, bb_from: 1 an Position der Dame
     # Zielfelder der gegnerischen Figur sind erlaubt (Schlagen)
     # eigene Figuren sind Blockaden
-    return moves_queen(b, bb_from, player) & ~( b['W']) 
+    return moves_queen(b, bb_from) & ~( b['W']) 
 
-def moves_queen_B(b, bb_from, player):
-    return moves_queen(b, bb_from, player) & ~( b['B'])
+def moves_queen_B(b, bb_from):
+    return moves_queen(b, bb_from) & ~( b['B'])
 
-def moves_queen(b, bb_from, player):#returns bitboard of all possible plays
-    return (moves_bishop(b, bb_from, player) | moves_rook(b, bb_from, player))
+def moves_queen(b, bb_from):#returns bitboard of all possible plays
+    return (moves_bishop(b, bb_from) | moves_rook(b, bb_from))
 
 # bishop moves
-def moves_bishop_W(b, bb_from, player):
-    return moves_bishop(b, bb_from, player) & ~( b['W'])
+def moves_bishop_W(b, bb_from):
+    return moves_bishop(b, bb_from) & ~( b['W'])
 
-def moves_bishop_B(b, bb_from, player):
-    return moves_bishop(b, bb_from, player) & ~( b['B'])
+def moves_bishop_B(b, bb_from):
+    return moves_bishop(b, bb_from) & ~( b['B'])
 
-def moves_bishop(b, bb_from , player):
+def moves_bishop(b, bb_from):
     #pseudocode:
     #Läufer Position mit Kreuz bitboards verunden (-> entsprechendes Kreuz auswählen)
     #idee kreuz bitboards: kreuz in der mitte implementieren und damm immer um pos(bishop) verschieben
@@ -433,7 +419,7 @@ def moves_bishop(b, bb_from , player):
     #cut(Kreuz, color)
     #-> Kreuz geht nur bis dahin wo ein eigner spieler steht (<) oder ein gegnerischer spieler (<=) 
 
-    if player.current:
+    if b["B"]&bb_from:
         enemy = b['B']
         bb= b["W"]
     else:
@@ -493,13 +479,13 @@ def moves_bishop(b, bb_from , player):
 # rook moves
 
 
-def moves_rook_W(b, bb_from, player):
-    return moves_rook(b, bb_from, player) & ~( b['W'])
+def moves_rook_W(b, bb_from):
+    return moves_rook(b, bb_from) & ~( b['W'])
 
-def moves_rook_B(b, bb_from, player):
-    return moves_rook(b, bb_from, player) & ~( b['B'])
+def moves_rook_B(b, bb_from):
+    return moves_rook(b, bb_from) & ~( b['B'])
 
-def moves_rook(b, bb_from, player):#-> bitboard aller mögl züge des Turms
+def moves_rook(b, bb_from):#-> bitboard aller mögl züge des Turms
     
     #TODO implement Pseudocode
     #Turm Reihe und Spalte zuweisen
@@ -507,13 +493,13 @@ def moves_rook(b, bb_from, player):#-> bitboard aller mögl züge des Turms
     #-> Kreuz oder pos -> kreuz mit zügen
     #cut(Kreuz,color)
     # -> Kreuz geht nur bis dahin wo ein eigner spieler steht (<) oder ein gegnerischer spieler (<=) 
-
-    if player.current:
+    if b["B"]&bb_from:
         enemy = b['B']
         color= b["W"]
     else:
         enemy = b['W']
         color= b["B"]
+    
     pos=np.where(bb_from)#position des turms ermitteln
     #print(pos)#[x,y]
     #kreuz=np.roll(sbb[bibsbbl[0]] & sbb[bibssbr[1]])#kreuz je nach position ausgeben
