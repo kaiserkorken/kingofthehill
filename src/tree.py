@@ -63,6 +63,14 @@ class Tree(object):
         for pre, fill, n in RenderTree(node):
             print((u"%s%s"%(pre,n.index)).ljust(8),n.value,n.h)
             # print((u"%s%s"%(pre,node.name)).ljust(8),node.value,node.h)
+    def sort_nodes(self):
+        for x in self.nodes:
+            #sortiere tupel x.children
+            if x.h%2==0:#max spieler
+                self.children=sorted(reverted=True)
+            else: #min spieler
+                self.children=sorted()
+
 
 
 
