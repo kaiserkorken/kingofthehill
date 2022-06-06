@@ -35,18 +35,20 @@ def make_move_name(b_old, bb_from, bb_to, short = False):
         strike_or_quiet = '-' # Still
         
     # Figur
+    piece="null"
     for p in bibp:
         
         if np.any(bb_from & b_old[p]):
             piece = p
             
     if piece == 'p': # Bauern werden nicht spezifiziert
-        piece = ''
+        piece = 'p'#brauchen aber 
         
     if color == 'W': # Weiße Figuren werden groß geschrieben
         piece = piece.upper()
         
     # Felder
+    line_from ,row_from ,line_to ,row_to="0","0","0","0"#TODO wieso kommt da nichts raus?
     for l in bibsbbl: # Linie
         if np.any(bb_from & sbb[l]):
             line_from = l[1]
@@ -57,6 +59,7 @@ def make_move_name(b_old, bb_from, bb_to, short = False):
             row_from = r
         if np.any(bb_to & sbb[r]):
             row_to = r
+        
             
     # Zusammensetzen
     
@@ -320,10 +323,10 @@ def gen_moves_queen(b, player):
     # generates bb_lists with caputure and quiet moves
     if player.current == 1:
         bb_from = b['q'] & b['W']
-        bb_all_moves = moves_queen_W(b, bb_from, player)
+        bb_all_moves = moves_queen_W(b, bb_from)
     else:
         bb_from = b['q'] & b['B']
-        bb_all_moves = moves_queen_B(b, bb_from, player)
+        bb_all_moves = moves_queen_B(b, bb_from)
         
     return gen_capture_quiet_lists_from_all_moves(b, [[bb_from, bb_all_moves]], player)
 
@@ -343,10 +346,10 @@ def gen_moves_rook(b, player):
     # generates bb_lists with caputure and quiet moves
     if player.current == 1:
         bb_rooks = b['r'] & b['W']
-        bb_from_and_all_moves_list = [[bb_from, moves_rook_W(b, bb_from, player)] for bb_from in serialize_bb(bb_rooks)] # iteriere über alle Türme
+        bb_from_and_all_moves_list = [[bb_from, moves_rook_W(b, bb_from)] for bb_from in serialize_bb(bb_rooks)] # iteriere über alle Türme
     else:
         bb_rooks = b['r'] & b['B']
-        bb_from_and_all_moves_list = [[bb_from, moves_rook_B(b, bb_from, player)] for bb_from in serialize_bb(bb_rooks)] # iteriere über alle Türme
+        bb_from_and_all_moves_list = [[bb_from, moves_rook_B(b, bb_from)] for bb_from in serialize_bb(bb_rooks)] # iteriere über alle Türme
     
     # zu jeder Figur capture- und quiet-listen erstellen
     return gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player)
@@ -357,10 +360,10 @@ def gen_moves_bishop(b, player):
     # generates bb_lists with caputure and quiet moves
     if player.current == 1:
         bb_bishops = b['b'] & b['W']
-        bb_from_and_all_moves_list = [[bb_from, moves_bishop_W(b, bb_from, player)] for bb_from in serialize_bb(bb_bishops)] # iteriere über alle Türme
+        bb_from_and_all_moves_list = [[bb_from, moves_bishop_W(b, bb_from)] for bb_from in serialize_bb(bb_bishops)] # iteriere über alle Türme
     else:
         bb_bishops = b['b'] & b['B']
-        bb_from_and_all_moves_list = [[bb_from, moves_bishop_B(b, bb_from, player)] for bb_from in serialize_bb(bb_bishops)] # iteriere über alle Türme
+        bb_from_and_all_moves_list = [[bb_from, moves_bishop_B(b, bb_from)] for bb_from in serialize_bb(bb_bishops)] # iteriere über alle Türme
     
     # zu jeder Figur capture- und quiet-listen erstellen
     return gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player)
