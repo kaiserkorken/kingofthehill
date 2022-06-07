@@ -1,19 +1,13 @@
-from lib2to3.pgen2.token import ISTERMINAL
-from tkinter.font import families
 import numpy as np
 # requires: pip install anytree
-from anytree import Node, RenderTree
 import random
 
 from movegen_verbose import generate_moves_verbose
-from sqlalchemy import values
 from bitboard import *
 from tree import *
 from movegen import *
 import logging
-import threading
 import time
-import concurrent.futures
 from tt import ttable
 
 def timer(function):
@@ -153,7 +147,7 @@ class Player():
         moves, names = generate_moves_verbose(node.b, self) # generiere alle Züge aus Position b
         #moves=[["a1a2",move(b)],["a2a4",b],...]
         #print("moves")
-        alphabet=["a","b","c","d","e","f","g"]
+        alphabet=["a","b","c","d","e","f","g","h"]
         for b in range(len(moves)):
         #for b in range (len(moves)):
             if moves[b]:
@@ -165,6 +159,7 @@ class Player():
                         x=z
                         break
                 if x==-1:
+                    
                     print(names[b], "has wrong syntax")
                     print(names[b][4],"is not an column index")
                 ### Test ende ###
@@ -205,7 +200,7 @@ class Player():
         #moves=self.generate_moves(node.b)#liste aller moves von bb
         #moves=[["a1a2",move(b)],["a2a4",b],...]
         #print("moves")
-        alphabet=["a","b","c","d","e","f","g"]
+        alphabet=["a","b","c","d","e","f","g","h"]
         for b in range(len(moves)):
         #for b in range (len(moves)):
             if moves[b]:
@@ -216,21 +211,22 @@ class Player():
                         x=z
                         break
                 if x==-1:
-                    print(names[b], "has wrong syntax")
-                    print(names[b][4],"is not an column index")
+                    pass
+                    # print(names[b], "has wrong syntax")
+                    # print(names[b][4],"is not an column index")
                 else:
                     #name=b[0]
                     #bb=b[1]
                     #print("b:")
                     #print(b)
                     #tree.insert_node(node,[bb,self.utility(b),h,name])
-                    y=int(names[b][5])
+                    y=int(names[b][5])-1
                     #x=np.where(alphabet==names[b][4])#a->1
                     token=names[b][0]
                     hash=self.tt.hash_value(node.hash,x,y,token)
                     util=self.tt.in_table(hash,h+1)
                     if len(util)!=2:
-                        print(hash)
+                        #print(hash)
                         util=self.utility(moves[b])
                         self.tt.to_table(hash,util,h+1)
                         tree.insert_node(node,moves[b],util,h+1,names[b],hash)
@@ -490,6 +486,8 @@ class Player():
             else:#baumspeichern bis time mit utility (Standard)
                 zeit=value
                 self.tree_height(t,zeit)
+                t.print_node(t.nodes[len(t.nodes)-1])
+                print(len(t.nodes))
                 return t.nodes[len(t.nodes)-1].h
         if search:#alphabetasearch zeit messen für tiefe
             #if value>=0:
@@ -519,12 +517,12 @@ class Player():
         elif baum:#baum ergebnis printen # teste tree.py
             bb=FENtoBit(FEN)
             if tt:   
-                self.tt=ttable("testtable.mymemmap",32)
+                self.tt=ttable("testtable",dict=True)
                 tre=Tree(bb,self.tt.starthash)
             else:
                 tre=Tree(bb)
             zeit=value#eher durchgänge
-            tmove=zeit/2 
+            tmove=zeit#/2 
             #bb=init_game()
             #bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#TODO fix fen->bit
             
@@ -541,8 +539,8 @@ class Player():
             else:
                 arr=self.tree_height(tre,tmove)
             #tre.print_tree()
-            tre.print_node(tre.nodes[len(tre.nodes)-1])
-
+                tre.print_node(tre.nodes[len(tre.nodes)-1])
+            print(len(tre.nodes))
             #print(tre)
             # for x in tre.nodes:
             #     if x.h==4:
@@ -746,9 +744,10 @@ if __name__ == "__main__":
     #FEN="rnb1kbnr/p4ppp/1p1pp3/2p3q1/3P4/NQP1PNPB/PP3P1P/R1B1K2R w"
     #FEN="3q3r/1pp2pb1/3pkn2/1B6/3P4/4PN1P/5K1P/7R b"
     #FEN="rnbqkbnr/pp1p1ppp/4p3/1Pp5/8/2N5/P1PPPPPP/R1BQKBNR w"
-    FEN="8/4k3/8/8/8/8/3K4/8"
+    #FEN="8/4k3/8/8/8/8/3K4/8"
+    FEN="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
 
-    zeit=10
+    zeit=30
     depth=4
     wdh=1000
 
@@ -761,8 +760,8 @@ if __name__ == "__main__":
     #t=p.teste(FEN,wdh,utility=True)#utility only
     #t=p.teste(FEN,depth,tree=True,tiefe=True)#baumspeicher bis tiefe ohne utility
     #t=p.teste(FEN,depth,tree=True,tiefe=True,utility=True)#baumspeicher bis tiefe mit utility
-    #tiefe=p.teste(FEN,zeit,tree=True)#baumspeichern bis time mit utility (Standard)
-    p.teste(FEN,zeit,baum=True)#baum ergebnis printen
+    tiefe=p.teste(FEN,zeit,tree=True)#baumspeichern bis time mit utility (Standard)
+    #p.teste(FEN,zeit,baum=True)#baum ergebnis printen
     
     
    
@@ -770,7 +769,44 @@ if __name__ == "__main__":
 
     #transposition tables test: 8 GB Speicherplatz benoetigt!!!!!
     
-    #p.teste(FEN,zeit,baum=True,tt=True)#baum ergebnis printen
-    #p.tt.save_table()
-    #print(len(p.tt.table))
-    #del p.tt.table
+    # p.teste(FEN,zeit,baum=True,tt=True)#baum ergebnis printen
+    # print(len(p.tt.table))
+    # p.tt.save_table()
+    # print(len(p.tt.table))
+    #del p.tt.table$
+    
+    #time=60 -> 30 sek
+    #einmal
+#     19467
+# 12098
+# 12098
+
+#nochmal
+# 22625
+# 14945
+# 14945
+
+#ohne movenames missprint
+# 29002
+# 18749
+# 18749
+
+#ohne hash print
+# 37205
+# 23525
+# 23525
+
+#mit letzter spalte
+# 34444
+# 30164
+# 30164
+
+#vergleich 30 sek. tree mit utility:
+# node 32407 :
+# ph7-h6   9 4
+# 32408
+
+#vergeich mit tt
+# 46119
+# 32078
+# 32078

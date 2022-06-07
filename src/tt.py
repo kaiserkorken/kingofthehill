@@ -2,13 +2,14 @@
 #https://numpy.org/doc/stable/reference/generated/numpy.memmap.html
 #TODO hashes speichern, depth dazuschreiben
 import random
-import os.path as path
-from tempfile import mkdtemp
-from numpy import memmap
 from bitboard import *
+import json
 class ttable(object):
-    def __init__(self,location="table.mymemmap",bits=False):
+    def __init__(self,location="table",dict=False,bits=False):
         random.seed()
+        self.bits=32
+        if bits:
+            self.bits=bits
         self.location=location#TODO auf syntax checken
         self.file=self.location
         #self.file=path.join(mkdtemp(),self.location)
@@ -19,15 +20,19 @@ class ttable(object):
 1913297848, 476756986, 3659456674, 53042883, 4159154121, 259096126, 592101509, 4202824252, 3284799133, 2077883448, 3754829409, 977594828, 3735829885, 1804337456, 3461395918, 788790334, 56153880, 3645896125, 1036292400, 515457042, 3998701555, 2993452895, 107484246, 1797111786, 2383807316, 11859820, 1594258179, 2944567874, 2049689067, 2664143795, 1996639538, 539488091, 1086144828, 722658595, 2758180626, 2267798438, 530922579, 83051673, 1357654734, 188940971, 2393472447, 3687896826, 1627402622, 624), None)
         #random.getstate()
         #print(self.rand)
+        if dict:
+            self.bits=64
+            self.location+=".json"#".npy"
+        else:
+            self.location+=".mymemmap"
+        self.dict=dict
+        
         random.setstate(self.rand)
         self.zobTable = self.init_table()# zobTable.append(random.randint(1,2**64 - 1)for x in range(8))#,[8*enpassant]]
         self.tokens=np.asarray(['p','b','r','n','q','k'])#umgedreht, weil pawns oefter als kings gesucht werden
-        b = init_game()
+        b = init_game()#TODO wrong start board, missing black tokens
         self.starthash = 0
         self.init_hash(b)
-        self.bits=32
-        if bits:
-            self.bits=bits
         # if not self.init_hash(b):
         #     return False
         #print(hashValue)
@@ -46,7 +51,8 @@ class ttable(object):
         if self.starthash:
             #print((2**32)-self.starthash)
             #print(self.table[(2**self.bits)-self.starthash])
-            self.table[(2**self.bits)-self.starthash]=[0,-1]
+            self.to_table(self.starthash,0,-1)
+            #self.table[(2**self.bits)-self.starthash]=[0,-1]
             #print(self.table[(2**self.bits)-self.starthash])
         #self.save_table(self.table)#?
         #self.table=self.load_table()#TODO datei bereits vorhanden checken
@@ -106,7 +112,7 @@ class ttable(object):
     def init_table(self):
         random.setstate(self.rand)
         #                           von,bis (64 bit)         i Zufallszahlen                 m*              n grossens feld
-        zobTable = [[[random.randint(1,2**32 - 1) for i in range(2*6)]for m in range(8)]for n in range(8)]
+        zobTable = [[[random.randint(1,2**self.bits - 1) for i in range(2*6)]for m in range(8)]for n in range(8)]
         # array= [[[whitepawn0,..., blackking0],...,[whitepawn7,...,blackking7]],...,[...,[...,blackking7]]
         # array[y][x][t]= zufallszahl fuer token t an position(x,y)
         # token 0-8 white, 9-15 black, reihenfolge tokens: pawn,,queen,king
@@ -125,7 +131,12 @@ class ttable(object):
         #table=np.full(2**bits-1,None) #ValueError: Maximum allowed dimension exceeded
     
         #table = np.memmap('test.mymemmap', dtype="int16", mode='w+', shape=(2000,2),offset=2*16/8)#maximal 65535
-        self.table= np.memmap(self.file, dtype='int8', mode='w+', shape=(2**self.bits-1,2))
+        if self.dict:
+            self.table=dict()
+            #np(self.file, dtype='int8', mode='w+', shape=(2**self.bits-1,2))
+            #alternativ numpy structured array
+        else:
+            self.table= np.memmap(self.file, dtype='int8', mode='w+', shape=(2**self.bits-1,2))
         #32 bit:4294967295, 16bit: 65535, 64 bit 18446744073709551615
         return self.table
 
@@ -137,15 +148,37 @@ class ttable(object):
         # if location != False:
         #     st=location
         # np.save(st,self.table)
-        self.table.flush()
+        if self.dict:
+            
+            self.table= dict(self.table)
+            string=json.dumps(self.table)
+            with open(self.location, 'w+') as outfile:
+                json.dump(string, outfile)
+                
+            # dtype= dict(names=["id","value","depth"],formats=["f8","f8","f8"])
+            # self.table=np.array(list(self.table),dtype=dtype)
+            # np.save(self.location,self.table,allow_pickle=True)
+        else:
+            self.table.flush()
 
     def load_table(self):
-        self.table= np.memmap(self.file, dtype='int8', mode='r+', shape=(2**self.bits-1,2))
+        if self.dict:
+            with open(self.location, 'r') as j:
+                content = json.loads(j.read())   
+            self.table=json.loads(content)
+        else:
+            self.table= np.memmap(self.file, dtype='int8', mode='r+', shape=(2**self.bits-1,2))
         
         return self.table
 
     def in_table(self,hash,h):
-        value=self.table[self.bits-hash]
+        if self.dict:
+            try:
+                value=self.table[str(hash)]
+            except:
+                return []
+        else:
+            value=self.table[hash]
         depth=value[1]
         #if depth!=0:#depth ungleich 0 (sonst nicht initialisiert)
         if h<=depth:#aelterer wert bereits sicherer(tiefer)
@@ -156,7 +189,14 @@ class ttable(object):
         
         4294967295
     def to_table(self,hash,value,depth):
-        self.table[self.bits-hash]=[value,depth]
+        if self.dict:
+            if len(self.table)<=588823529:#-> kleiner 2 GB
+                self.table[str(hash)]=[value,depth]
+            else:
+                return False
+            
+        else:
+            self.table[hash]=[value,depth]
 
     def hash_value(self,hash,x,y,token):#to = [pos x, pos y, "K"], deshalb von vorteil: node.name -> a1a2K=to
         #value=self.starthash
@@ -164,24 +204,28 @@ class ttable(object):
         #print(hash)
         return hash
 def in_table(table,hash):
-    value=table[hash]
+    if dict:
+        value=table[str(hash)]
+    else:
+        value=table[hash]
     if value!=0:
         return value
     else:
         return False
 if __name__ == "__main__":
-    tt=ttable("testtable.mymemmap")
+    #tt=ttable("testtable.mymemmap")
     #tt.create_table()
     #print(tt.in_table(569765))
+    tt=ttable("testtable",dict=True)
     if tt.starthash:
         tt.to_table(569765,127,9)#hier utility einsetzen
-        print(tt.in_table(569765))
+        print(tt.in_table(569765,1))
         print("save table")
         tt.save_table()
         del tt.table
         tt.table=tt.load_table()
         #table=tt.load_table()
-        print(tt.in_table(569765))
+        print(tt.in_table(569765,1))
         #print(tt.in_table(3531))
 
     ### minimax implementation (Pseudocode): ### 

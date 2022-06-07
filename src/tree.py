@@ -15,7 +15,7 @@ class Node(knoten, NodeMixin):  # Add Node feature
         self.b=bitb
         self.value=util
         self.h=h
-        self.hash=None
+        self.hash=hash
         self.name=name
         #TODO aus bitboard rauslesen
         #self.name
@@ -24,7 +24,7 @@ class Tree(object):
     def __init__(self,bb,starthash=False) -> None:
         self.nodes=[]
         self.value=None
-        self.root=Node(0,None,bb,0,0,starthash,"Wstart")
+        self.root=Node(0,None,bb,0,0,"Wstart",starthash)
         self.nodes.append(self.root)
         self.index=1
         self.h=1
@@ -72,9 +72,6 @@ class Tree(object):
                 x.children=sorted(x.children,reverted=True)#TODO implement eigene schnellere sortieragorithmen
             else: #min spieler
                 x.children=sorted(x.children)
-
-
-
 
 
 
