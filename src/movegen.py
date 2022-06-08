@@ -361,10 +361,10 @@ def moves_king_W(b):
     
     straight = (up|down|left|right)
     
-    up_left    = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['la'])),   8-1) & ~(b['W'] )
-    up_right   = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['lh'])),   8+1) & ~(b['W'] )
-    down_left  = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['la'])),  -8-1) & ~(b['W'] )
-    down_left  = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['lh'])),  -8+1) & ~(b['W'] )
+    up_left     = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['la'])),   8-1) & ~(b['W'] )
+    up_right    = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['lh'])),   8+1) & ~(b['W'] )
+    down_left   = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['la'])),  -8-1) & ~(b['W'] )
+    down_right  = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['lh'])),  -8+1) & ~(b['W'] )
 
     diagonal = (up_left|up_right|down_left|down_right)
     return (straight | diagonal)
@@ -379,10 +379,10 @@ def moves_king_B(b):
     
     straight = (up|down|left|right)
     
-    up_left    = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['la'])),   8-1) & ~(b['B'] )
-    up_right   = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['lh'])),   8+1) & ~(b['B'] )
-    down_left  = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['la'])),  -8-1) & ~(b['B'] )
-    down_left  = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['lh'])),  -8+1) & ~(b['B'] )
+    up_left     = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['la'])),   8-1) & ~(b['B'] )
+    up_right    = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['lh'])),   8+1) & ~(b['B'] )
+    down_left   = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['la'])),  -8-1) & ~(b['B'] )
+    down_right  = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['lh'])),  -8+1) & ~(b['B'] )
 
     diagonal = (up_left|up_right|down_left|down_right)
     return (straight | diagonal)
