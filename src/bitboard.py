@@ -79,13 +79,13 @@ def give_static_bitboards():
 sbb = give_static_bitboards()
 
 
-def init_game(player):#kein b als input(wozu?)
+def init_game():#kein b als input(wozu?)
     # initializes board with pieces
     # stellt Spielfiguren auf die jeweiligen Felder auf Spielfeld
     # -> könnte auch mit static bitboards initialisiert werden
     
     # weiß beginnt
-    player = player.__set__('W')
+    #player = player.__set__('W') outgesourcet in client.py
     b = give_bitboards()
     
     # colored pieces for black/white player

@@ -6,22 +6,25 @@ class knoten(object):  # Just an example of a base class
     foo=0
         
 class Node(knoten, NodeMixin):  # Add Node feature
-    def __init__(self, value, parent=None, children=None):
+    def __init__(self, index,parent,bitb,util,h,name,hash=None):
         super(knoten, self).__init__()
         self.parent = parent
-        if children:
-            self.children = children
-        self.values=value
-        self.index=value[0]
-        self.b=value[1]
-        self.value=value[2]
-        self.h=value[3]
+        # if children:
+        #     self.children = children
+        self.index=index
+        self.b=bitb
+        self.value=util
+        self.h=h
+        self.hash=hash
+        self.name=name
+        #TODO aus bitboard rauslesen
+        #self.name
         #self.name=value[4]
 class Tree(object):
-    def __init__(self,bb) -> None:
+    def __init__(self,bb,starthash=False) -> None:
         self.nodes=[]
         self.value=None
-        self.root=Node([0,bb,None,0])
+        self.root=Node(0,None,bb,0,0,"Wstart",starthash)
         self.nodes.append(self.root)
         self.index=1
         self.h=1
@@ -37,11 +40,10 @@ class Tree(object):
         
         return moves
 
-    def insert_node(self,parent,input):#value=[index,b,value,h]
+    def insert_node(self,parent,bitb,util,h,name,hash=None):#value=[index,b,value,h]
     #def insert_node(self,parent,input):#value=[index,b,value,h,name]
         self.h=parent.h+1#neue ebene erstellen
-        values=[self.index,input[0],input[1],input[2]]
-        new_node=Node(values,parent)
+        new_node=Node(self.index,parent,bitb,util,h,name,hash)
         #print(parent.children)
         #parent.children+=(new_node,)
         self.nodes.append(new_node)
@@ -56,15 +58,20 @@ class Tree(object):
     def print_tree(self):
         print("tree:")
         for pre, fill, node in RenderTree(self.root):
-            print((u"%s%s"%(pre,node.index)).ljust(8),node.value,node.h)
+            print((u"%s%s"%(pre,node.name)).ljust(8),node.value,node.h)
             # print((u"%s%s"%(pre,node.name)).ljust(8),node.value,node.h)
     def print_node(self,node):
         print("node",node.index,": ")
         for pre, fill, n in RenderTree(node):
-            print((u"%s%s"%(pre,n.index)).ljust(8),n.value,n.h)
+            print((u"%s%s"%(pre,n.name)).ljust(8),n.value,n.h)
             # print((u"%s%s"%(pre,node.name)).ljust(8),node.value,node.h)
-
-
+    def sort_nodes(self):
+        for x in self.nodes:
+            #sortiere tupel x.children
+            if x.h%2==0:#max spieler
+                x.children=sorted(x.children,reverted=True)#TODO implement eigene schnellere sortieragorithmen
+            else: #min spieler
+                x.children=sorted(x.children)
 
 
 

@@ -1,18 +1,14 @@
-from lib2to3.pgen2.token import ISTERMINAL
-from tkinter.font import families
 import numpy as np
 # requires: pip install anytree
-from anytree import Node, RenderTree
 import random
 
-from sqlalchemy import values
+from movegen_verbose import generate_moves_verbose
 from bitboard import *
 from tree import *
 from movegen import *
 import logging
-import threading
 import time
-import concurrent.futures
+from tt import ttable
 
 def timer(function):
     start_time = time.time()
@@ -26,6 +22,9 @@ class Player():
     def __init__(self):
         # weiß beginnt
         self.current = 1
+
+        #### das auskommentieren kostet 8 GB Speicherplatz!!! ####
+        #self.tt=ttable("testtable.mymemmap",32)
     def __switch__(self):
         # wechselt die Spieler ab
         self.current *= -1
@@ -144,28 +143,104 @@ class Player():
         #print("node:")
         #print(node)
         #while node.h==h:
-        moves=self.generate_moves(node.b)#liste aller moves von bb
+        #moves=self.generate_moves(node.b)#liste aller moves von bb
+        moves, names = generate_moves_verbose(node.b, self) # generiere alle Züge aus Position b
         #moves=[["a1a2",move(b)],["a2a4",b],...]
         #print("moves")
-        for b in moves:
+        alphabet=["a","b","c","d","e","f","g","h"]
+        for b in range(len(moves)):
         #for b in range (len(moves)):
-            if b:
+            if moves[b]:
             #if b[0] and b[1]:
+                ### Test der names aus movegen verbose ###
+                x=-1
+                for z in range(len(alphabet)):
+                    if alphabet[z]==names[b][4].lower():
+                        x=z
+                        break
+                if x==-1:
+                    
+                    print(names[b], "has wrong syntax")
+                    print(names[b][4],"is not an column index")
+                ### Test ende ###
+
                 #name=b[0]
                 #bb=b[1]
                 #print("b:")
                 #print(b)
                 #tree.insert_node(node,[bb,self.utility(b),h,name])
-                tree.insert_node(node,[b,self.utility(b),h])  #in Node mit bitboard und wertung einsetzen
+                tree.insert_node(node,moves[b],self.utility(moves[b]),h,names[b])  #in Node mit bitboard und wertung einsetzen
                 
-                #TODO auch in insert node auskommentieren! (tree.py)
+                # auch in insert node auskommentieren! (tree.py)
                 # print("u:")
                 # print(self.utility(b))
                 #print(self.utility(b))
                 #tree.print_tree()
             else:
                 print("leerer move")
-                moves.remove(b)
+                moves.remove(moves[b])
+        #index +=1
+        #node=tree.find_node(index)
+        
+        #step+=index
+        #h+=1
+        #print("h:",h,"moves:",len(moves))
+        
+        
+        return [len(moves),h]   
+
+    def set_tt_movetree(self,tree,h=0,index=0,step=0):#added züge an node(index)
+    #while (time-(tmax/2)>0):
+        
+        node=tree.find_node(index)#parent
+        #print("node:")
+        #print(node)
+        #while node.h==h:
+        moves, names = generate_moves_verbose(node.b, self) # generiere alle Züge aus Position b
+        #moves=self.generate_moves(node.b)#liste aller moves von bb
+        #moves=[["a1a2",move(b)],["a2a4",b],...]
+        #print("moves")
+        alphabet=["a","b","c","d","e","f","g","h"]
+        for b in range(len(moves)):
+        #for b in range (len(moves)):
+            if moves[b]:
+            #if b[0] and b[1]:
+                x=-1
+                for z in range(len(alphabet)):
+                    if alphabet[z]==names[b][4].lower():
+                        x=z
+                        break
+                if x==-1:
+                    pass
+                    # print(names[b], "has wrong syntax")
+                    # print(names[b][4],"is not an column index")
+                else:
+                    #name=b[0]
+                    #bb=b[1]
+                    #print("b:")
+                    #print(b)
+                    #tree.insert_node(node,[bb,self.utility(b),h,name])
+                    y=int(names[b][5])-1
+                    #x=np.where(alphabet==names[b][4])#a->1
+                    token=names[b][0]
+                    hash=self.tt.hash_value(node.hash,x,y,token)
+                    util=self.tt.in_table(hash,h+1)
+                    if len(util)!=2:
+                        #print(hash)
+                        util=self.utility(moves[b])
+                        self.tt.to_table(hash,util,h+1)
+                        tree.insert_node(node,moves[b],util,h+1,names[b],hash)
+                    else:
+                        tree.insert_node(node,moves[b],util[0],h+1,names[b],hash)  #in Node mit bitboard und wertung einsetzen
+                    
+                    #TODO auch in insert node auskommentieren! (tree.py)
+                    # print("u:")
+                    # print(self.utility(b))
+                    #print(self.utility(b))
+                    #tree.print_tree()
+            else:
+                print("leerer move")
+                moves.remove(moves[b])
         #index +=1
         #node=tree.find_node(index)
         
@@ -212,32 +287,36 @@ class Player():
         
         return [len(moves),h]#h nötig?
 
-    def c_tree_height(self,tree,depth,value=False,index=0,altaltstep=0,altstep=1,h=1):#tree ebenen erstellen bis tiefe d
-            #tmove=arr[4]
-            #arr=[tree,h,index,step,tmove]
-            #logging.info("Thread1    : started")
-            #print(arr)
-            # if h==0:
-            #     arr=player.set_movetree(tree,tmove,h,index)#ein ausgerechneter zug alle züge ausrechnen
-            #     print(arr)
-            arr=[altstep,depth]#auskommentieren?
-            neustep=altstep
-            altstep+=altaltstep
-            for z in range(index, altstep):#eine weitere ebene durchgehen
-                #print(arr[0])
-                #logging.info("Main    : creating height "+str(h))
-                if value:
-                    arr=(self.set_movetree(tree,h,z))#setze alle moves unter parent index=z
-                else:
-                    arr=(self.set_test_movetree(tree,h,z))
-                neustep+=arr[0]
-                #print("Tree "+str(z)+":")
-                #tre.print_tree()
+    def tree_tt_height(self,tree,tmove,index=0,altstep=1,h=0):#tree ebenen erstellen bis tiefe d
+        #tmove=arr[4]
+        #arr=[tree,h,index,step,tmove]
+        #logging.info("Thread1    : started")
+        #print(arr)
+        # if h==0:
+        #     arr=player.set_movetree(tree,tmove,h,index)#ein ausgerechneter zug alle züge ausrechnen
+        #     print(arr)
+        start=time.time()
+        arr=[tmove,altstep]
+        altstep=len(tree.nodes)
+        for z in range(index, altstep):#eine weitere ebene durchgehen
             #print(arr[0])
-            if arr[1]<=depth:
-                altstep-=altaltstep#-=alt
-                return self.d_tree_height(tree,depth,value,index+altstep,altstep,neustep-altstep,h+1)
-            return arr
+            #logging.info("Main    : creating height "+str(h))
+            arr=(self.set_tt_movetree(tree,h+1,z))
+            #neustep+=arr[0]
+            #print("Tree "+str(z)+":")
+            #tre.print_tree()
+            if start+tmove<=time.time():#zeitlimit überschritten
+                print("finished till ebene: " +str((h+1)))
+                arr[1]-=1#letzte ebene nicht fertig geworden
+                return arr
+        #print(arr[0])
+        if tmove>=time.time()-start:
+            index=altstep
+            self.__switch__()#neue ebene für gegner
+            return self.tree_tt_height(tree,tmove,index,altstep,h+1)
+        print("finish")
+        return arr
+
     def d_tree_height(self,tree,depth,value=False,index=0,altstep=1,h=0):#tree ebenen erstellen bis tiefe d
                 #tmove=arr[4]
             #arr=[tree,h,index,step,tmove]
@@ -287,7 +366,7 @@ class Player():
             #print("Tree "+str(z)+":")
             #tre.print_tree()
             if start+tmove<=time.time():#zeitlimit überschritten
-                print("ebene" +(h+1)+" not finished")
+                print("finished till ebene: " +str((h+1)))
                 arr[1]-=1#letzte ebene nicht fertig geworden
                 return arr
         #print(arr[0])
@@ -308,10 +387,11 @@ class Player():
         tmove=(t/10)*9#seconds
         tsearch=t/10
         [bb,play]=FENtoBit(FEN,True)
+        #tt=ttable("testtable.mymemmap",32)#erstellen falls noetig, sonst in build tree
         if self.current==play:#spieler am zug
 
             #bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#testFEN
-            tree=Tree(bb)#leerer baum mit b als root
+            tree=Tree(bb)#,self.tt.starthash)#leerer baum mit b als root
             if not checkmate(bb,self):#Spielende überprüfen
                 #tre.print_tree()
                 #arr=p.set_movetree(tre,tmove)
@@ -331,6 +411,7 @@ class Player():
                 depth=1
                 logging.info("Main    : doing minimax "+str(tleft))
                 savetree=tree
+                savetree.sort_nodes()
                 sstart=time.time()
                 while(time.time()-start+tsearch>=0 and depth<=arr[1]):#noch zeit und noch nicht so tief wie baumhöhe
                     tree=savetree
@@ -356,7 +437,7 @@ class Player():
             #self.__switch__()#Spieler wechseln (egal ob zug gemacht odeer nicht
         return FEN
             
-    def teste(self,FEN,value=0,search=False,zug=False,utility=False,tree=False,tiefe=False,turn=False,baum=False):
+    def teste(self,FEN,value=0,search=False,zug=False,utility=False,tree=False,tiefe=False,turn=False,baum=False,tt=False):
         # value depends on what you want to do:
         # eingabe -> prozess: datatype(value) -> return
         # zug-> player.turn(): int(time) -> str(FEN)
@@ -405,6 +486,8 @@ class Player():
             else:#baumspeichern bis time mit utility (Standard)
                 zeit=value
                 self.tree_height(t,zeit)
+                t.print_node(t.nodes[len(t.nodes)-1])
+                print(len(t.nodes))
                 return t.nodes[len(t.nodes)-1].h
         if search:#alphabetasearch zeit messen für tiefe
             #if value>=0:
@@ -432,12 +515,18 @@ class Player():
             return(FEN)
             # print_board(FENtoBit(FEN))
         elif baum:#baum ergebnis printen # teste tree.py
-            zeit=value#eher durchgänge
-            tmove=zeit/2 
-            #bb=init_game(p)
-            #bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#TODO fix fen->bit
             bb=FENtoBit(FEN)
-            tre=Tree(bb)
+            if tt:   
+                self.tt=ttable("testtable",dict=True)
+                tre=Tree(bb,self.tt.starthash)
+            else:
+                tre=Tree(bb)
+            zeit=value#eher durchgänge
+            tmove=zeit#/2 
+            #bb=init_game()
+            #bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#TODO fix fen->bit
+            
+            
             # format = "%(asctime)s: %(message)s"
             # logging.basicConfig(format=format, level=logging.INFO,
             #                             datefmt="%H:%M:%S")
@@ -445,14 +534,26 @@ class Player():
             #arr=p.set_movetree(tre,tmove)
             #save=arr[0]
             tre.print_tree()
-            arr=self.tree_height(tre,tmove)
-            tre.print_tree()
+            if tt:
+                arr=self.tree_tt_height(tre,tmove)
+            else:
+                arr=self.tree_height(tre,tmove)
+            #tre.print_tree()
+                tre.print_node(tre.nodes[len(tre.nodes)-1])
+            print(len(tre.nodes))
             #print(tre)
             # for x in tre.nodes:
             #     if x.h==4:
             #         tre.print_node(x)  
             #         break
-
+            # Ke3-e4 -24 4
+            # ├── kf4-d3 24 5
+            # ├── kf4-e3 24 5
+            # ├── kf4-f3 24 5
+            # ├── kf4-d4 24 5
+            # ├── kf4-d5 0 5
+            # ├── kf4-e5 0 5
+            # └── kf4-f5 24 5
 
 
 def checkmate(bitbrd,player):#Spiel nächsten Zug beendet -> True
@@ -602,7 +703,7 @@ class ThreadWithReturnValue(threading):#https://stackoverflow.com/questions/6893
 if __name__ == "__main__":
     player = Player()
     
-    b = init_game(give_bitboards(), player)
+    b = init_game()
     sbb = give_static_bitboards()
     print(print_board(b))
 
@@ -643,9 +744,10 @@ if __name__ == "__main__":
     #FEN="rnb1kbnr/p4ppp/1p1pp3/2p3q1/3P4/NQP1PNPB/PP3P1P/R1B1K2R w"
     #FEN="3q3r/1pp2pb1/3pkn2/1B6/3P4/4PN1P/5K1P/7R b"
     #FEN="rnbqkbnr/pp1p1ppp/4p3/1Pp5/8/2N5/P1PPPPPP/R1BQKBNR w"
-    FEN="8/4k3/8/8/8/8/3K4/8"
+    #FEN="8/4k3/8/8/8/8/3K4/8"
+    FEN="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
 
-    zeit=10
+    zeit=30
     depth=4
     wdh=1000
 
@@ -657,8 +759,54 @@ if __name__ == "__main__":
     #t=p.teste(FEN,wdh,zug=True)#zuggenerator only 1000 mal durchschnitt
     #t=p.teste(FEN,wdh,utility=True)#utility only
     #t=p.teste(FEN,depth,tree=True,tiefe=True)#baumspeicher bis tiefe ohne utility
-    t=p.teste(FEN,depth,tree=True,tiefe=True,utility=True)#baumspeicher bis tiefe mit utility
-    #tiefe=p.teste(FEN,zeit,tree=True)#baumspeichern bis time mit utility (Standard)
+    #t=p.teste(FEN,depth,tree=True,tiefe=True,utility=True)#baumspeicher bis tiefe mit utility
+    tiefe=p.teste(FEN,zeit,tree=True)#baumspeichern bis time mit utility (Standard)
     #p.teste(FEN,zeit,baum=True)#baum ergebnis printen
-
+    
+    
+   
     #print(searchtime)
+
+    #transposition tables test: 8 GB Speicherplatz benoetigt!!!!!
+    
+    # p.teste(FEN,zeit,baum=True,tt=True)#baum ergebnis printen
+    # print(len(p.tt.table))
+    # p.tt.save_table()
+    # print(len(p.tt.table))
+    #del p.tt.table$
+    
+    #time=60 -> 30 sek
+    #einmal
+#     19467
+# 12098
+# 12098
+
+#nochmal
+# 22625
+# 14945
+# 14945
+
+#ohne movenames missprint
+# 29002
+# 18749
+# 18749
+
+#ohne hash print
+# 37205
+# 23525
+# 23525
+
+#mit letzter spalte
+# 34444
+# 30164
+# 30164
+
+#vergleich 30 sek. tree mit utility:
+# node 32407 :
+# ph7-h6   9 4
+# 32408
+
+#vergeich mit tt
+# 46119
+# 32078
+# 32078

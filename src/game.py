@@ -5,7 +5,7 @@ def newGame():#unsere KI gegen sich selbst
     player=[]
     player[0]=Player()
     player[1]=Player()
-    FEN=BittoFEN(init_game(player[0]))
+    FEN=BittoFEN(init_game())
     x=0
     while (not checkmate(FENtoBit(FEN),player[x])):
         FEN=player[x].turn(FEN,time)#TODO hier zeitbeschränkung z.B. per threads einbauen
@@ -18,3 +18,4 @@ def newGame():#unsere KI gegen sich selbst
     
 
 if __name__ == "__main__":
+    pass

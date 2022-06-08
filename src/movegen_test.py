@@ -44,7 +44,7 @@ def unit_test(FEN, all_moves):
 if __name__ == "__main__":
     player = Player()
     
-    b = init_game(player)
+    b = init_game()
     sbb = give_static_bitboards()
     print(print_board(b))
 

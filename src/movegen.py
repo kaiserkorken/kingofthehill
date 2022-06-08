@@ -311,7 +311,7 @@ def moves_attack_pawn_to_queen_W(b, bb_from):
     right_attack = np.roll(bb_from & ~sbb['lh'] & sbb['7'], 9) & b['B']
     return (left_attack | right_attack)
 
-def moves_attack_paw_to_queen_B(b, bb_from):
+def moves_attack_pawn_to_queen_B(b, bb_from):
     left_attack  = np.roll(bb_from & ~sbb['la'] & sbb['2'], -9) & b['W']
     right_attack = np.roll(bb_from & ~sbb['lh'] & sbb['2'], -7) & b['W']
     return (left_attack | right_attack)
@@ -379,10 +379,10 @@ def moves_king_B(b):
     
     straight = (up|down|left|right)
     
-    up_left     = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['la'])),   8-1) & ~(b['B'] )
-    up_right    = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['lh'])),   8+1) & ~(b['B'] )
-    down_left   = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['la'])),  -8-1) & ~(b['B'] )
-    down_right  = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['lh'])),  -8+1) & ~(b['B'] )
+    up_left    = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['la'])),   8-1) & ~(b['B'] )
+    up_right   = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['lh'])),   8+1) & ~(b['B'] )
+    down_left  = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['la'])),  -8-1) & ~(b['B'] )
+    down_left  = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['lh'])),  -8+1) & ~(b['B'] )
 
     diagonal = (up_left|up_right|down_left|down_right)
     return (straight | diagonal)
@@ -418,14 +418,14 @@ def moves_bishop(b, bb_from):
     #-> Kreuz oder pos -> kreuz mit zügen
     #cut(Kreuz, color)
     #-> Kreuz geht nur bis dahin wo ein eigner spieler steht (<) oder ein gegnerischer spieler (<=) 
-
-    if b["B"]&bb_from:
+    pos=np.where(bb_from)#position des läufers ermitteln
+    if  b["W"][pos]==bb_from[pos]:
         enemy = b['B']
         bb= b["W"]
     else:
         enemy = b['W']
         bb= b["B"]
-    pos=np.where(bb_from)#position des läufers ermitteln
+    
     #print(pos)#[x,y]
 
     #iterative variante:
@@ -493,14 +493,15 @@ def moves_rook(b, bb_from):#-> bitboard aller mögl züge des Turms
     #-> Kreuz oder pos -> kreuz mit zügen
     #cut(Kreuz,color)
     # -> Kreuz geht nur bis dahin wo ein eigner spieler steht (<) oder ein gegnerischer spieler (<=) 
-    if b["B"]&bb_from:
+    pos=np.where(bb_from)#position des turms ermitteln
+    if b["W"][pos]==bb_from[pos]:
         enemy = b['B']
         color= b["W"]
     else:
         enemy = b['W']
         color= b["B"]
     
-    pos=np.where(bb_from)#position des turms ermitteln
+    
     #print(pos)#[x,y]
     #kreuz=np.roll(sbb[bibsbbl[0]] & sbb[bibssbr[1]])#kreuz je nach position ausgeben
     #iterative variante:
