@@ -767,6 +767,8 @@ def spielBewertung(bitbrd, player):
     wertB = calculateValue(bitbrd, playerWert(bitbrd, -1), -1)
     pracTable = pawnP(FENtoBoard(BittoFEN(bitbrd, player)), player)
     #print(pracTable)
+    if wertW==None or wertB==None or pracTable==None:
+        print(wertW, wertB ,pracTable)
     if player == 1:
         return wertW - wertB + pracTable
     elif player == 0:
@@ -877,15 +879,15 @@ if __name__ == "__main__":
     # FEN="3q3r/1pp2pb1/3pkn2/1B6/3P4/4PN1P/5K1P/7R b"
     # FEN="rnbqkbnr/pp1p1ppp/4p3/1Pp5/8/2N5/P1PPPPPP/R1BQKBNR w"
     # FEN="8/4k3/8/8/8/8/3K4/8"
-    FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+    FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"
 
-    zeit = 30
+    zeit = 10
     depth = 4
     wdh = 1000
 
     ### Unit/Benchmark Tests ###
 
-    # p.teste(FEN,zeit,turn=True)#turn ausführen
+    p.teste(FEN,zeit,turn=True)#turn ausführen
     # searchtime=p.teste(FEN,depth,search=True)#alphabetasearch zeit messen für tiefe
     # t=p.teste(FEN,wdh,zug=True)#zuggenerator only 1000 mal durchschnitt
     # t=p.teste(FEN,wdh,utility=True)#utility only
