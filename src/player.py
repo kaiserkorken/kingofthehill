@@ -771,8 +771,19 @@ def spielBewertung(bitbrd, player):
         return wertW - wertB + pracTable
     elif player == 0:
         return wertB - wertW + pracTable
+"""Testen der Bewertungsfunktion
+def testen(fenss):
+    print(spielBewertung(FENtoBit(fenss),0))
 
-
+testen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+testen("5r2/6k1/p2p3p/P1pP4/2P1p3/7P/5PK1/R7 b - -  30;")
+testen("8/6pp/ppnk1p2/2p5/P3K3/2P5/1P4PP/4N3 b - -  36")
+testen("8/7p/1p1n1p2/p2k2p1/P5P1/2P1K2P/2N5/8 w - -  44")
+testen("rnbqk2r/pp2bppp/3p1n2/2pP4/4PB2/2N5/PPP3PP/R2QKBNR w KQkq -  7")
+testen("2kr4/1p2K1R1/p2P4/P1P5/8/8/8/8 b - -  62")
+testen("4r3/1p4k1/p7/P2PN1r1/5p1R/6P1/2P1R2p/4K3 w - -  36")
+testen("1rb5/1p3pk1/p4np1/P2Pp1r1/R1N1P3/3B2Pp/2P2R1P/2q1QK2 b - -  27")
+"""
 """
 class ThreadWithReturnValue(threading):#https://stackoverflow.com/questions/6893968/how-to-get-the-return-value-from-a-thread-in-python
     def __init__(self, group=None, target=None, name=None,
