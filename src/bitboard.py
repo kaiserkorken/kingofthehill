@@ -322,20 +322,30 @@ def FENtoBit(fen,player=False):
 # FEN=BittoFEN(FEN,-1)
 # print(FEN)
 
+def FENzumB(fen):
+    neuerS = ""
+    for x in fen:
+        if x.isdigit():
+            for i in range(int(x)):
+                neuerS = neuerS + "1"
+        else:
+            neuerS = neuerS + x
+    return neuerS
 
-def FENtoBoard(fens,player=True):
-    onlyP = fens[0:len(fens)]  # -13] #hängt von den fens ab
-    if player:
-         onlyP = fens[0:len(fens)-2] 
+
+def FENtoBoard(fens):
     rows, cols = (8, 8)
     newBoard = [["--"] * rows for _ in range(cols)]
-    fenS = onlyP.split("/")
-    newChar = list(fenS[2])
-    bull = newChar[0].isdigit()
+    neuerF = FENzumB(fens.split(" ")[0])
+    # print(neuerF)
+    fenS = neuerF.split("/")
+
     for countA, value in enumerate(fenS):
         for countB, info in enumerate(value):
             if info == "r":
                 newBoard[countA][countB] = "bR"
+            elif info == "1":
+                newBoard[countA][countB] = "--"
             elif info == "n":
                 newBoard[countA][countB] = "bN"
             elif info == "b":
