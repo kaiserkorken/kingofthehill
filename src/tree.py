@@ -1,5 +1,3 @@
-from re import M
-from tkinter.messagebox import NO
 from anytree import NodeMixin, RenderTree
 
 class knoten(object):  # Just an example of a base class
@@ -33,12 +31,6 @@ class Tree(object):
         #self.node beinhaltet festen index, value und dict
         #node.value=value
         #node.h=height
-
-    def generate_search_tree(self,b, player):
-        # generate a searchtree and search for possible pseudolegal moves
-        moves = Node('root')
-        
-        return moves
 
     def insert_node(self,parent,bitb,util,h,name,hash=None):#value=[index,b,value,h]
     #def insert_node(self,parent,input):#value=[index,b,value,h,name]

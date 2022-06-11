@@ -8,7 +8,7 @@ class GameState():
         # First is color
         # Second is the type
         #"--" - represents an emprty space with no piece.
-        self.board = [
+        self.startboard = [
             ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
             ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
             ["--", "--", "--", "--", "--", "--", "--", "--"],
@@ -17,6 +17,7 @@ class GameState():
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
             ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]]
+        self.board=self.startboard
         self.whiteToMove = True
         self.moveLog = []
 
@@ -87,47 +88,63 @@ def loadImages():
         IMAGES[piece] = p.transform.scale(p.image.load("images/"+piece+".png"),(SQ_SIZE, SQ_SIZE))
 
     # We can load images by calling 'IMAGES['wp']
-
-def main():
+class gui():
+    def __init__(self,single=True):
         p.init()
-        screen = p.display.set_mode((WIDTH, HEIGHT))
-        clock = p.time.Clock()
-        screen.fill(p.Color("white"))
-        gs = GameState()
+        self.single=single
+        self.screen = p.display.set_mode((WIDTH, HEIGHT))
+        self.clock = p.time.Clock()
+        self.screen.fill(p.Color("white"))
+        self.gs = GameState()
+        self.klick=False
+        self.player=1
         loadImages() #only once
-        running = True
-        sqSelected = () # no square is selected, keeps track of the last click on the user
-        playerClicks =  [] #keeps track of player clicks (two tuples)
-        while running:
-            for e in p.event.get():
-                if e.type == p.QUIT:
-                    running = False
-                #mouse handler
-                elif e.type ==p.MOUSEBUTTONDOWN:
+        self.running = True
+        self.sqSelected = () # no square is selected, keeps track of the last click on the user
+        self.playerClicks =  [] #keeps track of player clicks (two tuples)
+       
+    def reset(self):
+        self.draw(self.gs.startboard)
+        
+    def draw(self,board):
+        self.gs.board=board
+        drawGameState(self.screen,self.gs)
+        self.clock.tick(MAX_FPS)
+        p.display.flip()
+        
+    def run(self):
+        for e in p.event.get():
+            if e.type == p.QUIT:
+                self.running = False
+            #mouse handler
+            if self.single:
+                if e.type ==p.MOUSEBUTTONDOWN:
                     location = p.mouse.get_pos()
                     col = location[0]//SQ_SIZE
                     row = location[1]//SQ_SIZE
-                    if sqSelected == (row,col): # square was clicked twice
-                        sqSelected = () # deselect
-                        playerClicks = [] #clear the player clicks
+                    if self.sqSelected == (row,col): # square was clicked twice
+                        self.sqSelected = () # deselect
+                        self.playerClicks = [] #clear the player clicks
                     else:
-                        sqSelected = (row,col)
-                        playerClicks.append(sqSelected) # append for 1st and 2nd clicks
-                    if len(playerClicks) == 2: #after the 2nd click
-                        move = Move(playerClicks[0],playerClicks[1],gs.board)
+                        self.sqSelected = (row,col)
+                        self.playerClicks.append(self.sqSelected) # append for 1st and 2nd clicks
+                    if len(self.playerClicks) == 2: #after the 2nd click
+                        move = Move(self.playerClicks[0],self.playerClicks[1],self.gs.board)
                         print(move.getChessNotation())
-                        gs.makeMove(move)
-                        sqSelected = () # reset user clicks
-                        playerClicks = []
+                        self.gs.makeMove(move)
+                        self.sqSelected = () # reset user clicks
+                        self.playerClicks = []
+                        self.klick=True
+                        self.player*=(-1)
                         # move = ChessEngie.Move(bestMoveX,bestMoveY,gs.board
                 #key handlers
                 elif e.type == p.KEYDOWN:
                     if e.key == p.K_z: #undo when key is pressed
-                        gs.undoMove()
+                        self.gs.undoMove()
 
 
-            drawGameState(screen,gs)
-            clock.tick(MAX_FPS)
+            drawGameState(self.screen,self.gs)
+            self.clock.tick(MAX_FPS)
             p.display.flip()
 
 def drawGameState(screen,gs):
@@ -150,5 +167,7 @@ def drawPieces(screen, board):
             if piece != "--":
                 screen.blit(IMAGES[piece], p.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
-main()
-
+if __name__ == "__main__":
+    bild =gui()
+    while bild.running:
+        bild.run()

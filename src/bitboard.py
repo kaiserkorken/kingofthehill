@@ -321,3 +321,123 @@ def FENtoBit(fen,player=False):
 #print(FEN)
 # FEN=BittoFEN(FEN,-1)
 # print(FEN)
+
+def FENzumB(fen):
+    neuerS = ""
+    for x in fen:
+        if x.isdigit():
+            for i in range(int(x)):
+                neuerS = neuerS + "1"
+        else:
+            neuerS = neuerS + x
+    return neuerS
+
+
+def FENtoBoard(fens):
+    rows, cols = (8, 8)
+    newBoard = [["--"] * rows for _ in range(cols)]
+    neuerF = FENzumB(fens.split(" ")[0])
+    # print(neuerF)
+    fenS = neuerF.split("/")
+
+    for countA, value in enumerate(fenS):
+        for countB, info in enumerate(value):
+            if info == "r":
+                newBoard[countA][countB] = "bR"
+            elif info == "1":
+                newBoard[countA][countB] = "--"
+            elif info == "n":
+                newBoard[countA][countB] = "bN"
+            elif info == "b":
+                newBoard[countA][countB] = "bB"
+            elif info == "q":
+                newBoard[countA][countB] = "bQ"
+            elif info == "k":
+                newBoard[countA][countB] = "bK"
+            elif info == "p":
+                newBoard[countA][countB] = "bp"
+            elif info == "P":
+                newBoard[countA][countB] = "wp"
+            elif info == "R":
+                newBoard[countA][countB] = "wR"
+            elif info == "N":
+                newBoard[countA][countB] = "wN"
+            elif info == "B":
+                newBoard[countA][countB] = "wB"
+            elif info == "Q":
+                newBoard[countA][countB] = "wQ"
+            elif info == "K":
+                newBoard[countA][countB] = "wK"
+    return newBoard
+
+
+def BoardtoFEN(board,player=False):
+    result = ""
+    for countA, value in enumerate(board):
+        helpingC = 0
+        for countB, info in enumerate(value):
+            if (countB == 7 and helpingC != 7):
+
+                if helpingC != 0:
+                    result = result + str(helpingC + 1) + "/"
+
+                else:
+                    result = result + convertPiece(info) + "/"
+
+            elif (info == "--"):
+                if helpingC == 7:
+                    result = result + str(helpingC + 1) + "/"
+                else:
+                    helpingC = helpingC + 1
+            else:
+                if (helpingC != 0):
+                    result = result + str(helpingC) + convertPiece(info)
+                    helpingC = 0
+                else:
+                    result = result + convertPiece(info)
+    ergeb = result[0:len(result) - 1]
+    if player==-1:
+        ergeb+=" B"
+    elif player==1:
+        ergeb+=" W"
+    print(ergeb)
+    return ergeb
+
+
+def convertPiece(piece):
+    if piece == "bR":
+        piece = "r"
+        return piece
+    elif piece == "bN":
+        piece = "n"
+        return piece
+    elif piece == "bB":
+        piece = "b"
+        return piece
+    elif piece == "bQ":
+        piece = "q"
+        return piece
+    elif piece == "bK":
+        piece = "k"
+        return piece
+    elif piece == "bp":
+        piece = "p"
+        return piece
+    elif piece == "wR":
+        piece = "R"
+        return piece
+    elif piece == "wN":
+        piece = "N"
+        return piece
+    elif piece == "wB":
+        piece = "B"
+        return piece
+    elif piece == "wQ":
+        piece = "Q"
+        return piece
+    elif piece == "wK":
+        piece = "K"
+        return piece
+    elif piece == "wp":
+        piece = "P"
+        return piece
