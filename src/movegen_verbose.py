@@ -40,10 +40,10 @@ def make_move_name(b_old, bb_from, bb_to, short = False):
         
         if np.any(bb_from & b_old[p]):
             piece = p
-            
+    """        
     if piece == 'p': # Bauern werden nicht spezifiziert
         piece = 'p'#brauchen aber 
-        
+    """   
     if color == 'W': # Weiße Figuren werden groß geschrieben
         piece = piece.upper()
         
@@ -94,6 +94,17 @@ def generate_moves_verbose(b, player):
     # corresponding move names
     name_list_capture = []
     name_list_quiet = []
+    
+    
+    # pawn to queen
+#    print('pawn to queen')
+    move_list_capture_pawn_to_queen, move_list_quiet_pawn_to_queen, name_list_capture_pawn_to_queen, name_list_quiet_pawn_to_queen = gen_moves_pawn_to_queen(b, player) 
+    if move_list_capture_pawn_to_queen:
+        move_list_capture.append(move_list_capture_pawn_to_queen)
+        name_list_capture.append(name_list_capture_pawn_to_queen)
+    if move_list_quiet_pawn_to_queen:
+        move_list_quiet.append(move_list_quiet_pawn_to_queen)
+        name_list_quiet.append(name_list_capture_pawn_to_queen)
     
     # king
 #    print('king')
@@ -256,7 +267,7 @@ def generate_moves_verbose(b, player):
 
 
 # Hilfsfunktion für figurenspezifische Zuggeneratoren
-def gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player):
+def gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player, pawn_to_queen=False):
     # erstellt Listen mit Folgezuständen aus Liste in der Paare aus bb_from und bb_all_moves stehen
     # bb_from: einzelne 1 für bewegte Figur
     # bb_all_moves: 1en auf alle Felder die sich die Figur auf bb_from bewegen kann
@@ -272,13 +283,20 @@ def gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player
         bb_capture_list = serialize_bb(bb_capture)
         bb_quiet_list = serialize_bb(bb_quiet)
         
-        # simuliert Züge -> Elemente sind Dictionaries mit Folgezuständen
-        capture_list = [make_move(b, bb_from, bb_to) for bb_to in bb_capture_list]
-        quiet_list = [make_move(b, bb_from, bb_to) for bb_to in bb_quiet_list]
+                
+        if pawn_to_queen: # spezieller Zugsimulator für Damenumwandlung
+            capture_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_capture_list]
+            quiet_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_quiet_list]
+            
+        else:      
+            # simuliert Züge -> Elemente sind Dictionaries mit Folgezuständen
+            capture_list = [make_move(b, bb_from, bb_to) for bb_to in bb_capture_list]
+            quiet_list = [make_move(b, bb_from, bb_to) for bb_to in bb_quiet_list]
+            
         # erstelle entsprechende Zugnotation
         capture_names = [make_move_name(b, bb_from, bb_to) for bb_to in bb_capture_list]
         quiet_names = [make_move_name(b, bb_from, bb_to) for bb_to in bb_quiet_list]
-        
+    
         #print('TEST')
         #print(str(len(capture_list)) + " " + str(len(quiet_list)))
         #print(str(len(capture_names)) + " " + str(len(quiet_names)))
@@ -308,6 +326,19 @@ def gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player
 
 
 # Figurenspezifische Generatoren für capture und quiet Listen
+
+
+def gen_moves_pawn_to_queen(b, player):
+    # generates bb_lists with caputure and quiet moves
+    if player.current == 1:
+        bb_pawns = b['p'] & b['W']
+        bb_from_and_all_moves_list = [[bb_from, moves_pawn_to_queen_W(b, bb_from)] for bb_from in serialize_bb(bb_pawns)] # iteriere über alle Türme
+    else:
+        bb_pawns = b['p'] & b['B']
+        bb_from_and_all_moves_list = [[bb_from, moves_pawn_to_queen_B(b, bb_from)] for bb_from in serialize_bb(bb_pawns)] # iteriere über alle Türme
+    
+    # zu jeder Figur capture- und quiet-listen erstellen
+    return gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player, pawn_to_queen=True)
 
 def gen_moves_king(b, player):
     # generates bb_lists with caputure and quiet moves

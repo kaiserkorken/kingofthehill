@@ -1,13 +1,71 @@
-from anytree import Node, RenderTrees
+from anytree import Node
 from tree import *
 import time
+import numpy as np
+import random
 
-
+from player import checkmate
 
 
 ### constants
 inf = 100000
 
+
+def best_node(tree):
+    # nodes height 1 sammeln
+    # print(tree.root.children)
+    children = list(tree.root.children)
+    # print(children)
+    # print(children)
+    if len(children) > 0:  # falls Züge vorhanden
+        values = []
+        for x in children:
+            values.append(x.value)
+        # values = [value for index,parent,b,value,h in children]
+        # print(tree)
+        # print(children)
+        # return best node of nodes of tree height 1 
+        best_nodes = []
+        # print(children)
+        while len(children) > 0:
+            possible_best_node = children[np.argmax(values)]
+            children.pop(np.argmax(values))  # bzw. values.remove(node.index)
+            # print(children)
+            values = []
+            for x in children:
+                values.append(x.value)
+
+            if best_nodes:  # falls Liste schon Element enthält
+                if possible_best_node.value == best_nodes.value:  # falls ein weiterer gleichwertiger Zug existiert
+                    best_nodes.append(possible_best_node)
+                else:  # falls nächstbester Zug schlechter
+                    break  # alle besten Züge gefunden
+            else:  # falls Liste noch leer
+                if checkmate(possible_best_node.b,
+                             (-1) ** possible_best_node.h) == False:  # erster Zug muss auf jeden Fall legal sein
+                    best_nodes.append(possible_best_node)  # ,player)=(-1)^höhe
+        # best_nodes sollte nun mindestens einen Zug enthalten. Dieser ist immer legal
+        if len(best_nodes) == 1:  # falls nur ein Zug vorhanden
+            print("best0:", best_nodes[0])
+            return best_nodes[0]  # gib Zug zurück
+        elif len(best_nodes) > 1:
+            while len(best_nodes) > 0:  # entferne Züge von Liste bis zufälliger legaler Zug gefunden
+                best_node = random.choice(best_nodes)  # wähle zufällig besten Zug
+                if checkmate(best_node, (-1) ** best_node.h) == False:  # falls Zug legal
+                    print("best:", best_node)
+                    return best_node  # gib Zug zurück
+                else:
+                    best_nodes.remove(best_node)
+        print('kein guter Zug vorhanden!')
+        children = list(tree.root.children)
+        # print("doof: ",children[0])
+        node = random.choice(children)
+        return node
+
+    else:
+        print('kein Zug vorhanden!')
+        print("else: ", children[0])
+        return children[0]
 
 def time_expected_next(time_last_run):
     time_exponent = 2   # Exponent mit der benötigte Zeit ansteigt
@@ -15,27 +73,28 @@ def time_expected_next(time_last_run):
     return time_expected
 
 ### Hauptsuchroutine. Wählt taktisch verschiedene Suchverfahren
-def search(root_node, player, time=30, max_depth):
+def search(root_node, player, max_depth, search_time=30):
     # iterative Tiefensuche
     time_last_run = 0.0 # benötigte Zeit für letzten Durchlauf
-    time_left = time - time_last_run # Zeit bis Abbruch
+    time_left = search_time - time_last_run # Zeit bis Abbruch
     time_expected_next_run = time_expected_next(time_last_run) # Zeit, die voraussichtlich für nächste Ebene benötigt wird
     
     depth = 0
     alpha = -inf
     beta = inf
     
+    ### DEEP COPY TREE VON ALTER ITERATION
 
     
     print("search initiated with time to run: " + str(time_left))
     while (time_left > time_expected_next_run and depth <= max_depth): # Erhöhe Tiefe so lange wie Fertigstellung der Ebene noch realistisch
         time_start = time.time()
         ### Suche
-        if depth > 0 # aspiration window suche um besten wert aus der letzten Tiefeniteration
-            best_val, aw_failed_left, aw_failed_right = a_b_search_aspiration_window(root_node, player, depth, best_val)
+        if depth > 0: # aspiration window suche um besten wert aus der letzten Tiefeniteration
+            best_val, aw_failed_left, aw_failed_right = a_b_search_aspiration_window(root_node, player, best_val, depth)
         else: # kein aspiration window, da Wert geraten werden müsste
             best_val = a_b_search_principal_variation(root_node, player, depth, alpha, beta)
-        depth += 1
+        
         
         time_stop = time.time()
         time_last_run = time_stop - time_start # benötigte Zeit für letzten Durchlauf
@@ -43,14 +102,21 @@ def search(root_node, player, time=30, max_depth):
         time_left -= time_last_run # Zeit bis Abbruch
         time_expected_next_run = time_expected_next(time_last_run) # Zeit, die voraussichtlich für nächste Ebene benötigt wird
     
-        print("  depth : " + str(depth) + " took " str(time_last_run) + " to complete.")
+        print("  depth : " + str(depth) + " took " + str(time_last_run) + " to complete.")
         print("  best value found: " + str(best_val))
-        print("     aspiration bounds failed [left/right]: " + str(aw_failed_left) + " / " + str(aw_failed_right))
-        print("  time left: " + str(time_left) + ". next estimate: " str(int(time_expected_next_run)))
+        if depth > 0:
+            print("     aspiration bounds failed [left/right]: " + str(aw_failed_left) + " / " + str(aw_failed_right))
+        print("  time left: " + str(time_left) + ". next estimate: " + str(int(time_expected_next_run)))
+        
+        depth += 1
+        
         
     print("search completed at depth: " + str(depth) + " with total time left: " + str(time_left))
     print("best value found: " + str(best_val))
+    
     return best_val
+
+
 
 # alpha beta
 def a_b_search(node, player, depth=0, alpha=-inf, beta=inf):
@@ -94,7 +160,7 @@ def a_b_search_principal_variation(node, player, depth=0, alpha=-inf, beta=inf):
     return best
 
 # aspriation window suche 
-def a_b_search_aspiration_window(node, player, depth=0, expected_value, widening_constant=2):
+def a_b_search_aspiration_window(node, player, expected_value, depth=0, widening_constant=2):
     
     alpha = expected_value - widening_constant
     beta = expected_value + widening_constant

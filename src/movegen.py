@@ -192,6 +192,20 @@ def gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player
 # Figurenspezifische Generatoren für capture und quiet Listen
 
 
+def gen_moves_pawn_to_queen(b, player):
+    # generates bb_lists with caputure and quiet moves
+    if player.current == 1:
+        bb_pawns = b['p'] & b['W']
+        bb_from_and_all_moves_list = [[bb_from, moves_pawn_to_queen_W(b, bb_from)] for bb_from in serialize_bb(bb_pawns)] # iteriere über alle Türme
+    else:
+        bb_pawns = b['p'] & b['B']
+        bb_from_and_all_moves_list = [[bb_from, moves_pawn_to_queen_B(b, bb_from)] for bb_from in serialize_bb(bb_pawns)] # iteriere über alle Türme
+    
+    # zu jeder Figur capture- und quiet-listen erstellen
+    move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player, pawn_to_queen=True)
+    return move_list_capture, move_list_quiet
+
+
 def gen_moves_king(b, player):
     # generates bb_lists with caputure and quiet moves
     if player.current == 1:
@@ -270,18 +284,6 @@ def gen_moves_pawn(b, player):
     move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player)
     return move_list_capture, move_list_quiet
 
-def gen_moves_pawn_to_queen(b, player):
-    # generates bb_lists with caputure and quiet moves
-    if player.current == 1:
-        bb_pawns = b['p'] & b['W']
-        bb_from_and_all_moves_list = [[bb_from, moves_pawn_to_queen_W(b, bb_from)] for bb_from in serialize_bb(bb_pawns)] # iteriere über alle Türme
-    else:
-        bb_pawns = b['p'] & b['B']
-        bb_from_and_all_moves_list = [[bb_from, moves_pawn_to_queen_B(b, bb_from)] for bb_from in serialize_bb(bb_pawns)] # iteriere über alle Türme
-    
-    # zu jeder Figur capture- und quiet-listen erstellen
-    move_list_capture, move_list_quiet = gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player, pawn_to_queen=True)
-    return move_list_capture, move_list_quiet
 
     
 ### POSSIBLE MOVES LOGIC ###
@@ -382,7 +384,7 @@ def moves_king_B(b):
     up_left    = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['la'])),   8-1) & ~(b['B'] )
     up_right   = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['lh'])),   8+1) & ~(b['B'] )
     down_left  = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['la'])),  -8-1) & ~(b['B'] )
-    down_left  = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['lh'])),  -8+1) & ~(b['B'] )
+    down_right = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['lh'])),  -8+1) & ~(b['B'] )
 
     diagonal = (up_left|up_right|down_left|down_right)
     return (straight | diagonal)

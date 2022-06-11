@@ -2,10 +2,11 @@ import numpy as np
 # requires: pip install anytree
 import random
 
+#from movegen import *
 from movegen_verbose import generate_moves_verbose
 from bitboard import *
 from tree import *
-from movegen import *
+
 import logging
 import time
 from tt import ttable
@@ -79,61 +80,7 @@ class Player():
 
     # TODO insert functions in class
 
-    def best_node(self, tree):
-        # nodes height 1 sammeln
-        # print(tree.root.children)
-        children = list(tree.root.children)
-        # print(children)
-        # print(children)
-        if len(children) > 0:  # falls Züge vorhanden
-            values = []
-            for x in children:
-                values.append(x.value)
-            # values = [value for index,parent,b,value,h in children]
-            # print(tree)
-            # print(children)
-            # return best node of nodes of tree height 1 
-            best_nodes = []
-            # print(children)
-            while len(children) > 0:
-                possible_best_node = children[np.argmax(values)]
-                children.pop(np.argmax(values))  # bzw. values.remove(node.index)
-                # print(children)
-                values = []
-                for x in children:
-                    values.append(x.value)
 
-                if best_nodes:  # falls Liste schon Element enthält
-                    if possible_best_node.value == best_nodes.value:  # falls ein weiterer gleichwertiger Zug existiert
-                        best_nodes.append(possible_best_node)
-                    else:  # falls nächstbester Zug schlechter
-                        break  # alle besten Züge gefunden
-                else:  # falls Liste noch leer
-                    if checkmate(possible_best_node.b,
-                                 (-1) ** possible_best_node.h) == False:  # erster Zug muss auf jeden Fall legal sein
-                        best_nodes.append(possible_best_node)  # ,player)=(-1)^höhe
-            # best_nodes sollte nun mindestens einen Zug enthalten. Dieser ist immer legal
-            if len(best_nodes) == 1:  # falls nur ein Zug vorhanden
-                print("best0:", best_nodes[0])
-                return best_nodes[0]  # gib Zug zurück
-            elif len(best_nodes) > 1:
-                while len(best_nodes) > 0:  # entferne Züge von Liste bis zufälliger legaler Zug gefunden
-                    best_node = random.choice(best_nodes)  # wähle zufällig besten Zug
-                    if checkmate(best_node, (-1) ** best_node.h) == False:  # falls Zug legal
-                        print("best:", best_node)
-                        return best_node  # gib Zug zurück
-                    else:
-                        best_nodes.remove(best_node)
-            print('kein guter Zug vorhanden!')
-            children = list(tree.root.children)
-            # print("doof: ",children[0])
-            node = random.choice(children)
-            return node
-
-        else:
-            print('kein Zug vorhanden!')
-            print("else: ", children[0])
-            return children[0]
 
     def generate_moves(self, b):
         return generate_moves(b, self)
@@ -380,8 +327,63 @@ class Player():
             return self.tree_height(tree, tmove, index, altstep, h + 1)
         print("finish")
         return arr
-
+    
     def turn(self, FEN, t=20):  # ein kompletter zug der ki
+        # print(FEN)
+        start = time.time()
+        format = "%(asctime)s: %(message)s"
+        logging.basicConfig(format=format, level=logging.INFO,
+                            datefmt="%H:%M:%S")
+        logging.info("Main    : start turn " + str(start - start))
+        tmove = (t / 10) * 9  # seconds
+        tsearch = t / 10
+        [bb, play] = FENtoBit(FEN, True)
+        # tt=ttable("testtable.mymemmap",32)#erstellen falls noetig, sonst in build tree
+        if self.current == play and FENtoBit(FEN,True) != False:  # spieler am zug
+
+            # bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#testFEN
+            tree = Tree(bb)  # ,self.tt.starthash)#leerer baum mit b als root
+            if not checkmate(bb, self):  # Spielende überprüfen
+                # tre.print_tree()
+                # arr=p.set_movetree(tre,tmove)
+                # tree.print_tree()
+                logging.info("Main    : building movetree " + str(time.time() - start))
+                arr = self.tree_height(tree, (start + tmove - time.time()))  # time bzw. depth
+                # arr[1]=tree.h
+                self.current = play
+                tleft = time.time() - start
+                logging.info("Main    : movetree finished with height: " + str(arr[1]) + " " + str(tleft))
+                logging.info("Main    : tree build finished in:" + str(time.time() - start) + "s")
+
+                # tree.print_tree()
+                # print(tree)  
+                # utility auf root?
+                depth = 1
+                logging.info("Main    : doing minimax " + str(tleft))
+                savetree = tree
+                #savetree.sort_nodes() FEhler bei invertet=True
+                sstart = time.time()
+                best_val = search(tree.root, self.current, arr[1], tsearch)
+                # tree.print_node(tree.nodes[2])#teste tree nach search
+                tleft = time.time() - start
+                logging.info("Main    : minimax finished with depth: " + str(depth - 1) + " in " + str(
+                    time.time() - sstart) + "s")
+                logging.info("Main    : choosing good move " + str(tleft))
+                node = best_node(tree)  # besten zug auswaehlen
+                # move=tree.find_node(node.index)
+                # logging.info("Main    : finished turn "+str(start+t))
+                finish = time.time()
+                self.__switch__()
+                FEN = BittoFEN(node.b, self.current)
+                self.__switch__()
+                logging.info("Main    : finished turn in " + str(finish - start) + "s")
+                logging.info("Main    : time remaining: " + str(start + t - time.time()))
+        else:  # Spieler nicht dran
+            FEN = False
+        # self.__switch__()#Spieler wechseln (egal ob zug gemacht odeer nicht
+        return FEN
+
+    def turn_bak(self, FEN, t=20):  # ein kompletter zug der ki
         # print(FEN)
         start = time.time()
         format = "%(asctime)s: %(message)s"
@@ -428,7 +430,7 @@ class Player():
                 logging.info("Main    : minimax finished with depth: " + str(depth - 1) + " in " + str(
                     time.time() - sstart) + "s")
                 logging.info("Main    : choosing good move " + str(tleft))
-                node = self.best_node(tree)  # besten zug auswaehlen
+                node = best_node(tree)  # besten zug auswaehlen
                 # move=tree.find_node(node.index)
                 # logging.info("Main    : finished turn "+str(start+t))
                 finish = time.time()
