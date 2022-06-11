@@ -744,7 +744,7 @@ testBoardC = [
 # print(isolatedPawns(testBoardC,'b'))
 
 def pawnP(board, player):
-    if player == 0:
+    if player == -1:
         return (doubledPawns(board, 'w') + blockedPawns(board, 'w') + isolatedPawns(board, 'w')) - \
                (doubledPawns(board, 'b') + blockedPawns(board, 'b') + isolatedPawns(board, 'b'))
 
@@ -771,11 +771,11 @@ def spielBewertung(bitbrd, player):
         print(wertW, wertB ,pracTable)
     if player == 1:
         return wertW - wertB + pracTable
-    elif player == 0:
+    elif player == -1:
         return wertB - wertW + pracTable
-"""Testen der Bewertungsfunktion
-def testen(fenss):
-    print(spielBewertung(FENtoBit(fenss),0))
+#Testen der Bewertungsfunktion
+"""def testen(fenss):
+    print(spielBewertung(FENtoBit(fenss),-1))
 
 testen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 testen("5r2/6k1/p2p3p/P1pP4/2P1p3/7P/5PK1/R7 b - -  30;")
