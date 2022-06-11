@@ -9,6 +9,7 @@ from movegen import *
 import logging
 import time
 from tt import ttable
+from tree_search import *
 
 def timer(function):
     start_time = time.time()
