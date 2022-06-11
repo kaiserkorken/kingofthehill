@@ -563,14 +563,22 @@ class Player():
             # └── kf4-f5 24 5
 
 
-def checkmate(bitbrd, player):  # Spiel nächsten Zug beendet -> True
-    listeS = playerWert(bitbrd, player)
-    schach = True
-    for x in listeS:
-        if bitbrd['k'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
-            schach = False
-    if schach == True:
+def checkmate(bitboard,player):
+    counter = 0
+    sss = FENtoBit(BoardtoFEN(bitboard))
+    mitte = False
+    for countA, value in enumerate(sss['k']):
+        for countB, info in enumerate(value):
+            if info == True:
+                counter = counter+1
+                if countA==3 and countB ==3 or countA==3 and countB ==4 or countA==4 and countB ==3 or countA==4 and countB ==4:
+                    mitte = True
+            else:
+                pass
+    if counter < 2 or mitte == True:
         return True
+    else:
+        return mitte
 
 
 # erstellt ein array mit String values der position der Weißen oder Schwarzen Figuren
