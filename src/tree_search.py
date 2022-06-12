@@ -128,7 +128,7 @@ def a_b_search_bak(node, depth=0, ismax=True):
     #print("depth: " + str(depth) + ", player: " + str(ismax) + ", node_value: " + str(node.value) + ", value*player: " + str(node.value*ismax))
 
     if depth == 0 or node.children == None:
-        player = -1+2*ismax
+        player = -(-1**ismax)
         #print("player: " + str(player) + ", node_value: " + str(node.value) + ", value*player: " + str(node.value*player))
         return node.value
     if ismax:
