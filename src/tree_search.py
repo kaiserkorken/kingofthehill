@@ -10,6 +10,21 @@ from player import checkmate
 ### constants
 inf = 100000
 
+def minimax(node, depth=0, ismax=True):
+        if depth == 0 or node.children == None:
+            return node.value
+        if ismax:
+            v = 1000000
+            for x in node.children:
+                v = max(v, minimax(x, depth - 1, False))
+                node.value = v
+            return v
+        else:
+            v = -1000000
+            for x in node.children:
+                v = min(v, minimax(x, depth - 1, True))
+                node.value = v
+            return v
 
 def best_node(tree):
     # nodes height 1 sammeln
@@ -114,7 +129,7 @@ def search(root_node, player, max_depth, search_time=30):
     print("search completed at depth: " + str(depth) + " with total time left: " + str(time_left))
     print("best value found: " + str(best_val))
     
-    return best_val
+    return depth#best_val
 
 
 

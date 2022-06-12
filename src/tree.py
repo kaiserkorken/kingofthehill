@@ -64,7 +64,3 @@ class Tree(object):
                 x.children=sorted(x.children,reverted=True)#TODO implement eigene schnellere sortieragorithmen
             else: #min spieler
                 x.children=sorted(x.children)
-
-
-
-            

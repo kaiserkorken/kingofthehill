@@ -1,36 +1,194 @@
-import numpy as np
 from player import *
-from movegen_test import unit_test
+from movegen_verbose import generate_moves_verbose
+from tt import *
 
+def teste(player, FEN, value=0, search=False, zug=False, utility=False, tree=False, tiefe=False, turn=False,
+              baum=False, tt=False):
+        # value depends on what you want to do:
+        # eingabe -> prozess: datatype(value) -> return
+        # zug-> player.turn(): int(time) -> str(FEN)
+        # search -> alphabetasearch zeit messen für tiefe: int(tiefe) -> int(time)
+        # zug -> zuggenerator: int(wdh.) -> int(time)
+        # utility (einzeln) -> utility: int(wdh) -> int(time)
+        #         sonst -> Funktion ohne utility ausführen: -
+        # tree -> baumspeichern: tiefe or time
+        # tiefe -> baumspeichern bis tiefe value: int(tiefe) -> int(time)
+        # not tiefe -> baumspeichern bis time=0: int(time) -> int(tiefe)
+        # baum -> baum printen: int(time) -> print
 
-# Stellung 1: 
-FEN_1 = 'rnbqkbnr/p4ppp/1p1pp3/2p5/3P4/NQP1PNPB/PP3P1P/R1B1K2R b'
-possible_moves_1 = ['ke8-e7', 'qd8-h4', 'qd8-g5', 'qd8-f6', 'qd8-c7', 'qd8-d7', 'qd8-e7', 'nb8-d1',
- 'nb8-a6', 'nb8-c6', 'nb8-d7', 'ng8xe1', 'ng8-f6', 'ng8-h6', 'ng8-e7', 'bc8-a6',
- 'bc8-b7', 'bc8-d7', 'bf8-e7', 'c5-c4', 'c5xd4', 'b6-b5', 'd6-d5', 'e6-e5',
- 'a7-a5', 'a7-a6', 'f7-f5', 'f7-f6', 'g7-g5', 'g7-g6', 'h7-h5', 'h7-h6']
-# Stellung 2: 
-FEN_2 = 'r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w'
-possible_moves_2 = ['Bc1xg5', 'h4xg5', 'Ke1-d1', 'Ke1-f1', 'Ke1-e2', 'Ng1-e2', 'Ng1-f3', 'Ng1-h3',
- 'Nb7-a5', 'Nb7-c5', 'Nb7-d6', 'Ra1-b1', 'Rh1-h2', 'Rh1-h3', 'Bc1-d2', 'Bc1-e3',
- 'Bc1-f4', 'a2-a3', 'a2-a4', 'b2-b3', 'b2-b4', 'f2-f3', 'f2-f4', 'g2-g3', 'g2-g4',
- 'c3-c4', 'd4-d5', 'c6-c7']
+        if search:  # alphabetasearch zeit messen für tiefe
+            turn = False
+        elif zug:  # zuggenerator only
+            zeit = time.time()
+            for i in range(value):
+                moves = generate_moves_verbose(FENtoBit(FEN),player)
+            zeit = (time.time() - zeit) / value
 
+            # print(moves)
+            return zeit
+        elif utility and not tree:  # utility only
+            tree = Tree(FENtoBit(FEN))
+            height = build_tree(tree, 3)#TODO er
+            dep = len(tree.nodes)
+            print("baum fertig")
+            zeit = time.time()
+            for i in tree.nodes:
+                i.value = utility(i.b)
+            zeit = (time.time() - zeit)
+            print(dep)
+            print(zeit / dep)
+            # print(wert)
+            return zeit
 
+        elif tree:  # baumseichern
+            bb = FENtoBit(FEN)
+            t = Tree(bb)
+            if tiefe:  # baumspeicher bis tiefe mit/ohne utility
+                depth = value
+                zeit = time.time()
+                h= build_tree(t, depth, utility)  # timer einbauen
+                # t.print_tree()
+                return time.time() - zeit
+            else:  # baumspeichern bis time mit utility (Standard)
+                zeit = value
+                build_tree(t, zeit)
+                t.print_node(t.nodes[len(t.nodes) - 1])
+                print(len(t.nodes))
+                return t.nodes[len(t.nodes) - 1].h
+        if search:  # alphabetasearch zeit messen für tiefe
+            # if value>=0:
+            zeit = time.time()
+            tree = Tree(FENtoBit(FEN))
+            arr = build_tree(tree, 2)
+            dep = len(tree.nodes)
+            zeit = time.time() - zeit
+            print("baum fertig" + str(zeit))
+            zeit = time.time()
+            for i in tree.nodes:
+                i.value = utility(i.b)
+            zeit = time.time() - zeit
+            print("utility fertig" + str(zeit))
+            searchtime = time.time()
+            tiefe = value
+            # while(depth<=arr[1] and tiefe>=depth):#noch zeit und noch nicht so tief wie baumhöhe
+            search(tree.root, tiefe)  # indizes aktualisieren#wertung des bestmöglichen zuges ausgeben
+            # children = list(tree.root.children)
+            # print("search:",depth,children[0].value)
+            return time.time() - searchtime
+        elif turn:  # normaler zug #und alphabetasearch bis zeit um
+            FEN = turn(FEN, value)
+            print(FEN)
+            return (FEN)
+            # print_board(FENtoBit(FEN))
+        elif baum:  # baum ergebnis printen # teste tree.py
+            bb = FENtoBit(FEN)
+            if tt:
+                tt = ttable("testtable", dict=True)
+                tre = Tree(bb, tt.starthash)
+            else:
+                tre = Tree(bb)
+            zeit = value  # eher durchgänge
+            tmove = zeit  # /2 
+            # bb=init_game()
+            # bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#TODO fix fen->bit
+
+            # format = "%(asctime)s: %(message)s"
+            # logging.basicConfig(format=format, level=logging.INFO,
+            #                             datefmt="%H:%M:%S")
+            # tre.print_tree()
+            # arr=p.set_movetree(tre,tmove)
+            # save=arr[0]
+            tre.print_tree()
+            if tt:
+                build_tree()#TODO efrd
+                # tre.print_tree()
+                tre.print_node(tre.nodes[len(tre.nodes) - 1])
+            print(len(tre.nodes))
+            # print(tre)
+            # for x in tre.nodes:
+            #     if x.h==4:
+            #         tre.print_node(x)  
+            #         break
+            # Ke3-e4 -24 4
+            # ├── kf4-d3 24 5
+            # ├── kf4-e3 24 5
+            # ├── kf4-f3 24 5
+            # ├── kf4-d4 24 5
+            # ├── kf4-d5 0 5
+            # ├── kf4-e5 0 5
+            # └── kf4-f5 24 5
+            
 if __name__ == "__main__":
-    
-    print('Unit Test 1:')
-    print('Moves to find: ' + str(len(possible_moves_1)) + ' move(s) possible')
-    print(possible_moves_1)
-    passed = unit_test(FEN_1, possible_moves_1)
-    print('Unit test passed?: ' + str(passed))
-    
-    print('------------------')
-    print('------------------')
-    print('------------------')
-    
-    print('Unit Test 2:')
-    print('Moves to find: ' + str(len(possible_moves_2)) + ' move(s) possible')
-    print(possible_moves_2)
-    passed = unit_test(FEN_2, possible_moves_2)
-    print('Unit test passed?: ' + str(passed))
+    ## DEMO ## TODO andere Demos auf aktualität überprüfen ung ggf. removen
+    #                   ich brauch davon nichts mehr
+
+    # inputs:#
+
+    p = Player()
+    # FEN="r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR W"
+    # FEN="rnb1kbnr/p4ppp/1p1pp3/2p3q1/3P4/NQP1PNPB/PP3P1P/R1B1K2R w"
+    # FEN="3q3r/1pp2pb1/3pkn2/1B6/3P4/4PN1P/5K1P/7R b"
+    # FEN="rnbqkbnr/pp1p1ppp/4p3/1Pp5/8/2N5/P1PPPPPP/R1BQKBNR w"
+    # FEN="8/4k3/8/8/8/8/3K4/8"
+    FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"
+
+    zeit = 10
+    depth = 4
+    wdh = 1000
+
+    ### Unit/Benchmark Tests ###
+
+    p.teste(FEN,zeit,turn=True)#turn ausführen
+    # searchtime=p.teste(FEN,depth,search=True)#alphabetasearch zeit messen für tiefe
+    # t=p.teste(FEN,wdh,zug=True)#zuggenerator only 1000 mal durchschnitt
+    # t=p.teste(FEN,wdh,utility=True)#utility only
+    # t=p.teste(FEN,depth,tree=True,tiefe=True)#baumspeicher bis tiefe ohne utility
+    # t=p.teste(FEN,depth,tree=True,tiefe=True,utility=True)#baumspeicher bis tiefe mit utility
+    # tiefe = p.teste(FEN, zeit, tree=True)  # baumspeichern bis time mit utility (Standard)
+    # p.teste(FEN,zeit,baum=True)#baum ergebnis printen
+
+    # print(searchtime)
+
+    # transposition tables test: 8 GB Speicherplatz benoetigt!!!!!
+
+    # p.teste(FEN,zeit,baum=True,tt=True)#baum ergebnis printen
+    # print(len(p.tt.table))
+    # p.tt.save_table()
+    # print(len(p.tt.table))
+    # del p.tt.table$
+
+    # time=60 -> 30 sek
+    # einmal
+#     19467
+# 12098
+# 12098
+
+# nochmal
+# 22625
+# 14945
+# 14945
+
+# ohne movenames missprint
+# 29002
+# 18749
+# 18749
+
+# ohne hash print
+# 37205
+# 23525
+# 23525
+
+# mit letzter spalte
+# 34444
+# 30164
+# 30164
+
+# vergleich 30 sek. tree mit utility:
+# node 32407 :
+# ph7-h6   9 4
+# 32408
+
+# vergeich mit tt
+# 46119
+# 32078
+# 32078
