@@ -4,6 +4,7 @@ import time
 import numpy as np
 import random
 
+from tree import *
 from player import checkmate
 
 
@@ -27,8 +28,9 @@ def minimax(node, depth=0, ismax=True):
             return v
 
 def best_node(tree):
+    #tree.print_tree()
     # nodes height 1 sammeln
-    # print(tree.root.children)
+    #print(tree.root.children)
     children = list(tree.root.children)
     # print(children)
     # print(children)
@@ -39,6 +41,7 @@ def best_node(tree):
         # values = [value for index,parent,b,value,h in children]
         # print(tree)
         # print(children)
+        print(values)
         # return best node of nodes of tree height 1 
         best_nodes = []
         # print(children)
@@ -51,15 +54,19 @@ def best_node(tree):
                 values.append(x.value)
 
             if best_nodes:  # falls Liste schon Element enthält
-                if possible_best_node.value == best_nodes.value:  # falls ein weiterer gleichwertiger Zug existiert
+                if possible_best_node.value == best_nodes[0].value:  # falls ein weiterer gleichwertiger Zug existiert
                     best_nodes.append(possible_best_node)
                 else:  # falls nächstbester Zug schlechter
                     break  # alle besten Züge gefunden
             else:  # falls Liste noch leer
+                print(possible_best_node.value)
+                print(checkmate(possible_best_node.b,
+                             (-1) ** possible_best_node.h))
                 if checkmate(possible_best_node.b,
                              (-1) ** possible_best_node.h) == False:  # erster Zug muss auf jeden Fall legal sein
                     best_nodes.append(possible_best_node)  # ,player)=(-1)^höhe
         # best_nodes sollte nun mindestens einen Zug enthalten. Dieser ist immer legal
+        print(best_nodes)
         if len(best_nodes) == 1:  # falls nur ein Zug vorhanden
             print("best0:", best_nodes[0])
             return best_nodes[0]  # gib Zug zurück
@@ -83,8 +90,8 @@ def best_node(tree):
         return children[0]
 
 def time_expected_next(time_last_run):
-    time_exponent = 2   # Exponent mit der benötigte Zeit ansteigt
-    time_expected = time_last_run**time_exponent
+    time_exponent = 10   # Exponent mit der benötigte Zeit ansteigt
+    time_expected = time_last_run*time_exponent
     return time_expected
 
 ### Hauptsuchroutine. Wählt taktisch verschiedene Suchverfahren
@@ -121,7 +128,7 @@ def search(root_node, player, max_depth, search_time=30):
         print("  best value found: " + str(best_val))
         if depth > 0:
             print("     aspiration bounds failed [left/right]: " + str(aw_failed_left) + " / " + str(aw_failed_right))
-        print("  time left: " + str(time_left) + ". next estimate: " + str(int(time_expected_next_run)))
+        print("  time left: " + str(time_left) + ". next estimate: " + str(time_expected_next_run))
         
         depth += 1
         
@@ -132,11 +139,31 @@ def search(root_node, player, max_depth, search_time=30):
     return depth#best_val
 
 
+def a_b_search_bak(node, depth=0, ismax=True):
+    #print("depth: " + str(depth) + ", player: " + str(ismax) + ", node_value: " + str(node.value) + ", value*player: " + str(node.value*ismax))
+
+    if depth == 0 or node.children == None:
+        player = -(-1**ismax)
+        #print("player: " + str(player) + ", node_value: " + str(node.value) + ", value*player: " + str(node.value*player))
+        return node.value
+    if ismax:
+        v = -1000000
+        for x in node.children:
+            v = max(v, a_b_search_bak(x, depth - 1, False))
+            node.value = v
+        return v
+    else:
+        v = 1000000
+        for x in node.children:
+            v = min(v, a_b_search_bak(x, depth - 1, True))
+            node.value = v
+        return v
+
 
 # alpha beta
 def a_b_search(node, player, depth=0, alpha=-inf, beta=inf):
     if depth==0 or node.children==None:
-        return node.value
+        return node.value*player
     #val=1000000
     for child in node.children:
         val = -(a_b_search(child, -player, depth-1,-beta, -alpha,))
@@ -151,8 +178,13 @@ def a_b_search(node, player, depth=0, alpha=-inf, beta=inf):
 
 # principal variation
 def a_b_search_principal_variation(node, player, depth=0, alpha=-inf, beta=inf):
+    ###TEST
+    return a_b_search_bak(node, depth, player)
+    
+    ####
     if depth==0 or node.children==None:
-        return node.value
+        print("player: " + str(player) + ", node_value: " + str(node.value) + ", value*player: " + str(node.value*player))
+        return node.value*player
     PV_gefunden = False
     best = -inf
     for child in node.children:

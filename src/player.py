@@ -171,8 +171,6 @@ class Player():
         # self.__switch__()#Spieler wechseln (egal ob zug gemacht odeer nicht
         return FEN
 
-    
-
 
 def checkmate(bitboard,player):
     counter = 0
@@ -190,5 +188,3 @@ def checkmate(bitboard,player):
         return True
     else:
         return mitte
-
-
