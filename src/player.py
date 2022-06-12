@@ -83,7 +83,7 @@ class Player():
 
 
     def generate_moves(self, b):
-        return generate_moves(b, self)
+        return generate_moves_verbose(b, self)
 
     def make_move(self, b_old, bb_from, bb_to):
         return make_move(b_old, bb_from, bb_to)
@@ -210,7 +210,7 @@ class Player():
         # print("node:")
         # print(node)
         # while node.h==h:
-        moves = self.generate_moves(node.b)  # liste aller moves von bb
+        moves = generate_moves_verbose(node.b, player)  # liste aller moves von bb
         # moves=[["a1a2",move(b)],["a2a4",b],...]
         # print("moves")
         for b in moves:
@@ -461,6 +461,7 @@ class Player():
         if search:  # alphabetasearch zeit messen für tiefe
             turn = False
         elif zug:  # zuggenerator only
+            print('teste Zuggenerator')
             zeit = time.time()
             for i in range(value):
                 moves = self.generate_moves(FENtoBit(FEN))
@@ -518,6 +519,7 @@ class Player():
             # print("search:",depth,children[0].value)
             return time.time() - searchtime
         elif turn:  # normaler zug #und alphabetasearch bis zeit um
+            print('teste turn:')
             FEN = self.turn(FEN, value)
             print(FEN)
             return (FEN)
@@ -569,8 +571,7 @@ def checkmate(bitbrd, player):  # Spiel nächsten Zug beendet -> True
     for x in listeS:
         if bitbrd['k'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
             schach = False
-    if schach == True:
-        return True
+    return schach
 
 
 # erstellt ein array mit String values der position der Weißen oder Schwarzen Figuren
@@ -883,14 +884,14 @@ if __name__ == "__main__":
     # FEN="rnbqkbnr/pp1p1ppp/4p3/1Pp5/8/2N5/P1PPPPPP/R1BQKBNR w"
     # FEN="8/4k3/8/8/8/8/3K4/8"
     FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"
-
+    FEN_2 = 'r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w'
     zeit = 10
     depth = 4
     wdh = 1000
 
     ### Unit/Benchmark Tests ###
 
-    p.teste(FEN,zeit,turn=True)#turn ausführen
+    p.teste(FEN_2,zeit,turn=True, )#turn ausführen
     # searchtime=p.teste(FEN,depth,search=True)#alphabetasearch zeit messen für tiefe
     # t=p.teste(FEN,wdh,zug=True)#zuggenerator only 1000 mal durchschnitt
     # t=p.teste(FEN,wdh,utility=True)#utility only
