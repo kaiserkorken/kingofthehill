@@ -60,7 +60,22 @@ class Tree(object):
     def sort_nodes(self):
         for x in self.nodes:
             #sortiere tupel x.children
+            # if x.h%2==0:#max spieler
+            #     x.children=sorted(x.children,reverse=True)#TODO implement eigene schnellere sortieragorithmen
+            # else: #min spieler
+            #     x.children=sorted(x.children)
+            oldchilds=x.children
+            values=[]
+            for index, z in enumerate(x.children):
+                values.append((z.value,index))
+                
             if x.h%2==0:#max spieler
-                x.children=sorted(x.children,reverted=True)#TODO implement eigene schnellere sortieragorithmen
+                values=sorted(values,reverse=True)#TODO implement eigene schnellere sortieragorithmen
             else: #min spieler
-                x.children=sorted(x.children)
+                values=sorted(values)
+            del x.children
+            x.children=[]
+            for y in values:
+                x.children+=(oldchilds[y[1]],)
+            x.children=list(x.children)
+            

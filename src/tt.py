@@ -5,7 +5,7 @@ import random
 from bitboard import *
 import json
 class ttable(object):
-    def __init__(self,location="table",dict=False,bits=False):
+    def __init__(self,location="table",dict=True,bits=False):
         random.seed()
         self.bits=32
         if bits:

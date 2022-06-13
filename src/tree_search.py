@@ -5,7 +5,7 @@ import numpy as np
 import random
 
 from tree import *
-from player import checkmate
+from checkmate import checkmate
 
 
 ### constants
@@ -59,21 +59,19 @@ def best_node(tree):
                 else:  # falls nächstbester Zug schlechter
                     break  # alle besten Züge gefunden
             else:  # falls Liste noch leer
-                print(possible_best_node.value)
-                print(checkmate(possible_best_node.b,
-                             (-1) ** possible_best_node.h))
-                if checkmate(possible_best_node.b,
-                             (-1) ** possible_best_node.h) == False:  # erster Zug muss auf jeden Fall legal sein
+                #print(possible_best_node.value)
+                #print(checkmate(possible_best_node.b,(-1) ** possible_best_node.h))
+                if checkmate(possible_best_node.b,(-1) ** possible_best_node.h) == False:  # erster Zug muss auf jeden Fall legal sein
                     best_nodes.append(possible_best_node)  # ,player)=(-1)^höhe
         # best_nodes sollte nun mindestens einen Zug enthalten. Dieser ist immer legal
-        print(best_nodes)
+        #print(best_nodes)
         if len(best_nodes) == 1:  # falls nur ein Zug vorhanden
             print("best0:", best_nodes[0])
             return best_nodes[0]  # gib Zug zurück
         elif len(best_nodes) > 1:
             while len(best_nodes) > 0:  # entferne Züge von Liste bis zufälliger legaler Zug gefunden
                 best_node = random.choice(best_nodes)  # wähle zufällig besten Zug
-                if checkmate(best_node, (-1) ** best_node.h) == False:  # falls Zug legal
+                if checkmate(best_node.b, (-1) ** best_node.h) == False:  # falls Zug legal
                     print("best:", best_node)
                     return best_node  # gib Zug zurück
                 else:
@@ -95,7 +93,7 @@ def time_expected_next(time_last_run):
     return time_expected
 
 ### Hauptsuchroutine. Wählt taktisch verschiedene Suchverfahren
-def search(root_node, player, max_depth, search_time=30):
+def search(root_node, player, max_depth, search_time=30, old=False):
     # iterative Tiefensuche
     time_last_run = 0.0 # benötigte Zeit für letzten Durchlauf
     time_left = search_time - time_last_run # Zeit bis Abbruch
@@ -112,10 +110,14 @@ def search(root_node, player, max_depth, search_time=30):
     while (time_left > time_expected_next_run and depth <= max_depth): # Erhöhe Tiefe so lange wie Fertigstellung der Ebene noch realistisch
         time_start = time.time()
         ### Suche
-        if depth > 0: # aspiration window suche um besten wert aus der letzten Tiefeniteration
-            best_val, aw_failed_left, aw_failed_right = a_b_search_aspiration_window(root_node, player, best_val, depth)
-        else: # kein aspiration window, da Wert geraten werden müsste
-            best_val = a_b_search_principal_variation(root_node, player, depth, alpha, beta)
+        if old:
+            best_val=a_b_search(root_node,player)
+        else:
+            if depth > 0: # aspiration window suche um besten wert aus der letzten Tiefeniteration
+                best_val, aw_failed_left, aw_failed_right = a_b_search_aspiration_window(root_node, player, best_val, depth)
+                print("     aspiration bounds failed [left/right]: " + str(aw_failed_left) + " / " + str(aw_failed_right))
+            else: # kein aspiration window, da Wert geraten werden müsste
+                best_val = a_b_search_principal_variation(root_node, player, depth, alpha, beta)
         
         
         time_stop = time.time()
@@ -126,13 +128,11 @@ def search(root_node, player, max_depth, search_time=30):
     
         print("  depth : " + str(depth) + " took " + str(time_last_run) + " to complete.")
         print("  best value found: " + str(best_val))
-        if depth > 0:
-            print("     aspiration bounds failed [left/right]: " + str(aw_failed_left) + " / " + str(aw_failed_right))
         print("  time left: " + str(time_left) + ". next estimate: " + str(time_expected_next_run))
-        
         depth += 1
+           
         
-        
+         
     print("search completed at depth: " + str(depth) + " with total time left: " + str(time_left))
     print("best value found: " + str(best_val))
     

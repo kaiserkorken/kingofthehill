@@ -2,6 +2,8 @@ import threading
 import socket
 from main import *
 from bitboard import BoardtoFEN, FENtoBit, FENtoBoard
+#TODO checkmate integrieren
+#TODO zeitbegrenzung schicken
 host = '127.0.0.1'
 port = 59566
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -330,7 +330,7 @@ def gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player
 
 def gen_moves_pawn_to_queen(b, player):
     # generates bb_lists with caputure and quiet moves
-    if player.current == 1:
+    if player == 1:
         bb_pawns = b['p'] & b['W']
         bb_from_and_all_moves_list = [[bb_from, moves_pawn_to_queen_W(b, bb_from)] for bb_from in serialize_bb(bb_pawns)] # iteriere über alle Türme
     else:
@@ -342,7 +342,7 @@ def gen_moves_pawn_to_queen(b, player):
 
 def gen_moves_king(b, player):
     # generates bb_lists with caputure and quiet moves
-    if player.current == 1:
+    if player== 1:
         bb_from = b['k'] & b['W']
         bb_all_moves = moves_king_W(b)
     else:
@@ -352,7 +352,7 @@ def gen_moves_king(b, player):
 
 def gen_moves_queen(b, player):
     # generates bb_lists with caputure and quiet moves
-    if player.current == 1:
+    if player == 1:
         bb_from = b['q'] & b['W']
         bb_all_moves = moves_queen_W(b, bb_from)
     else:
@@ -362,7 +362,7 @@ def gen_moves_queen(b, player):
     return gen_capture_quiet_lists_from_all_moves(b, [[bb_from, bb_all_moves]], player)
 
 def gen_moves_knight(b, player):
-    if player.current == 1:
+    if player == 1:
         bb_knights = b['n'] & b['W']
         bb_from_and_all_moves_list = [[bb_from, moves_knight_W(b, bb_from)] for bb_from in serialize_bb(bb_knights)] # iteriere über alle Springer
     else:
@@ -375,7 +375,7 @@ def gen_moves_knight(b, player):
     
 def gen_moves_rook(b, player):
     # generates bb_lists with caputure and quiet moves
-    if player.current == 1:
+    if player == 1:
         bb_rooks = b['r'] & b['W']
         bb_from_and_all_moves_list = [[bb_from, moves_rook_W(b, bb_from)] for bb_from in serialize_bb(bb_rooks)] # iteriere über alle Türme
     else:
@@ -389,7 +389,7 @@ def gen_moves_rook(b, player):
     
 def gen_moves_bishop(b, player):
     # generates bb_lists with caputure and quiet moves
-    if player.current == 1:
+    if player == 1:
         bb_bishops = b['b'] & b['W']
         bb_from_and_all_moves_list = [[bb_from, moves_bishop_W(b, bb_from)] for bb_from in serialize_bb(bb_bishops)] # iteriere über alle Türme
     else:
@@ -401,7 +401,7 @@ def gen_moves_bishop(b, player):
 
 def gen_moves_pawn(b, player):
     # generates bb_lists with caputure and quiet moves
-    if player.current == 1:
+    if player == 1:
         bb_pawns = b['p'] & b['W']
         bb_from_and_all_moves_list = [[bb_from, moves_pawn_W(b, bb_from)] for bb_from in serialize_bb(bb_pawns)] # iteriere über alle Türme
     else:

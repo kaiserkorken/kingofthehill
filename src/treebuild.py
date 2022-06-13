@@ -3,7 +3,7 @@ from utility import utility
 from tt import *
 import time
 
-def moves_to_node(tree, player, h=0, index=0, tt=True, utilities=True):  # added züge an node(index) mit nodes.value=None
+def moves_to_node(tree, player, h=0, index=0, tt=False, utilities=True):  # added züge an node(index) mit nodes.value=None
     # while (time-(tmax/2)>0):
     node = tree.find_node(index)
     
@@ -16,7 +16,14 @@ def moves_to_node(tree, player, h=0, index=0, tt=True, utilities=True):  # added
         if moves[b]:
             # if b[0] and b[1]:
             ### Test der names aus movegen verbose ###
-            if tt:
+            if not tt:
+                
+                if utilities:
+                    util=utility(moves[b],player)      
+                else:
+                    util=None
+                tree.insert_node(node, moves[b], util, h+1, names[b])  # in Node mit bitboard und wertung einsetzen
+            else:
                 x = -1
                 for z in range(len(alphabet)):
                     if alphabet[z] == names[b][4].lower():
@@ -35,20 +42,14 @@ def moves_to_node(tree, player, h=0, index=0, tt=True, utilities=True):  # added
                     if len(util) != 2:
                         # print(hash)
                         if utilities:
-                            util = utility(moves[b])
+                            util = utility(moves[b],player)
                         else:
                             util=None
                         tt.to_table(hash, util, h + 1)
                         tree.insert_node(node, moves[b], util, h + 1, names[b], hash)
                     else:
                         tree.insert_node(node, moves[b], util[0], h + 1, names[b], hash)  # in Node mit bitboard und wertung einsetzen
-            else:
-                if utilities:
-                    util=utility(moves[b])      
-                else:
-                    util=None
-                tree.insert_node(node, moves[b], util, h+1, names[b])  # in Node mit bitboard und wertung einsetzen
-
+            
             # auch in insert node auskommentieren! (tree.py)
             # print("u:")
             # print(utility(b))
@@ -61,7 +62,7 @@ def moves_to_node(tree, player, h=0, index=0, tt=True, utilities=True):  # added
     return h  # h nötig?
 
 
-def build_tree(tree, player,index=0, altstep=1, h=0, tmove=None, utilities=True,tt=True):  # tree ebenen erstellen bis tiefe d
+def build_tree(tree, player,index=0, altstep=1, h=0, tmove=None, depth=None,utilities=True,tt=False):  # tree ebenen erstellen bis tiefe d
     # tmove=height[4]
     # height=[tree,h,index,step,tmove]
     # logging.info("Thread1    : started")
@@ -69,7 +70,7 @@ def build_tree(tree, player,index=0, altstep=1, h=0, tmove=None, utilities=True,
     # if h==0:
     #     height=player.set_movetree(tree,tmove,h,index)#ein ausgerechneter zug alle züge ausrechnen
     #     print(height)
-    if tmove!= None:
+    if depth== None:
         start = time.time()
     height = altstep  # auskommentieren?
     altstep = len(tree.nodes)
@@ -77,23 +78,24 @@ def build_tree(tree, player,index=0, altstep=1, h=0, tmove=None, utilities=True,
         # print(height)
         # logging.info("Main    : creating height "+str(h))
         
-        height = build_tree(tree,player, h + 1, z,utilities=utilities,tt=tt)
+        height = moves_to_node(tree,player, h + 1, z,utilities=utilities,tt=tt)
  
-        if start + tmove <= time.time():  # zeitlimit überschritten
-            print("finished till ebene: " + str((h + 1)))
-            height -= 1  # letzte ebene nicht fertig geworden
-            return height
+        if depth==None:
+            if start + tmove <= time.time():  # zeitlimit überschritten
+                print("finished till ebene: " + str((h + 1)))
+                 # letzte ebene nicht fertig geworden
+                return height   
     if tmove==None:
         depth -= 1
         if depth > 0:
             index = altstep
         # altstep-=altaltstep#-=alt
         #__switch__()  # neue ebene für gegner
-            return build_tree(tree,player, h + 1, index,utilities=utilities,tt=tt)
+            return build_tree(tree,player, h + 1, index,utilities=utilities,tt=tt,tmove=tmove,depth=depth)
     else:
         if tmove >= time.time() - start:
             index = altstep
         #__switch__()  # neue ebene für gegner
-            return build_tree(tree,player, h + 1, index,utilities=utilities,tt=tt)
-    print("finished with ebene: " + h + 1)
-    return height
+            return build_tree(tree,player, h + 1, index,utilities=utilities,tt=tt,tmove=tmove,depth=depth)
+    print("finished with ebene: " , h + 1)
+    return height+1

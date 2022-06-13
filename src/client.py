@@ -1,6 +1,7 @@
 import threading
 import socket
 from player import *
+from tt import ttable
 alias = input('Choose an alias >>> ')
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(('127.0.0.1', 59566))
@@ -8,6 +9,7 @@ startFEN = "rnb1kbnr/p4ppp/1p1pp3/2p3q1/3P4/NQP1PNPB/PP3P1P/R1B1K2R w"
 #startFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 player = Player()
 win = True
+tt = ttable("hashtable")
 
 def client_receive():
     global win
@@ -27,7 +29,7 @@ def client_receive():
             elif FENtoBit(str(message)):
                 if not checkmate(FENtoBit(message),player):
                     #turn = player.turn(message,3)
-                    turn = player.turn(message,10)
+                    turn = player.turn(message,tt)
                     print("Turn:"+str(turn))
                     client.send(str(turn).encode('utf-8'))
                 else:

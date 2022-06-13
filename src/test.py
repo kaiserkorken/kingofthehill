@@ -1,7 +1,8 @@
+from email import message
 from player import *
 from movegen_verbose import generate_moves_verbose
 from tt import *
-
+    
 def teste(player, FEN, value=0, search=False, zug=False, utility=False, tree=False, tiefe=False, turn=False,
               baum=False, tt=False):
         # value depends on what you want to do:
@@ -124,21 +125,28 @@ if __name__ == "__main__":
 
     # inputs:#
 
-    p = Player()
+    #p = Player()
+    
     # FEN="r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR W"
-    # FEN="rnb1kbnr/p4ppp/1p1pp3/2p3q1/3P4/NQP1PNPB/PP3P1P/R1B1K2R w"
+    FEN="rnb1kbnr/p4ppp/1p1pp3/2p3q1/3P4/NQP1PNPB/PP3P1P/R1B1K2R w"
     # FEN="3q3r/1pp2pb1/3pkn2/1B6/3P4/4PN1P/5K1P/7R b"
     # FEN="rnbqkbnr/pp1p1ppp/4p3/1Pp5/8/2N5/P1PPPPPP/R1BQKBNR w"
     # FEN="8/4k3/8/8/8/8/3K4/8"
-    FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"
-
-    zeit = 10
-    depth = 4
+    # FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"
+    player=Player()
+    zeit = 20
+    depth = 2
     wdh = 1000
+    
+    tt=ttable("testtable")
+    #player.test_turn(FEN, t=None, depth=None,utilities=True,tt=False,sort=False,windows=False)
+    player.test_turn(FEN, depth, utilities=False, tt=tt)
+    tt.save_table()
 
-    ### Unit/Benchmark Tests ###
 
-    p.teste(FEN,zeit,turn=True)#turn ausführen
+    ### Unit/Benchmark Tests alt###
+
+    # p.teste(FEN,zeit,turn=True)#turn ausführen
     # searchtime=p.teste(FEN,depth,search=True)#alphabetasearch zeit messen für tiefe
     # t=p.teste(FEN,wdh,zug=True)#zuggenerator only 1000 mal durchschnitt
     # t=p.teste(FEN,wdh,utility=True)#utility only
@@ -192,3 +200,7 @@ if __name__ == "__main__":
 # 46119
 # 32078
 # 32078
+
+# 70700 nodes h 3
+# + 20 sek treebuild (tt)
+# -> - sek utility
