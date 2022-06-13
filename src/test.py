@@ -135,12 +135,12 @@ if __name__ == "__main__":
     # FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"
     player=Player()
     zeit = 20
-    depth = 2
+    depth = 4
     wdh = 1000
     
     tt=ttable("testtable")
-    #player.test_turn(FEN, t=None, depth=None,utilities=True,tt=False,sort=False,windows=False)
-    player.test_turn(FEN, depth, utilities=False, tt=tt)
+    player.test_turn(FEN, depth=depth,utilities=True,tt=tt)
+   # player.test_turn(FEN, depth, utilities=False, tt=tt)
     tt.save_table()
 
 
