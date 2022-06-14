@@ -85,7 +85,64 @@ def generate_moves_verbose(b, player):
     
     ### erstelle Liste aller möglichen Züge durch Simulation ###
     
-    # list of list: liste mit elementen: liste mit allen zügen für jeden Figurentyp
+
+    
+    
+    # pawn to queen
+#    print('pawn to queen')
+    move_list_capture_pawn_to_queen, move_list_quiet_pawn_to_queen, name_list_capture_pawn_to_queen, name_list_quiet_pawn_to_queen = gen_moves_pawn_to_queen(b, player) 
+    move_list_capture_king, move_list_quiet_king, name_list_capture_king, name_list_quiet_king = gen_moves_king(b, player)
+    move_list_capture_queen, move_list_quiet_queen, name_list_capture_queen, name_list_quiet_queen = gen_moves_queen(b, player)
+    move_list_capture_knight, move_list_quiet_knight, name_list_capture_knight, name_list_quiet_knight = gen_moves_knight(b, player) 
+    move_list_capture_rook, move_list_quiet_rook, name_list_capture_rook, name_list_quiet_rook = gen_moves_rook(b, player) 
+    move_list_capture_bishop, move_list_quiet_bishop, name_list_capture_bishop, name_list_quiet_bishop = gen_moves_bishop(b, player) 
+    move_list_capture_pawn, move_list_quiet_pawn, name_list_capture_pawn, name_list_quiet_pawn = gen_moves_pawn(b, player) 
+    
+    """    
+    move_list_capture = np.concatenate((move_list_capture_pawn_to_queen, 
+                                        move_list_capture_king,
+                                        move_list_capture_queen,
+                                        move_list_capture_knight,
+                                        move_list_capture_rook,
+                                        move_list_capture_bishop,
+                                        move_list_capture_pawn,
+                                        ))
+                                       
+    # add quiet moves
+    move_list_quiet = np.concatenate((move_list_quiet_pawn_to_queen, 
+                                      move_list_quiet_king,
+                                      move_list_quiet_queen,
+                                      move_list_quiet_knight,
+                                      move_list_quiet_rook,
+                                      move_list_quiet_bishop,
+                                      move_list_quiet_pawn,
+                                      ))
+      
+    # corresponding move names
+    name_list_capture = np.concatenate((name_list_capture_pawn_to_queen, 
+                                        name_list_capture_king,
+                                        name_list_capture_queen,
+                                        name_list_capture_knight,
+                                        name_list_capture_rook,
+                                        name_list_capture_bishop,
+                                        name_list_capture_pawn,
+                                        ))
+    
+    name_list_quiet = np.concatenate((name_list_quiet_pawn_to_queen, 
+                                      name_list_quiet_king,
+                                      name_list_quiet_queen,
+                                      name_list_quiet_knight,
+                                      name_list_quiet_rook,
+                                      name_list_quiet_bishop,
+                                      name_list_quiet_pawn,
+                                      ))
+    
+    move_list = np.concatenate((move_list_capture, move_list_quiet))
+    name_list = np.concatenate((name_list_capture, name_list_quiet))
+    
+    """
+    
+     # list of list: liste mit elementen: liste mit allen zügen für jeden Figurentyp
     # add possible capture moves
     move_list_capture = []
     # add quiet moves
@@ -95,10 +152,6 @@ def generate_moves_verbose(b, player):
     name_list_capture = []
     name_list_quiet = []
     
-    
-    # pawn to queen
-#    print('pawn to queen')
-    move_list_capture_pawn_to_queen, move_list_quiet_pawn_to_queen, name_list_capture_pawn_to_queen, name_list_quiet_pawn_to_queen = gen_moves_pawn_to_queen(b, player) 
     if move_list_capture_pawn_to_queen:
         move_list_capture.append(move_list_capture_pawn_to_queen)
         name_list_capture.append(name_list_capture_pawn_to_queen)
@@ -108,33 +161,15 @@ def generate_moves_verbose(b, player):
     
     # king
 #    print('king')
-    move_list_capture_king, move_list_quiet_king, name_list_capture_king, name_list_quiet_king = gen_moves_king(b, player)
     if move_list_capture_king:
         move_list_capture.append(move_list_capture_king)
         name_list_capture.append(name_list_capture_king)
     if move_list_quiet_king:
         move_list_quiet.append(move_list_quiet_king)
         name_list_quiet.append(name_list_quiet_king)
-    '''    
-    print('TEST king')
-    print(str(len(move_list_capture)) + " " + str(len(move_list_quiet)))
-    print(str(len(name_list_capture)) + " " + str(len(name_list_quiet)))
-    
-        # flacht list of list zu liste ab [[a,b],[c,d]] -> [a,b,c,d] (zugehörigkeit für figuren geht flöten)
-    move_list_capture_flat = flatten_list_of_list(move_list_capture)
-    move_list_quiet_flat = flatten_list_of_list(move_list_quiet)
-    
-    name_list_capture_flat = flatten_list_of_list(name_list_capture)
-    name_list_quiet_flat = flatten_list_of_list(name_list_quiet)
-    
-    print('TEST 3.0')
-    print(str(len(move_list_capture_flat)) + " " + str(len(move_list_quiet_flat)))
-    print(str(len(name_list_capture_flat)) + " " + str(len(name_list_quiet_flat)))
-    '''
-    
+
     # queen
 #    print('queen')
-    move_list_capture_queen, move_list_quiet_queen, name_list_capture_queen, name_list_quiet_queen = gen_moves_queen(b, player)
     if move_list_capture_queen:
         move_list_capture.append(move_list_capture_queen)
         name_list_capture.append(name_list_capture_queen)
@@ -142,102 +177,36 @@ def generate_moves_verbose(b, player):
         move_list_quiet.append(move_list_quiet_queen)
         name_list_quiet.append(name_list_quiet_queen)
     
-    '''
-    print('TEST queen')
-    print(str(len(move_list_capture)) + " " + str(len(move_list_quiet)))
-    print(str(len(name_list_capture)) + " " + str(len(name_list_quiet)))
-    
-        # flacht list of list zu liste ab [[a,b],[c,d]] -> [a,b,c,d] (zugehörigkeit für figuren geht flöten)
-    move_list_capture_flat = flatten_list_of_list(move_list_capture)
-    move_list_quiet_flat = flatten_list_of_list(move_list_quiet)
-    
-    name_list_capture_flat = flatten_list_of_list(name_list_capture)
-    name_list_quiet_flat = flatten_list_of_list(name_list_quiet)
-    
-    print('TEST 3.1')
-    print(str(len(move_list_capture_flat)) + " " + str(len(move_list_quiet_flat)))
-    print(str(len(name_list_capture_flat)) + " " + str(len(name_list_quiet_flat)))
-    '''
     # knight
 #    print('knight')
-    move_list_capture_knight, move_list_quiet_knight, name_list_capture_knight, name_list_quiet_knight = gen_moves_knight(b, player) 
     if move_list_capture_knight:
         move_list_capture.append(move_list_capture_knight)
         name_list_capture.append(name_list_capture_knight)
     if move_list_quiet_knight:
         move_list_quiet.append(move_list_quiet_knight)
         name_list_quiet.append(name_list_quiet_knight)
-    '''    
-    print('TEST knight')
-    print(str(len(move_list_capture)) + " " + str(len(move_list_quiet)))
-    print(str(len(name_list_capture)) + " " + str(len(name_list_quiet)))    
 
-    # flacht list of list zu liste ab [[a,b],[c,d]] -> [a,b,c,d] (zugehörigkeit für figuren geht flöten)
-    move_list_capture_flat = flatten_list_of_list(move_list_capture)
-    move_list_quiet_flat = flatten_list_of_list(move_list_quiet)
-    
-    name_list_capture_flat = flatten_list_of_list(name_list_capture)
-    name_list_quiet_flat = flatten_list_of_list(name_list_quiet)
-    
-    print('TEST 3.2')
-    print(str(len(move_list_capture_flat)) + " " + str(len(move_list_quiet_flat)))
-    print(str(len(name_list_capture_flat)) + " " + str(len(name_list_quiet_flat)))
-    '''
-    
     # rook
 #    print('rook')
-    move_list_capture_rook, move_list_quiet_rook, name_list_capture_rook, name_list_quiet_rook = gen_moves_rook(b, player) 
     if move_list_capture_rook:
         move_list_capture.append(move_list_capture_rook)
         name_list_capture.append(name_list_capture_rook)
     if move_list_quiet_rook:
         move_list_quiet.append(move_list_quiet_rook)
         name_list_quiet.append(name_list_quiet_rook)
-    '''
-    print('TEST rook')
-    print(str(len(move_list_capture)) + " " + str(len(move_list_quiet)))
-    print(str(len(name_list_capture)) + " " + str(len(name_list_quiet)))
-    
-    # flacht list of list zu liste ab [[a,b],[c,d]] -> [a,b,c,d] (zugehörigkeit für figuren geht flöten)
-    move_list_capture_flat = flatten_list_of_list(move_list_capture)
-    move_list_quiet_flat = flatten_list_of_list(move_list_quiet)
-    
-    name_list_capture_flat = flatten_list_of_list(name_list_capture)
-    name_list_quiet_flat = flatten_list_of_list(name_list_quiet)
-    
-    print('TEST 3.3')
-    print(str(len(move_list_capture_flat)) + " " + str(len(move_list_quiet_flat)))
-    print(str(len(name_list_capture_flat)) + " " + str(len(name_list_quiet_flat)))        
-    '''    
+
         
     # bishop
 #    print('bishop')
-    move_list_capture_bishop, move_list_quiet_bishop, name_list_capture_bishop, name_list_quiet_bishop = gen_moves_bishop(b, player) 
     if move_list_capture_bishop:
         move_list_capture.append(move_list_capture_bishop)
         name_list_capture.append(name_list_capture_bishop)
     if move_list_quiet_bishop:
         move_list_quiet.append(move_list_quiet_bishop)
         name_list_quiet.append(name_list_quiet_bishop)
-    '''    
-    print('TEST bishop')
-    print(str(len(move_list_capture)) + " " + str(len(move_list_quiet)))
-    print(str(len(name_list_capture)) + " " + str(len(name_list_quiet)))
-    
-    # flacht list of list zu liste ab [[a,b],[c,d]] -> [a,b,c,d] (zugehörigkeit für figuren geht flöten)
-    move_list_capture_flat = flatten_list_of_list(move_list_capture)
-    move_list_quiet_flat = flatten_list_of_list(move_list_quiet)
-    
-    name_list_capture_flat = flatten_list_of_list(name_list_capture)
-    name_list_quiet_flat = flatten_list_of_list(name_list_quiet)
-    
-    print('TEST 3.4')
-    print(str(len(move_list_capture_flat)) + " " + str(len(move_list_quiet_flat)))
-    print(str(len(name_list_capture_flat)) + " " + str(len(name_list_quiet_flat)))
-    '''
+
     # pawn
 #    print('pawn')
-    move_list_capture_pawn, move_list_quiet_pawn, name_list_capture_pawn, name_list_quiet_pawn = gen_moves_pawn(b, player) 
     if move_list_capture_pawn:
         move_list_capture.append(move_list_capture_pawn)
         name_list_capture.append(name_list_capture_pawn)
@@ -245,11 +214,7 @@ def generate_moves_verbose(b, player):
         move_list_quiet.append(move_list_quiet_pawn)
         name_list_quiet.append(name_list_quiet_pawn)
         
-    '''    
-    print('TEST pawn')
-    print(str(len(move_list_capture)) + " " + str(len(move_list_quiet)))
-    print(str(len(name_list_capture)) + " " + str(len(name_list_quiet)))
-    '''    
+
     # flacht list of list zu liste ab [[a,b],[c,d]] -> [a,b,c,d] (zugehörigkeit für figuren geht flöten)
     move_list_capture_flat = flatten_list_of_list(move_list_capture)
     move_list_quiet_flat = flatten_list_of_list(move_list_quiet)
@@ -261,7 +226,16 @@ def generate_moves_verbose(b, player):
     print(str(len(move_list_capture_flat)) + " " + str(len(move_list_quiet_flat)))
     print(str(len(name_list_capture_flat)) + " " + str(len(name_list_quiet_flat)))
     '''
-    return np.concatenate((move_list_capture_flat, move_list_quiet_flat)), np.concatenate((name_list_capture_flat, name_list_quiet_flat))
+    
+    move_list = np.concatenate((move_list_capture_flat, move_list_quiet_flat))
+    name_list = np.concatenate((name_list_capture_flat, name_list_quiet_flat))
+    
+  #  """
+   
+    print(move_list)
+    print(name_list)
+    
+    return move_list , name_list
 
 
 
@@ -410,4 +384,56 @@ def gen_moves_pawn(b, player):
     
     # zu jeder Figur capture- und quiet-listen erstellen
     return gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player)
+
+
+from player import *
+def bench_movegen(FEN, iterations=100, verbose=True):
+    player = Player()
+    
+    b, pl = FENtoBit(FEN, True)
+    player.current = pl
+    
+    t_start = time.time()
+    if verbose:
+        for i in range(iterations):
+            moves, names = generate_moves_verbose(b, player) # generiere alle Züge aus Position b
+    else:
+        for i in range(iterations):
+            moves = generate_moves(b, player) # generiere alle Züge aus Position b
+    t_end = time.time()
+    return t_end-t_start
+
+    
+    
+    
+
+# Stellung 1: 
+FEN_1 = 'rnbqkbnr/p4ppp/1p1pp3/2p5/3P4/NQP1PNPB/PP3P1P/R1B1K2R b'
+possible_moves_1 = ['ke8-e7', 'qd8-h4', 'qd8-g5', 'qd8-f6', 'qd8-c7', 'qd8-d7', 'qd8-e7', 'nb8-d1',
+ 'nb8-a6', 'nb8-c6', 'nb8-d7', 'ng8xe1', 'ng8-f6', 'ng8-h6', 'ng8-e7', 'bc8-a6',
+ 'bc8-b7', 'bc8-d7', 'bf8-e7', 'c5-c4', 'c5xd4', 'b6-b5', 'd6-d5', 'e6-e5',
+ 'a7-a5', 'a7-a6', 'f7-f5', 'f7-f6', 'g7-g5', 'g7-g6', 'h7-h5', 'h7-h6']
+# Stellung 2: 
+FEN_2 = 'r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w'
+possible_moves_2 = ['Bc1xg5', 'h4xg5', 'Ke1-d1', 'Ke1-f1', 'Ke1-e2', 'Ng1-e2', 'Ng1-f3', 'Ng1-h3',
+ 'Nb7-a5', 'Nb7-c5', 'Nb7-d6', 'Ra1-b1', 'Rh1-h2', 'Rh1-h3', 'Bc1-d2', 'Bc1-e3',
+ 'Bc1-f4', 'a2-a3', 'a2-a4', 'b2-b3', 'b2-b4', 'f2-f3', 'f2-f4', 'g2-g3', 'g2-g4',
+ 'c3-c4', 'd4-d5', 'c6-c7']
+
+
+if __name__ == "__main__":
+    verbose = True
+    iterations = 1
+    print('Benchmark: Movegen (verbose)')
+    print('iterations: ' + str(iterations))
+    time_stopped = bench_movegen(FEN_1, iterations, verbose)
+    print("avg. time per ieration: " + str(time_stopped/iterations))
+
+   
+    verbose = False
+    print('Benchmark: Movegen')
+    print('iterations: ' + str(iterations))
+    time_stopped = bench_movegen(FEN_1, iterations, verbose)
+    print("avg. time per ieration: " + str(time_stopped/iterations)) 
+
 

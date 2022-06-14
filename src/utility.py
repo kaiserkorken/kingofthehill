@@ -6,7 +6,7 @@ def utility(b,player, simple=True):
         return spielBewertung(b,player)
 
 def simple_utility(b,player):
-    piece_values = {'k':100, 'q':9, 'r':5, 'b':3, 'p':1}
+    piece_values = {'k':100, 'q':9, 'r':5, 'b':3, 'n':3, 'p':1}
 
        
     values_W = np.sum([np.sum(b[key] & b['W'])*piece_values[key] for key in piece_values])
