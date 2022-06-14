@@ -1,6 +1,27 @@
 import numpy as np
 from player import *
-from movegen_test import unit_test
+from movegen_verbose import make_move_name, generate_moves_verbose, generate_moves
+import time
+
+def bench_movegen(FEN, iterations=100, verbose=True):
+    player = Player()
+    
+    b, pl = FENtoBit(FEN, True)
+    player.current = pl
+    
+    t_start = time.time()
+    if verbose:
+        for i in range(iterations):
+            moves, names = generate_moves_verbose(b, player) # generiere alle Züge aus Position b
+    else:
+        for i in range(iterations):
+            moves = generate_moves(b, player) # generiere alle Züge aus Position b
+    t_end = time.time()
+    return t_end-t_start
+
+    
+    
+    
 
 # Stellung 1: 
 FEN_1 = 'rnbqkbnr/p4ppp/1p1pp3/2p5/3P4/NQP1PNPB/PP3P1P/R1B1K2R b'
@@ -17,20 +38,16 @@ possible_moves_2 = ['Bc1xg5', 'h4xg5', 'Ke1-d1', 'Ke1-f1', 'Ke1-e2', 'Ng1-e2', '
 
 
 if __name__ == "__main__":
-    
-    print('Unit Test 1:')
-    print('Moves to find: ' + str(len(possible_moves_1)) + ' move(s) possible')
-    print(possible_moves_1)
-    passed = unit_test(FEN_1, possible_moves_1)
-    print('Unit test passed?: ' + str(passed))
-    
-    print('------------------')
-    print('------------------')
-    print('------------------')
-    
-    print('Unit Test 2:')
-    print('Moves to find: ' + str(len(possible_moves_2)) + ' move(s) possible')
-    print(possible_moves_2)
-    passed = unit_test(FEN_2, possible_moves_2)
-    print('Unit test passed?: ' + str(passed))
-    
+    verbose = True
+    iterations = 100
+    print('Benchmark: Movegen (verbose)')
+    print('iterations: ' + str(iterations))
+    time_stopped = bench_movegen(FEN_1, iterations, verbose)
+    print("avg. time per ieration: " + str(time_stopped/iterations))
+
+   
+    verbose = False
+    print('Benchmark: Movegen')
+    print('iterations: ' + str(iterations))
+    time_stopped = bench_movegen(FEN_1, iterations, verbose)
+    print("avg. time per ieration: " + str(time_stopped/iterations)) 
