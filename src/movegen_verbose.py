@@ -232,7 +232,7 @@ def generate_moves_verbose(b, player):
     
   #  """
    
-    print(move_list)
+#    print(move_list)
     print(name_list)
     
     return move_list , name_list
