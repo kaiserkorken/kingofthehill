@@ -1,6 +1,18 @@
 from bitboard import *
-def utility(b,player):
-    return spielBewertung(b,player)
+def utility(b,player, simple=True):
+    if simple:
+        return simple_utility(b,player)
+    else:
+        return spielBewertung(b,player)
+
+def simple_utility(b,player):
+    piece_values = {'k':100, 'q':9, 'r':5, 'b':3, 'p':1}
+
+       
+    values_W = np.sum([np.sum(b[key] & b['W'])*piece_values[key] for key in piece_values])
+    values_B = np.sum([np.sum(b[key] & b['B'])*piece_values[key] for key in piece_values])
+    return player*(values_W - values_B)
+    
 
 # erstellt ein array mit String values der position der Weißen oder Schwarzen Figuren
 def playerWert(bitbrd, player):

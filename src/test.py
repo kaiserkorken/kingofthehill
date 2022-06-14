@@ -134,14 +134,14 @@ if __name__ == "__main__":
     # FEN="8/4k3/8/8/8/8/3K4/8"
     # FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"
     player=Player()
-    zeit = 20
-    depth = 4
+    zeit = 10
+    depth = 3
     wdh = 1000
     
-    tt=ttable("testtable")
-    player.test_turn(FEN, depth=depth,utilities=True,tt=tt)
+    #tt=ttable("testtable")
+    player.test_turn(FEN, depth=depth)
    # player.test_turn(FEN, depth, utilities=False, tt=tt)
-    tt.save_table()
+    #tt.save_table()
 
 
     ### Unit/Benchmark Tests alt###
