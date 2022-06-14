@@ -142,7 +142,7 @@ def generate_moves(b, player):
 
     
 def split_capture_quiet(b, bb_to, player):
-    if player:
+    if player == 1:
         bb_opponent = b['B']
     else:
         bb_opponent = b['W']

@@ -86,8 +86,6 @@ def generate_moves_verbose(b, player):
     ### erstelle Liste aller möglichen Züge durch Simulation ###
     
 
-    
-    
     # pawn to queen
 #    print('pawn to queen')
     move_list_capture_pawn_to_queen, move_list_quiet_pawn_to_queen, name_list_capture_pawn_to_queen, name_list_quiet_pawn_to_queen = gen_moves_pawn_to_queen(b, player) 
@@ -98,7 +96,7 @@ def generate_moves_verbose(b, player):
     move_list_capture_bishop, move_list_quiet_bishop, name_list_capture_bishop, name_list_quiet_bishop = gen_moves_bishop(b, player) 
     move_list_capture_pawn, move_list_quiet_pawn, name_list_capture_pawn, name_list_quiet_pawn = gen_moves_pawn(b, player) 
     
-    """    
+#    """    
     move_list_capture = np.concatenate((move_list_capture_pawn_to_queen, 
                                         move_list_capture_king,
                                         move_list_capture_queen,
@@ -230,10 +228,10 @@ def generate_moves_verbose(b, player):
     move_list = np.concatenate((move_list_capture_flat, move_list_quiet_flat))
     name_list = np.concatenate((name_list_capture_flat, name_list_quiet_flat))
     
-  #  """
+    """
    
 #    print(move_list)
-    print(name_list)
+#    print(name_list)
     
     return move_list , name_list
 

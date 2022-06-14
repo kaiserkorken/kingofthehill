@@ -9,7 +9,7 @@ def unit_test(FEN, all_moves, verbose=False):
     
     b, pl = FENtoBit(FEN, True)
     player.current = pl
-    print(player.current)
+#    print(player.current)
     
     moves, names = generate_moves_verbose(b, player.current) # generiere alle Züge aus Position b
     
