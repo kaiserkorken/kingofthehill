@@ -1,11 +1,8 @@
 from bitboard import *
+import time
 
 
-
-def utility(b, player, simple=True):
-#    print('new')
-#    print(simple_utility(b,player))
-#    print(spielBewertung(b,player))
+def utility(b,player, simple=True):
     if simple:
         return simple_utility(b,player)
     else:
@@ -21,68 +18,8 @@ def simple_utility(b,player):
     
 
 # erstellt ein array mit String values der position der Weißen oder Schwarzen Figuren
-def playerWert(bitbrd, player):
-    if player == 1:
-        farbe = 'W'
-    else:
-        farbe = 'B'
-    somelist = []
-    for num, x in enumerate(bitbrd[farbe], start=0):
-        for sec, y in enumerate(bitbrd[farbe][num], start=0):
-            if bitbrd[farbe][num][sec] == True:
-                somelist.append(str(num) + ";" + str(sec))
-    return somelist
 
-
-# nimmt den array von playerWert und iterirt durch die verschiedenen Bitboard um nachzuprüfen um welche Figur es sich handelt
-# Wert für Q = 9 R = 5 N = 3 B = 3 P = 1 K = 1
-# Falls ein P ein ende erreicht nimmt er den Wert von 9 an
-# Falls ein K die mittelpunkte erreicht kriegt er 1000 punkte erteilt weil er schon gewonnen hat
-
-
-def calculateValue(bitbrd, listeS, player):
-    wert = 0
-
-    for x in listeS:
-        if bitbrd['q'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
-            wert = wert + 9
-
-    for x in listeS:
-        if bitbrd['r'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
-            wert = wert + 5
-
-    for x in listeS:
-        if bitbrd['n'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
-            wert = wert + 3
-
-    for x in listeS:
-        if bitbrd['b'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
-            wert = wert + 3
-
-    for x in listeS:
-        if bitbrd['p'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
-            if int(x.split(";")[0]) == 7 and player == 1:
-                wert = wert + 9
-            elif int(x.split(";")[0]) == 0 and player == -1:
-                wert = wert + 9
-            elif int(x.split(";")[0]) != 0:
-                wert = wert + 1
-
-    for x in listeS:
-        if bitbrd['k'][int(x.split(";")[0])][int(x.split(";")[1])] == True:
-            wert = wert + 1
-            if int(x.split(";")[0]) == 3 and int(x.split(";")[1]) == 3:
-                wert = 100
-            if int(x.split(";")[0]) == 3 and int(x.split(";")[1]) == 4:
-                wert = 100
-            if int(x.split(";")[0]) == 4 and int(x.split(";")[1]) == 3:
-                wert = 100
-            if int(x.split(";")[0]) == 4 and int(x.split(";")[1]) == 4:
-                wert = 100
-
-    return wert
-
-
+#neue Bewertungsfunktion
 def doubledPawns(board, color):
     color = color[0]
     # Get indices of pawns:
@@ -108,30 +45,6 @@ def lookfor(board, piece):
                 y = row
                 listofLocations.append((x, y))
     return listofLocations
-
-
-testBoard = [
-    ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
-    ["--", "bp", "--", "--", "bp", "bp", "bp", "bp"],
-    ["--", "bp", "--", "--", "bp", "--", "bp", "--"],
-    ["--", "bp", "--", "--", "--", "--", "--", "--"],
-    ["--", "wp", "--", "--", "--", "--", "wp", "--"],
-    ["--", "--", "--", "bp", "--", "--", "--", "--"],
-    ["wp", "wp", "wp", "wp", "wp", "--", "--", "--"],
-    ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]]
-
-# print(doubledPawns(testBoard,"b"))
-
-testBoardB = [
-    ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
-    ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
-    ["bp", "bp", "--", "--", "bp", "--", "bp", "--"],
-    ["--", "bp", "--", "--", "--", "--", "--", "--"],
-    ["--", "--", "--", "wp", "--", "--", "--", "--"],
-    ["--", "--", "--", "wp", "--", "--", "bN", "--"],
-    ["wp", "wp", "--", "wp", "--", "wp", "wp", "wp"],
-    ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]]
-
 
 def blockedPawns(board, color):
     color = color[0]
@@ -179,20 +92,6 @@ def isolatedPawns(board, color):
             isolated += 1
     return isolated
 
-
-testBoardC = [
-    ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
-    ["--", "--", "--", "--", "bp", "bp", "bp", "bp"],
-    ["--", "--", "--", "--", "--", "--", "--", "--"],
-    ["bp", "--", "--", "--", "--", "--", "--", "--"],
-    ["--", "--", "bp", "--", "--", "--", "--", "--"],
-    ["--", "--", "--", "--", "--", "--", "--", "--"],
-    ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
-    ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]]
-
-
-# print(isolatedPawns(testBoardC,'b'))
-
 def pawnP(board, player):
     if player == -1:
         return (doubledPawns(board, 'w') + blockedPawns(board, 'w') + isolatedPawns(board, 'w')) - \
@@ -202,24 +101,42 @@ def pawnP(board, player):
         return (doubledPawns(board, 'b') + blockedPawns(board, 'b') + isolatedPawns(board, 'b')) - \
                (doubledPawns(board, 'w') + blockedPawns(board, 'w') + isolatedPawns(board, 'w'))
 
-
-# print(doubledPawns(testBoard,'w'))
-# print(blockedPawns(testBoard,'w'))
-# print(isolatedPawns(testBoard,'w'))
-# print(doubledPawns(testBoard,'b'))
-# print(blockedPawns(testBoard,'b'))
-# print(isolatedPawns(testBoard,'b'))
-
-
-# Bewertungsfunktion nimmt ein Bitboard und den Player 1 wenn Weiß und -1 wenn Schwarz
-def spielBewertung(bitbrd, player):
-    wertW = calculateValue(bitbrd, playerWert(bitbrd, 1), 1)
-    wertB = calculateValue(bitbrd, playerWert(bitbrd, -1), -1)
-    pracTable = pawnP(FENtoBoard(BittoFEN(bitbrd, player)), player)
-    #print(pracTable)
-    if wertW==None or wertB==None or pracTable==None:
-        print(wertW, wertB ,pracTable)
+def seitenWert(board,player):
+    summe = 0
+    color =""
     if player == 1:
-        return wertW - wertB + pracTable
-    elif player == -1:
-        return wertB - wertW + pracTable
+        color = "w"
+    elif player ==-1:
+        color = "b"
+
+    for x in board:
+        for y in x:
+                if y == color+'R':
+                    summe+=5
+                elif y ==color+'N':
+                    summe+=3
+                elif y ==color+'B':
+                    summe+=3
+                elif y ==color+'Q':
+                    summe+=9
+                elif y ==color+'K':
+                    summe+=100
+                elif y ==color+'p':
+                    summe+=1
+
+    if board[3][3]==color+'K' or board[3][4]==color+'K' or board[4][3]==color+'K' or board[4][4]==color+'K':
+        return 1000
+
+    else:
+        return summe
+
+def spielBewertung(BitBoard,Player):
+    nesBoard = FENtoBoard(BittoFEN(BitBoard))
+    valuesW = seitenWert(nesBoard,1)
+    valuesB = seitenWert(nesBoard,-1)
+    valuesP = pawnP(nesBoard,Player)
+
+    if Player ==1:
+        return valuesW-valuesB+valuesP
+    elif Player ==-1:
+        return valuesB-valuesW+valuesP
