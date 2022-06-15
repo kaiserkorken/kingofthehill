@@ -2,19 +2,19 @@ from bitboard import *
 import time
 
 
-def utility(b,player, simple=True):
+def utility(b,player_code, simple=True):
     if simple:
-        return simple_utility(b,player)
+        return simple_utility(b,player_code)
     else:
-        return spielBewertung(b,player)
+        return spielBewertung(b,player_code)
 
-def simple_utility(b,player):
+def simple_utility(b,player_code):
     piece_values = {'k':100, 'q':9, 'r':5, 'b':3, 'n':3, 'p':1}
 
        
     values_W = np.sum([np.sum(b[key] & b['W'])*piece_values[key] for key in piece_values])
     values_B = np.sum([np.sum(b[key] & b['B'])*piece_values[key] for key in piece_values])
-    return player*(values_W - values_B)
+    return player_code*(values_W - values_B)
     
 
 # erstellt ein array mit String values der position der Weißen oder Schwarzen Figuren
