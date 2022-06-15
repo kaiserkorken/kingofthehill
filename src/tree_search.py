@@ -170,8 +170,8 @@ def a_b_search(node, player, depth=0, alpha=-inf, beta=inf):
     #val=1000000
     for child in node.children:
         #print(a_b_search(child, -player, depth-1, -beta, -alpha,))
-        val = -(a_b_search(child, -player, depth-1, -beta, -alpha,))
-        #node.value = val
+        val = player*(a_b_search(child, -player, depth-1, -beta, -alpha,))
+        #node.value = vals
         if (val > alpha):
             alpha = val
             if (alpha >= beta):
@@ -330,10 +330,3 @@ if __name__ == "__main__":
     t_bench = bench_tree_search_list(copy.deepcopy(tree_dict_list), tree_height, search_time, search_mode, verbose)
     search_mode = 'aspiration_windows'
     t_bench = bench_tree_search_list(copy.deepcopy(tree_dict_list), tree_height, search_time, search_mode, verbose)
-
-
-
-    
-    
-    
-    
