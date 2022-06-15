@@ -84,13 +84,13 @@ class Player():
                 # arr[1]=tree.h
                 self.current = play
                 tleft = time.time() - start
-                logging.info("Main    : movetree finished with height: " + str(height) + " " + str(tleft))
+                logging.info("Main    : movetree finished with height: " + str(height+1) + " " + str(tleft))
                 logging.info("Main    : tree build finished in:" + str(time.time() - start) + "s")
 
                 # tree.print_tree()
                 # print(tree)  
                 # utility auf root?
-                depth = 1
+                #depth = 1
                 logging.info("Main    : doing tree search " + str(tleft))
                 tree.sort_nodes() #FEhler bei invertet=True
                 sstart = time.time()
@@ -117,7 +117,8 @@ class Player():
     
     def test_turn(self, FEN, t=None, depth=None,utilities=True,tt=False,sort=False,windows=False):  # ein kompletter zug der ki
         # print(FEN)
-        
+        # if depth!=None:
+        #     depth-=1
         start = time.time()
         format = "%(asctime)s: %(message)s"
         logging.basicConfig(format=format, level=logging.INFO,
@@ -149,7 +150,7 @@ class Player():
                 height = build_tree(tree,self.current,tmove=tmove,depth=depth,utilities=True,tt=tt)  # time bzw. depth
                 # arr[1]=tree.h
                 
-                    
+                utilities=True
                 self.current = play
                 tleft = time.time() - start
                 logging.info("Main    : movetree finished with height: " + str(height) + " " + str(tleft))
@@ -192,7 +193,7 @@ class Player():
                 # tree.print_tree()
                 # print(tree)  
                 # utility auf root?
-                depth = 1
+                #depth = 1
                 if sort:
                     logging.info("Main    : sorting nodes " + str(tleft))
                     sstart=time.time()
@@ -217,6 +218,7 @@ class Player():
                 self.__switch__()
                 logging.info("Main    : finished turn in " + str(finish - start) + "s")
                 if t==None:
+                    depth -= 1
                     t=0
                 logging.info("Main    : time remaining: " + str(start + t - time.time()))
                 print("lenge: ",len(tree.nodes))

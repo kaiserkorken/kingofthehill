@@ -29,7 +29,7 @@ def client_receive():
             elif FENtoBit(str(message)):
                 if not checkmate(FENtoBit(message),player):
                     #turn = player.turn(message,3)
-                    turn = player.turn(message,tt)
+                    turn = player.turn(message,tt=tt)
                     print("Turn:"+str(turn))
                     client.send(str(turn).encode('utf-8'))
                 else:
@@ -234,3 +234,38 @@ receive_thread.start()
 # message:r1b1k2r/1N5q/2n5/QNp3pp/5P1P/1P1P2P1/P1B5/R1B3R1 W
 # Starte Runde 80
 # message:remismessage:dsf: has lost the game!!
+
+
+# rnbqkbnr/pppppppp/8/8/8/4P3/PPP1PPPP/RNBQKBNR B
+# FEN;  rnbqkbnr/pppppppp/8/8/8/4P3/PPP1PPPP/RNBQKBNR B
+# message:rnbqkbnr/pppppppp/8/8/8/4P3/PPP1PPPP/RNBQKBNR B
+# Starte Runde 2
+# message:r1bqkbnr/pppppppp/8/8/8/4P3/PPP1PPPP/RNBnKBNR W
+# r1bqkbnr/pppppppp/8/8/8/4P3/PPP1PPPP/RNBnKBNR B
+# FEN;  r1bqkbnr/pppppppp/8/8/8/4P3/PPP1PPPP/RNBnKBNR B
+# message:r1bqkbnr/pppppppp/8/8/8/4P3/PPP1PPPP/RNBnKBNR B
+# Starte Runde 3
+# message:r1bqkbnr/pppppppp/8/8/8/4P3/PnP1PPPP/RNB1KBNR W
+# r1bqkbnr/pppppppp/8/8/8/4P3/PnP1PPPP/RNB1KBNR B
+# FEN;  r1bqkbnr/pppppppp/8/8/8/4P3/PnP1PPPP/RNB1KBNR B
+# message:r1bqkbnr/pppppppp/8/8/8/4P3/PnP1PPPP/RNB1KBNR B
+# Starte Runde 4
+# message:r1bq1bnr/pppppppp/8/8/8/4P3/PnP1PkPP/RNB1KBNR W
+# r1bq1bnr/pppppppp/8/8/8/4P3/PnP1PkPP/RNB1KBNR B
+# FEN;  r1bq1bnr/pppppppp/8/8/8/4P3/PnP1PkPP/RNB1KBNR B
+# message:r1bq1bnr/pppppppp/8/8/8/4P3/PnP1PkPP/RNB1KBNR B
+# Starte Runde 5
+# message:r1bq1bnr/pppppppp/8/8/8/4P3/PnP1P1PP/RNB1KkNR W
+# r1bq1bnr/pppppppp/8/8/8/4P3/PnP1P1PP/RNB1KkNR B
+# FEN;  r1bq1bnr/pppppppp/8/8/8/4P3/PnP1P1PP/RNB1KkNR B
+# message:r1bq1bnr/pppppppp/8/8/8/4P3/PnP1P1PP/RNB1KkNR B
+# Starte Runde 6
+# message:r1bq1bnr/pppppppp/8/8/8/4P3/PnP1P1PP/RNBkK1NR W
+# r1bq1bnr/pppppppp/8/8/8/4P3/PnP1P1PP/RNBkK1NR B
+# FEN;  r1bq1bnr/pppppppp/8/8/8/4P3/PnP1P1PP/RNBkK1NR B
+# message:r1bq1bnr/pppppppp/8/8/8/4P3/PnP1P1PP/RNBkK1NR B
+# Starte Runde 7
+# message:r1bq1bnr/ppppp1pp/5p2/8/8/4P3/PnP1P1PP/RNBkK1NR W
+# r1bq1bnr/ppppp1pp/5p2/8/8/4P3/PnP1P1PP/RNBkK1NR B
+# FEN;  r1bq1bnr/ppppp1pp/5p2/8/8/4P3/PnP1P1PP/RNBkK1NR B
+# message:r1bq1bnr/ppppp1pp/5p2/8/8/4P3/PnP1P1PP/RNBkK1NR B
