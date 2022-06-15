@@ -115,7 +115,7 @@ class Player():
         return FEN
     
     
-    def test_turn(self, FEN, t=None, depth=None,utilities=True,tt=False,sort=False,windows=False):  # ein kompletter zug der ki
+    def test_turn(self, FEN, t=None, depth=None,utilities=True,tt=False,sort=False,windows=False,zob=False):  # ein kompletter zug der ki
         # print(FEN)
         # if depth!=None:
         #     depth-=1
@@ -147,7 +147,7 @@ class Player():
                 logging.info("Main    : building movetree " + str(time.time() - start))
                 if t:
                     tmove=(start + tmove - time.time())
-                height = build_tree(tree,self.current,tmove=tmove,depth=depth,utilities=True,tt=tt)  # time bzw. depth
+                height = build_tree(tree,self.current,tmove=tmove,depth=depth,utilities=True,tt=tt,zob=zob)  # time bzw. depth
                 # arr[1]=tree.h
                 
                 utilities=True

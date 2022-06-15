@@ -40,6 +40,7 @@ class Tree(object):
         #parent.children+=(new_node,)
         self.nodes.append(new_node)
         self.index+=1
+        return new_node
 
     def find_node(self,index):
         return self.nodes[index]

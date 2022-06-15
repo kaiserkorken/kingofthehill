@@ -144,6 +144,13 @@ if __name__ == "__main__":
     tt.save_table()
 
 
+    #tt neu starten 81 sek
+    #tt initialisiert 79 sek.
+    #tt ohne verbose neu starten 37 sek.
+    #tt ohne verbose ohne tt 35/38 sek
+    #tt ohne verbose ohne bittofen 41,37,41   richtig: 44, 39.8, 42 sek. ohne 35,5
+    ## tt ohne verbose bittobyte 33, 26 sek.
+
     ### Unit/Benchmark Tests alt###
 
     # p.teste(FEN,zeit,turn=True)#turn ausführen

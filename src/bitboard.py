@@ -321,6 +321,41 @@ def FENtoBit(fen,player=False):
 #print(FEN)
 # FEN=BittoFEN(FEN,-1)
 # print(FEN)
+def BittoByte(b,player):
+    bb=bytes(b["B"])
+    ww=bytes(b["W"])
+    k=bytes(b["k"])
+    q=bytes(b["q"])
+    n=bytes(b["n"])
+    r=bytes(b["r"])
+    bi=bytes(b["b"])
+    p=bytes(b["p"])
+    return (ww,bb,k,q,n,r,bi,p,player)#hier noch rochade etc. adden
+
+def BittoArray(b):
+    board = np.empty((8,8), dtype=str)
+    board[:] = '_'
+    #   board=""
+    # for x in range (64):
+    #     board+=" "
+    
+    # black player: lower case, white player: UPPER CASE
+    
+    board[b['B'] & b['k']] = 'k'
+    board[b['B'] & b['q']] = 'q'
+    board[b['B'] & b['n']] = 'n'
+    board[b['B'] & b['r']] = 'r'
+    board[b['B'] & b['b']] = 'b'
+    board[b['B'] & b['p']] = 'p'
+    
+    board[b['W'] & b['k']] = 'K'
+    board[b['W'] & b['q']] = 'Q'
+    board[b['W'] & b['n']] = 'N'
+    board[b['W'] & b['r']] = 'R'
+    board[b['W'] & b['b']] = 'B'
+    board[b['W'] & b['p']] = 'P'
+    
+    return board
 
 def FENzumB(fen):
     neuerS = ""
