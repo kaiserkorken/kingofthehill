@@ -1,5 +1,6 @@
 from bitboard import *
 import copy
+import time
 
 from movegen import *
 
@@ -82,9 +83,8 @@ def generate_moves_verbose(b, player):
     # bishop moves
     # pawn moves
     
-    
+    t_start = time.time()
     ### erstelle Liste aller möglichen Züge durch Simulation ###
-    
 
     # pawn to queen
 #    print('pawn to queen')
@@ -96,6 +96,8 @@ def generate_moves_verbose(b, player):
     move_list_capture_bishop, move_list_quiet_bishop, name_list_capture_bishop, name_list_quiet_bishop = gen_moves_bishop(b, player) 
     move_list_capture_pawn, move_list_quiet_pawn, name_list_capture_pawn, name_list_quiet_pawn = gen_moves_pawn(b, player) 
     
+    #t_piece = time.time() - t_start
+    #print("t_piece: " + str(t_piece))
 #    """    
     move_list_capture = np.concatenate((move_list_capture_pawn_to_queen, 
                                         move_list_capture_king,
@@ -138,6 +140,8 @@ def generate_moves_verbose(b, player):
     move_list = np.concatenate((move_list_capture, move_list_quiet))
     name_list = np.concatenate((name_list_capture, name_list_quiet))
     
+    #t_cat = time.time() - t_start - t_piece
+    #print("t_cat: " + str(t_cat))
     """
     
      # list of list: liste mit elementen: liste mit allen zügen für jeden Figurentyp
@@ -235,11 +239,95 @@ def generate_moves_verbose(b, player):
     
     return move_list , name_list
 
+# Hilfsfunktion für figurenspezifische Zuggeneratoren
+def gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player, pawn_to_queen=False):
+    # erstellt Listen mit Folgezuständen aus Liste in der Paare aus bb_from und bb_all_moves stehen
+    # bb_from: einzelne 1 für bewegte Figur
+    # bb_all_moves: 1en auf alle Felder die sich die Figur auf bb_from bewegen kann
+    move_list_capture = []
+    move_list_quiet = []
+    
+    name_list_capture = []
+    name_list_quiet = []
+    
+    t_start = time.time()
+    t = t_start
+    
+    for bb_from, bb_all_moves in bb_from_and_all_moves_list:
+        #####
+        #t_start = time.time()
+        #t = t_start
+        
+        # teilt Züge in capture und quiet Züge auf.
+        bb_capture, bb_quiet = split_capture_quiet(b, bb_all_moves, player)
+        # erstellt für jeweils alle Züge Liste mit einzelnen Zügen
+        bb_capture_list = serialize_bb(bb_capture)
+        bb_quiet_list = serialize_bb(bb_quiet)
+        
+        #print('split: ')
+        #print(time.time() - t)
+        #t = time.time()
+                
+        if pawn_to_queen: # spezieller Zugsimulator für Damenumwandlung
+            capture_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_capture_list]
+            quiet_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_quiet_list]
+            
+        else:      
+            # simuliert Züge -> Elemente sind Dictionaries mit Folgezuständen
+            capture_list = [make_move(b, bb_from, bb_to) for bb_to in bb_capture_list]
+            quiet_list = [make_move(b, bb_from, bb_to) for bb_to in bb_quiet_list]
+            
+        #print('make move: ')
+        #print(time.time() - t)
+        #t = time.time()
+        
+        # erstelle entsprechende Zugnotation
+        capture_names = [make_move_name(b, bb_from, bb_to) for bb_to in bb_capture_list]
+        quiet_names = [make_move_name(b, bb_from, bb_to) for bb_to in bb_quiet_list]
+    
+        #print('TEST')
+        #print(str(len(capture_list)) + " " + str(len(quiet_list)))
+        #print(str(len(capture_names)) + " " + str(len(quiet_names)))
+        
+        # füge keine leeren elemente ein
+        if capture_list:
+            move_list_capture.append(capture_list)
+            name_list_capture.append(capture_names)
+        if quiet_list:
+            move_list_quiet.append(quiet_list)
+            name_list_quiet.append(quiet_names)
+        
+        #print('make move names: ')
+        #print(time.time() - t)
+        #t = time.time()
+        
+    #print('moves: ')
+    #print(time.time() - t)
+    #t = time.time()
+        
+    # flacht list of list zu liste ab
+    # zugehörigkeit für figuren eines Typs geht verloren
+    move_list_capture_flat = flatten_list_of_list(move_list_capture)
+    move_list_quiet_flat = flatten_list_of_list(move_list_quiet)
+     
+    name_list_capture_flat = flatten_list_of_list(name_list_capture)
+    name_list_quiet_flat = flatten_list_of_list(name_list_quiet)
+    
+    #print('flatten: ')
+    #print(time.time() - t)
+    #t = time.time()
+    '''
+    print('TEST 2')
+    print(str(len(move_list_capture_flat)) + " " + str(len(move_list_quiet_flat)))
+    print(str(len(name_list_capture_flat)) + " " + str(len(name_list_quiet_flat)))
+    '''
+    return move_list_capture_flat, move_list_quiet_flat, name_list_capture_flat, name_list_quiet_flat
+
 
 
 
 # Hilfsfunktion für figurenspezifische Zuggeneratoren
-def gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player, pawn_to_queen=False):
+def gen_capture_quiet_lists_from_all_moves_bak(b, bb_from_and_all_moves_list, player, pawn_to_queen=False):
     # erstellt Listen mit Folgezuständen aus Liste in der Paare aus bb_from und bb_all_moves stehen
     # bb_from: einzelne 1 für bewegte Figur
     # bb_all_moves: 1en auf alle Felder die sich die Figur auf bb_from bewegen kann
