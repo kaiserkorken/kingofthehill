@@ -66,7 +66,7 @@ def best_node(tree):
         # best_nodes sollte nun mindestens einen Zug enthalten. Dieser ist immer legal
         #print(best_nodes)
         if len(best_nodes) == 1:  # falls nur ein Zug vorhanden
-            print("best0:", best_nodes[0])
+            print("best0:", best_nodes[0].value)
             return best_nodes[0]  # gib Zug zurück
         elif len(best_nodes) > 1:
             while len(best_nodes) > 0:  # entferne Züge von Liste bis zufälliger legaler Zug gefunden
