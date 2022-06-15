@@ -230,5 +230,48 @@ def a_b_search_aspiration_window(node, player, expected_value, depth=0, widening
             
     
     
+def bench_tree_search(FEN, tree_height=3, search_time=30, old=False, verbose=True):
+    [b, player] = FENtoBit(FEN, True)
+    tree = Tree(b)
+    
+    height = build_tree(tree, tree_height)
+    dep = len(tree.nodes)
+    if verbose:
+        print("baum fertig")
+    zeit = time.time()
+    for i in tree.nodes:
+        i.value = utility(i.b)
+    if verbose:
+        print('baum bewertet')
+    
+    t_start = time.time()
+    best_value = search(tree.root, player.current, height, search_time, old)
+    
+    t_bench = time.time() - t_start
+    
+    if verbose:
+        print('search took:')
+        print(t_bench)
+    
+    return t_bench
+
+# Stellung 1: 
+FEN_1 = 'rnbqkbnr/p4ppp/1p1pp3/2p5/3P4/NQP1PNPB/PP3P1P/R1B1K2R b'
+# Stellung 2: 
+FEN_2 = 'r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w'
+
+if __name__ == "__main__":
+    FENs = [FEN_1, FEN_2]
+    
+    tree_height = 3
+    search_time = 30
+    
+    old = False
+
+    for FEN in FENs:
+        bench_tree_search(FEN, tree_height, search_time, old)
+    
+    
+    
     
     
