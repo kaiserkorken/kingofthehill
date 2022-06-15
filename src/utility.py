@@ -1,5 +1,11 @@
 from bitboard import *
-def utility(b,player, simple=True):
+
+
+
+def utility(b, player, simple=True):
+#    print('new')
+#    print(simple_utility(b,player))
+#    print(spielBewertung(b,player))
     if simple:
         return simple_utility(b,player)
     else:

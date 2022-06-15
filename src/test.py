@@ -139,8 +139,8 @@ if __name__ == "__main__":
     wdh = 1000
     
     #tt=ttable("testtable")
-    player.test_turn(FEN, depth=depth)
-   # player.test_turn(FEN, depth, utilities=False, tt=tt)
+    #player.test_turn(FEN, depth=depth)
+    player.test_turn(FEN, depth=depth, utilities=False)
     #tt.save_table()
 
 
