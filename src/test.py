@@ -135,7 +135,7 @@ if __name__ == "__main__":
     # FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"
     player=Player()
     zeit = 20
-    tiefe = 2
+    tiefe = 3
     wdh = 1000
     
     tt=ttable("testtable")

@@ -192,7 +192,7 @@ class ttable(object):
     def to_table(self,hash,value,depth):
         if self.dict:
             if len(self.table)<=588823529:#-> kleiner 2 GB
-                self.table[str(hash)]=[value,depth]
+                self.table[str(hash)]=[int(value),int(depth)]
             else:
                 return False
             
