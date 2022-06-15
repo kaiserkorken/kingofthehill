@@ -4,6 +4,12 @@ from main import *
 from bitboard import BoardtoFEN, FENtoBit, FENtoBoard
 #TODO checkmate integrieren
 #TODO zeitbegrenzung schicken
+import logging
+#logging.basicConfig(filename='server.log', encoding='utf-8', level=logging.DEBUG)
+
+format = "%(asctime)s: %(message)s"
+logging.basicConfig(filename='server.log', encoding='utf-8',format=format, level=logging.DEBUG,
+                            datefmt="%H:%M:%S")
 host = '127.0.0.1'
 port = 59566
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -12,7 +18,7 @@ server.listen()
 clients = []
 aliases = []
 plays=1
-single=False
+single=True
 bild=False
 answer=False
 full=False
@@ -35,6 +41,7 @@ def run_gui():
                 FEN=BoardtoFEN(bild.gs.board,bild.player)
                 bild.player*=(-1)
                 print("FEN; ",FEN)
+                logging.info("Server    : sending FEN: "+FEN)
                 broadcast(FEN)
                 bild.single=False#spieler kann nicht mehr klicken, ki ist dran
                 bild.klick=False
@@ -48,6 +55,7 @@ def run_gui():
 def broadcast(message):
     for client in clients:
         client.send(message.encode("utf-8"))
+    logging.info("Server    : sending message: "+str(message))
     print("message:"+str(message))
 # Function to handle clients'connections
 
@@ -63,6 +71,7 @@ def handle_client(client):
                 if (FENtoBit(message)):
                     plays+=1
                     print("Starte Runde "+str(plays))
+                    logging.info("Server    : Starting round: "+str(plays))
                     if plays>=80:
                         message="remis"
                     else:
@@ -79,6 +88,7 @@ def handle_client(client):
             client.close()
             alias = aliases[index]
             broadcast(f'{alias} has left the game!')
+            logging.info("Server    : disconnected player: "+str(alias))
             aliases.remove(alias)
             full=False
             break
@@ -94,7 +104,9 @@ def receive():
     if single==False:
         while True:
             print('Server is running and listening ... s')
+            logging.info("Server    : Server is running and listening ...")
             client, address = server.accept()
+            logging.info("Server    : established connection with player:"+str(address))
             print(f'connection is established with {str(address)}')
             client.send('alias?'.encode('utf-8'))
             alias = client.recv(1024).decode("utf-8")
@@ -116,7 +128,9 @@ def receive():
     else:
         while True:
             print('Server is running and listening ...')
+            logging.info("Server    : Server is running and listening ...")
             client, address = server.accept()
+            logging.info("Server    : established connection with player:"+str(address))
             print(f'connection is established with {str(address)}')
             client.send('alias?'.encode('utf-8'))
             alias = client.recv(1024).decode("utf-8")
