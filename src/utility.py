@@ -1,4 +1,5 @@
 from bitboard import *
+import time
 def utility(b,player, simple=True):
     if simple:
         return simple_utility(b,player)
