@@ -1,8 +1,9 @@
 import numpy as np
 from player import *
-from movegen_verbose import make_move_name, generate_moves_verbose, print_board
+from movegen_verbose import *
 import time
 
+np.set_printoptions(precision=4)
 
 def unit_test(FEN, all_moves, verbose=False):
     player = Player()
@@ -46,9 +47,44 @@ def bench_movegen(FEN, iterations=100, verbose=True):
         for i in range(iterations):
             moves = generate_moves(b, player) # generiere alle Züge aus Position b
     t_end = time.time()
-    return t_end-t_start
+    return (t_end-t_start)/iterations
 
+def bench_funcs(func_list, b, player, iterations=100):
+    t = np.empty(len(func_list)+1)
+    t[0] = time.time()
+    #print(t[0])
+    for i, f in enumerate(func_list):
+        #print("func: " + str(i+1))
+        
+        for it in range(iterations):
+            f(b, player)
+        t[i+1] = time.time()
+        #print(t[i+1])
 
+    times = (t[1:] - t[:-1])/iterations
+    return times
+        
+def bench_movegen_funcs(FEN, iterations=100, verbose=True):
+    player = Player()
+    
+    b, pl = FENtoBit(FEN, True)
+    player.current = pl
+    
+    func_list = [gen_moves_pawn_to_queen,
+                 gen_moves_king,
+                 gen_moves_queen,
+                 gen_moves_knight,
+                 gen_moves_rook,
+                 gen_moves_bishop,
+                 gen_moves_pawn,]
+    
+    piece_times = bench_funcs(func_list, b, player, iterations)
+    
+    
+    if verbose:
+        print("piece times: ")
+        print(np.transpose(piece_times))
+    #return times
 
 # Stellung 1: 
 FEN_1 = 'rnbqkbnr/p4ppp/1p1pp3/2p5/3P4/NQP1PNPB/PP3P1P/R1B1K2R b'
@@ -65,19 +101,30 @@ possible_moves_2 = ['Bc1xg5', 'h4xg5', 'Ke1-d1', 'Ke1-f1', 'Ke1-e2', 'Ng1-e2', '
 
 
 if __name__ == "__main__":
+    
     verbose = True
     iterations = 100
-    print('Benchmark: Movegen (verbose)')
+    
+    print('Benchmark: Movegen (verbose) FEN 1')
     print('iterations: ' + str(iterations))
     time_stopped = bench_movegen(FEN_1, iterations, verbose)
-    print("avg. time per ieration: " + str(time_stopped/iterations))
+    print("avg. time per ieration: " + str(time_stopped))
+    
+    print('Benchmark: Movegen (verbose) FEN 2')
+    print('iterations: ' + str(iterations))
+    time_stopped = bench_movegen(FEN_2, iterations, verbose)
+    print("avg. time per ieration: " + str(time_stopped))
 
-   
     verbose = False
-    print('Benchmark: Movegen')
+    
+    print('Benchmark: Movegen FEN 1')
     print('iterations: ' + str(iterations))
     time_stopped = bench_movegen(FEN_1, iterations, verbose)
-    print("avg. time per ieration: " + str(time_stopped/iterations)) 
+    print("avg. time per ieration: " + str(time_stopped)) 
     
+    print('Benchmark: Movegen FEN 2')
+    print('iterations: ' + str(iterations))
+    time_stopped = bench_movegen(FEN_2, iterations, verbose)
+    print("avg. time per ieration: " + str(time_stopped)) 
     
-    
+    bench_movegen_funcs(FEN, iterations)
