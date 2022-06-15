@@ -140,6 +140,7 @@ class ttable(object):
         #32 bit:4294967295, 16bit: 65535, 64 bit 18446744073709551615
         return self.table
 
+
     def set_location(self,location):
         self.location=location
 
