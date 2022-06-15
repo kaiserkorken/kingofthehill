@@ -3,7 +3,7 @@ from bitboard import FENtoBit,BittoFEN
 from tree import Tree
 import logging
 import time
-from treebuild import build_tree
+from treebuild import *#build_tree
 from tree_search import search, best_node
 from checkmate import checkmate
 from utility import utility

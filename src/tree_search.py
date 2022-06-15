@@ -1,11 +1,13 @@
 import time
 import numpy as np
 import random
+import copy
 
 from tree import *
 from bitboard import *
 from treebuild import *
 from checkmate import checkmate
+
 
 
 ### constants
@@ -252,6 +254,7 @@ def bench_tree_search(tree_dict, tree_height=None, search_time=30, search_mode='
     if verbose:
         print('----- initiate search -----')
         print('search mode is: ' + search_mode)
+        print('maximum search height is: ' + str(tree_height))
 #    print(tree)
 #    print(player_code)
 #    print(tree_height)
