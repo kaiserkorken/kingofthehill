@@ -125,23 +125,27 @@ def bench_utility(FEN):
     tree=Tree(FENtoBit(FEN),tt.starthash)
     
     start=time.time()
-    build_tree(tree,1,depth=3,tt=tt)
+    h,gen=build_tree(tree,1,depth=3,tt=tt,gen=True) 
     fin=time.time()
     
-    average=(fin-start)/len(tree.nodes)
+    gen=gen/len(tree.nodes)
+    average=(fin-start)/len(tree.nodes)-gen
     print("tt on")
-    print("average time per node:",average)
+    print("average time util per node:",average)
+    print("average time gen per node:",gen)
     
     tt.save_table()
+    
     start=time.time()
     tree=Tree(FENtoBit(FEN))
     
-    build_tree(tree,1,depth=3) 
+    h,gen=build_tree(tree,1,depth=3,gen=True) 
     fin=time.time()
-    
-    average=(fin-start)/len(tree.nodes)
+    gen=gen/len(tree.nodes)
+    average=(fin-start)/len(tree.nodes)-gen
     print("tt off")
-    print("average time per node:",average)
+    print("average time util per node:",average)
+    print("average time gen per node:",gen)
     
     print("sort nodes")
     start=time.time()
