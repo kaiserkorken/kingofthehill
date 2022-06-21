@@ -88,7 +88,7 @@ def loadImages():
         IMAGES[piece] = p.transform.scale(p.image.load("images/"+piece+".png"),(SQ_SIZE, SQ_SIZE))
 
     # We can load images by calling 'IMAGES['wp']
-class gui():
+class GUI():
     def __init__(self,single=True):
         p.init()
         self.single=single

@@ -8,8 +8,7 @@ import logging
 #logging.basicConfig(filename='server.log', encoding='utf-8', level=logging.DEBUG)
 
 format = "%(asctime)s: %(message)s"
-logging.basicConfig(filename='server.log', encoding='utf-8',format=format, level=logging.DEBUG,
-                            datefmt="%H:%M:%S")
+logging.basicConfig(filename='server.conf',format=format, level=logging.DEBUG,datefmt="%H:%M:%S")
 host = '127.0.0.1'
 port = 59566
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -26,7 +25,7 @@ def run_gui():
     global bild
     global answer
     global single
-    bild=gui(False)
+    bild=GUI(False)
     while bild.running:
         if single:
             if answer!=False:
@@ -35,11 +34,11 @@ def run_gui():
                 bild.player*=(-1)
                 answer=False
                 bild.single=True#spieler ist dran
-                bild.klick=True
+                #bild.klick=True
             if bild.klick==True:
                 #FENtoBit()
                 FEN=BoardtoFEN(bild.gs.board,bild.player)
-                bild.player*=(-1)
+                #bild.player*=(-1)
                 print("FEN; ",FEN)
                 logging.info("Server    : sending FEN: "+FEN)
                 broadcast(FEN)
@@ -99,8 +98,8 @@ def receive():
     global plays
     global bild
     global full
-    GUI=threadg = threading.Thread(target=run_gui, args=())
-    threadg.start()
+    gui = threading.Thread(target=run_gui, args=())
+    gui.start()
     if single==False:
         while True:
             print('Server is running and listening ... s')

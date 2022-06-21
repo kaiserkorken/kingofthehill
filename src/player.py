@@ -92,7 +92,7 @@ class Player():
                 # utility auf root?
                 #depth = 1
                 logging.info("Main    : doing tree search " + str(tleft))
-                tree.sort_nodes() #FEhler bei invertet=True
+                #tree.sort_nodes() #FEhler bei invertet=True
                 sstart = time.time()
                 depth = search(tree.root, self.current, height, tsearch)
                 # tree.print_node(tree.nodes[2])#teste tree nach search
