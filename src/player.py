@@ -23,7 +23,8 @@ class Player():
     def __init__(self):
         # weiß beginnt
         self.current = 1
-
+        self.tt=ttable("hashtable")
+        self.opening=tt("opening",open=True)
         #### das auskommentieren kostet 8 GB Speicherplatz!!! ####
         # self.tt=ttable("testtable.mymemmap",32)
 
@@ -67,12 +68,25 @@ class Player():
         logging.info("Main    : start turn " + str(start - start))
         tmove = (t / 10) * 9  # seconds
         tsearch = t / 10
-        if tt!=False:
-            tt=ttable("hashtable")
+        
+       
         [bb, play] = FENtoBit(FEN, True)
+        
         # tt=ttable("testtable.mymemmap",32)#erstellen falls noetig, sonst in build tree
         if self.current == play and FENtoBit(FEN,True) != False:  # spieler am zug und fen bekommen
-
+            hash=self.opening.hash_value(bb,self.current)
+            info=self.opening.in_table(hash)
+            if len(info==2):
+                logging.info("Main    : choosing from opening table: " + str(time.time()-start))
+                moves=info[1]
+                bb=move_to_bit(random.choice(moves))
+                FEN=BittoFEN(bb,-self.current)
+                logging.info("Main    : finished using opening table: " + str(time.time()-start))
+                return FEN
+            
+            if tt!=False:
+                tt=self.tt
+                
             # bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#testFEN
             tree = Tree(bb)  # ,self.tt.starthash)#leerer baum mit b als root
             if not checkmate(bb, self.current):  # Spielende überprüfen
