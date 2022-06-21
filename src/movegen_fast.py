@@ -34,7 +34,7 @@ def generate_moves(b, player):
     return moves
 
 def generate_move(b, player):
-    
+    pass
 
 
 # Figurenspezifische Generatoren für capture und quiet Listen
