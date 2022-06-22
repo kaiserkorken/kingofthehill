@@ -220,7 +220,7 @@ def a_b_search_principal_variation(node, player, depth=0, alpha=-inf, beta=inf):
     return best
 
 # aspriation window suche 
-def a_b_search_aspiration_window(node, player, expected_value, depth=0, widening_constant=.5):
+def a_b_search_aspiration_window(node, player, expected_value, depth=0, widening_constant=2):
     
     alpha = expected_value - widening_constant
     beta = expected_value + widening_constant

@@ -6,13 +6,14 @@ import time
 def utility(b,player,h,simple=True):
     if player.tt!= None:
         hash = player.tt.hash_value(b,player.current)
-        util = player.tt.in_table(hash, h + 1)
+        util = player.tt.in_table(hash, h)
         if len(util) != 2:
             # print(hash)
             if simple:
                 util=simple_utility(b,player.current)
             else:
                 util= spielBewertung(b,player.current)
+            player.tt.to_table(hash, util, h)
         else:
             util=util[0]
     else:
@@ -21,7 +22,7 @@ def utility(b,player,h,simple=True):
         else:
                 util= spielBewertung(b,player.current)         
     
-    player.tt.to_table(hash, util, h + 1)
+    
     return util
         
            

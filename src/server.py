@@ -18,7 +18,7 @@ server.listen()
 clients = []
 aliases = []
 plays=1
-single=True
+single=False
 bild=False
 answer=False
 full=False
@@ -106,7 +106,7 @@ def receive():
     if single==False:
         while True:
             print('Server is running and listening ... s')
-            logging.info("Server    : Server is running and listening ...")
+            logging.info("Server    : Server is running in AI vs. AI mode ...")
             client, address = server.accept()
             logging.info("Server    : established connection with player:"+str(address))
             print(f'connection is established with {str(address)}')
@@ -130,7 +130,7 @@ def receive():
     else:
         while True:
             print('Server is running and listening ...')
-            logging.info("Server    : Server is running and listening ...")
+            logging.info("Server    : Server is running in Single Mode...")
             client, address = server.accept()
             logging.info("Server    : established connection with player:"+str(address))
             print(f'connection is established with {str(address)}')

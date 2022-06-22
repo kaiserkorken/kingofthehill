@@ -168,22 +168,24 @@ if __name__ == "__main__":
     # FEN="3q3r/1pp2pb1/3pkn2/1B6/3P4/4PN1P/5K1P/7R b"
     # FEN="rnbqkbnr/pp1p1ppp/4p3/1Pp5/8/2N5/P1PPPPPP/R1BQKBNR w"
     # FEN="8/4k3/8/8/8/8/3K4/8"
-    # FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"
+    FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"
     player=Player()
     zeit = 20
     tiefe = 2
     wdh = 1000
     
     tt=ttable("testtable")
-    #player.test_turn(FEN, t=None, depth=None,utilities=True,tt=False,sort=False,windows=False)
-    #player.test_turn(FEN, depth=tiefe, tt=tt)
+    player.turn(FEN,t=zeit)
     tt.save_table()
-    # Stellung 1: 
-    FEN_1 = 'rnbqkbnr/p4ppp/1p1pp3/2p5/3P4/NQP1PNPB/PP3P1P/R1B1K2R b'
-    # Stellung 2: 
-    FEN_2 = 'r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w'
-    bench_utility(FEN_1)
-    bench_utility(FEN_2)
+        #FEN, t=None, depth=None,utilities=True,tt=False,sort=False,windows=False)
+    #player.test_turn(FEN, depth=tiefe, tt=tt)
+    # tt.save_table()
+    # # Stellung 1: 
+    # FEN_1 = 'rnbqkbnr/p4ppp/1p1pp3/2p5/3P4/NQP1PNPB/PP3P1P/R1B1K2R b'
+    # # Stellung 2: 
+    # FEN_2 = 'r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w'
+    # bench_utility(FEN_1)
+    # bench_utility(FEN_2)
     # tt on
     # average time per node: 0.00048032262470915717
     # tt off

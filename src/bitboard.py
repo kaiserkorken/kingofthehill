@@ -296,7 +296,7 @@ def FENtoBit(fen,player=False):
     #bit[63]== upper right
     #player=info[1]
     #if wh>=20 or bl>= 20:#damenumwandlung beachten
-    if player:
+    if player != False:
         if (info[1]=="W" or info[1]=="w"):
             player=1
         else:
@@ -330,7 +330,7 @@ def BittoByte(b,player):
     r=bytes(b["r"])
     bi=bytes(b["b"])
     p=bytes(b["p"])
-    return (ww,bb,k,q,n,r,bi,p,player)#hier noch rochade etc. adden
+    return str(ww)+str(bb)+str(k)+str(q)+str(n)+str(r)+str(bi)+str(p)+str(player)#hier noch rochade etc. adden
 
 def BittoArray(b):
     board = np.empty((8,8), dtype=str)
@@ -402,8 +402,9 @@ def FENtoBoard(fens):
             elif info == "K":
                 newBoard[countA][countB] = "wK"
             else:
-                for x in range(int(info)):
-                    newBoard[countA][x] = "--"
+                newBoard[countA][countB] = "--"
+                # for x in range(int(info)):
+                #     newBoard[countA][x] = "--"
     return newBoard
 
 
