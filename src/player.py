@@ -117,7 +117,7 @@ class Player():
                     logging.info("Main    : tree search finished with depth: " + str(depth) + " in " + str(
                         time.time() - sstart) + "s")
                     logging.info("Main    : choosing good move " + str(tleft))
-                    node = best_node(tree)  # besten zug auswaehlen
+                    node = best_node(tree,self.current)  # besten zug auswaehlen
                     # move=tree.find_node(node.index)
                     # logging.info("Main    : finished turn "+str(start+t))
                     finish = time.time()
@@ -228,7 +228,7 @@ class Player():
                     time.time() - sstart) + "s")
                 tleft = time.time() - start
                 logging.info("Main    : choosing good move " + str(tleft))
-                node = best_node(tree)  # besten zug auswaehlen
+                node = best_node(tree,self.current)  # besten zug auswaehlen
                 # move=tree.find_node(node.index)
                 # logging.info("Main    : finished turn "+str(start+t))
                 finish = time.time()

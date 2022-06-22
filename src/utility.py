@@ -13,6 +13,8 @@ def utility(b,player,h,simple=True):
                 util=simple_utility(b,player.current)
             else:
                 util= spielBewertung(b,player.current)
+        else:
+            util=util[0]
     else:
         if simple:
                 util=simple_utility(b,player.current)

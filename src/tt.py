@@ -130,7 +130,7 @@ class ttable(object):
             if not open:
                 self.table[str(hash)]=[int(value),int(depth)]
             else:
-                self.table[str(hash)]=[value]
+                self.table[str(hash)]=[value,int(depth)]
         else:
             return False
             
@@ -140,30 +140,45 @@ class ttable(object):
     def hash_value(self,b,x=None,y=None,token=None):#to = [pos x, pos y, "K"], deshalb von vorteil: node.name -> a1a2K=to
         return hash(BittoByte(b,x))#BittoFEN(b))#hash=b#x=Player
       
-    
-    def loadtxt():
-    with open('FEN.txt') as f:
+    def loadtxt(self):
         leere=[]
-        mylist = f.read().splitlines()
-
-    for x in mylist:
-        leere.append(x.strip('"'))
-        
+        with open('ultra.txt',"r") as f:
+            mylist = f.read().splitlines()
+        for x in range(len(mylist)):
+            z=mylist[x].split(";")[0].split(" ")
+            mylist[x]=" ".join(z[0:4])
+            
+        for x in range(1,len(mylist)-1):
+            hash=self.hash_value(BittoByte(FENtoBit(mylist[x-1][0]),True))
+            leere.append([hash,mylist[x][0]])
+        for x in leere:
+            hash=x[0]
+            arr=self.in_table(hash,x[2])
+            if len(arr)==0:
+                self.to_table(x[0],x[1])
+            else:
+                if arr[0]!=x[1]:
+                    arr[0].append(x[1])
+                    self.to_table(hash,arr[0])
+               
+        self.save_table("opening.json")
 if __name__ == "__main__":
     #tt=ttable("testtable.mymemmap")
     #tt.create_table()
     #print(tt.in_table(569765))
-    tt=ttable("testtable",dict=True)
-    if tt.starthash:
-        tt.to_table(569765,127,9)#hier utility einsetzen
-        print(tt.in_table(569765,1))
-        print("save table")
-        tt.save_table()
-        del tt.table
-        tt.table=tt.load_table()
-        #table=tt.load_table()
-        print(tt.in_table(569765,1))
-        #print(tt.in_table(3531))
+    # tt=ttable("testtable",dict=True)
+    # if tt.starthash:
+    #     tt.to_table(569765,127,9)#hier utility einsetzen
+    #     print(tt.in_table(569765,1))
+    #     print("save table")
+    #     tt.save_table()
+    #     del tt.table
+    #     tt.table=tt.load_table()
+    #     #table=tt.load_table()
+    #     print(tt.in_table(569765,1))
+    #     #print(tt.in_table(3531))
+    tt=ttable("opening",open=True)
+    tt.loadtxt()
         
 
     ### minimax implementation (Pseudocode): ### 

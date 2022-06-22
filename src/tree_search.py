@@ -15,7 +15,7 @@ inf = 100000
 
 
 
-def best_node(tree, player=1):
+def best_node(tree, player_code):
     #tree.print_tree()
     # nodes height 1 sammeln
     #print(tree.root.children)
@@ -23,7 +23,7 @@ def best_node(tree, player=1):
     # print(children)
     # print(children)
     if len(children) > 0:  # falls Züge vorhanden
-        values = player.current * np.array([x.value for x in children])
+        values = player_code * np.array([x.value for x in children])
         #"""
         #"""
         # values = [value for index,parent,b,value,h in children]
@@ -36,7 +36,7 @@ def best_node(tree, player=1):
             possible_best_node = children[np.argmax(values)]
             children.pop(np.argmax(values))  # bzw. values.remove(node.index)
             # print(children)
-            values = player.current * np.array([x.value for x in children])
+            values = player_code * np.array([x.value for x in children])
             #"""
             if best_nodes:  # falls Liste schon Element enthält
                 if possible_best_node.value == best_nodes[0].value:  # falls ein weiterer gleichwertiger Zug existiert
