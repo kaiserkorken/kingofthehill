@@ -228,7 +228,7 @@ def a_b_search_aspiration_window(node, player, expected_value, depth=0, widening
     a_w_window_too_small = True
     while a_w_window_too_small:
 
-        best = a_b_search_principal_variation(node, player, depth, alpha, beta)
+        best = a_b_search(node, player, depth, alpha, beta)
         
         if best < alpha: # tief gescheitert
             a_w_failed_alpha += 1
