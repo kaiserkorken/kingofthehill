@@ -1,12 +1,29 @@
 from bitboard import *
+from tt import ttable
 import time
 
 
-def utility(b,player_code, simple=True):
-    if simple:
-        return simple_utility(b,player_code)
+def utility(b,player,h,simple=True):
+    if player.tt!= None:
+        hash = player.tt.hash_value(b,player.current)
+        util = player.tt.in_table(hash, h + 1)
+        if len(util) != 2:
+            # print(hash)
+            if simple:
+                util=simple_utility(b,player.current)
+            else:
+                util= spielBewertung(b,player.current)
     else:
-        return spielBewertung(b,player_code)
+        if simple:
+                util=simple_utility(b,player.current)
+        else:
+                util= spielBewertung(b,player.current)         
+    
+    player.tt.to_table(hash, util, h + 1)
+    return util
+        
+           
+
 
 def simple_utility(b,player_code):
     piece_values = {'k':100, 'q':9, 'r':5, 'b':3, 'n':3, 'p':1}

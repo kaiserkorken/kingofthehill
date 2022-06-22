@@ -1,3 +1,4 @@
+from pydoc import cli
 import threading
 import socket
 from main import *
@@ -87,6 +88,7 @@ def handle_client(client):
             client.close()
             alias = aliases[index]
             broadcast(f'{alias} has left the game!')
+            bild.reset()
             logging.info("Server    : disconnected player: "+str(alias))
             aliases.remove(alias)
             full=False
@@ -98,6 +100,7 @@ def receive():
     global plays
     global bild
     global full
+    global clients
     gui = threading.Thread(target=run_gui, args=())
     gui.start()
     if single==False:
@@ -139,6 +142,7 @@ def receive():
             broadcast(f'{alias} has connected to the game, ')
             client.send('you are now connected!'.encode('utf-8'))
             if not full:
+                bild.reset()
                 thread = threading.Thread(target=handle_client, args=(client,))
                 thread.start()
             if len(clients) == 1:

@@ -9,7 +9,7 @@ startFEN = "rnb1kbnr/p4ppp/1p1pp3/2p3q1/3P4/NQP1PNPB/PP3P1P/R1B1K2R w"
 #startFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 player = Player()
 win = True
-tt = ttable("hashtable")
+
 
 def client_receive():
     global win
@@ -29,12 +29,13 @@ def client_receive():
             elif FENtoBit(str(message)):
                 if not checkmate(FENtoBit(message),player):
                     #turn = player.turn(message,3)
-                    turn = player.turn(message,tt=tt)
+                    turn = player.turn(message)
                     print("Turn:"+str(turn))
                     client.send(str(turn).encode('utf-8'))
                 else:
                     win = False
                     client.send(f'{alias}: has lost the game!!'.encode('utf-8'))
+                    player.close()
                     client.close()
             elif len(message.split(" "))>2:#genug leerzeichen
                 if message.split(" ")[2] == "lost":
@@ -44,6 +45,7 @@ def client_receive():
                 print("Unentschieden!")
                 win=False
                 client.send(f'{alias}: has lost the game!!'.encode('utf-8'))
+                player.close()
                 client.close()
             else:
                 print("else:"+str(message))

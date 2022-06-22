@@ -379,8 +379,6 @@ def FENtoBoard(fens):
         for countB, info in enumerate(value):
             if info == "r":
                 newBoard[countA][countB] = "bR"
-            elif info == "1":
-                newBoard[countA][countB] = "--"
             elif info == "n":
                 newBoard[countA][countB] = "bN"
             elif info == "b":
@@ -403,6 +401,9 @@ def FENtoBoard(fens):
                 newBoard[countA][countB] = "wQ"
             elif info == "K":
                 newBoard[countA][countB] = "wK"
+            else:
+                for x in range(int(info)):
+                    newBoard[countA][x] = "--"
     return newBoard
 
 

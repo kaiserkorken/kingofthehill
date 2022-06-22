@@ -15,7 +15,7 @@ inf = 100000
 
 
 
-def best_node(tree, player_code=1):
+def best_node(tree, player=1):
     #tree.print_tree()
     # nodes height 1 sammeln
     #print(tree.root.children)
@@ -23,7 +23,7 @@ def best_node(tree, player_code=1):
     # print(children)
     # print(children)
     if len(children) > 0:  # falls Züge vorhanden
-        values = player_code * np.array([x.value for x in children])
+        values = player.current * np.array([x.value for x in children])
         #"""
         #"""
         # values = [value for index,parent,b,value,h in children]
@@ -36,7 +36,7 @@ def best_node(tree, player_code=1):
             possible_best_node = children[np.argmax(values)]
             children.pop(np.argmax(values))  # bzw. values.remove(node.index)
             # print(children)
-            values = player_code * np.array([x.value for x in children])
+            values = player.current * np.array([x.value for x in children])
             #"""
             if best_nodes:  # falls Liste schon Element enthält
                 if possible_best_node.value == best_nodes[0].value:  # falls ein weiterer gleichwertiger Zug existiert
@@ -172,13 +172,14 @@ def a_b_search(node, player, depth=0, alpha=-inf, beta=inf):
     #print(player)
     #print(depth)
     if depth==0 or len(node.children)==0: 
-        if node.value == NULL:
-            node.value = utility(node.b, player)
+        if node.value == None:
+            node.value = utility(node.b, player,node.h)
         return node.value
     #val=1000000
     for child in node.children:
         #print(a_b_search(child, -player, depth-1, -beta, -alpha,))
-        val = a_b_search(child, -player, depth-1, -beta, -alpha,)
+        player.__switch__()
+        val = a_b_search(child, player, depth-1, -beta, -alpha,)
         #node.value = vals
         if (val > alpha):
             alpha = val
@@ -259,6 +260,8 @@ def bench_tree_search(tree_dict, tree_height=None, search_time=30, search_mode='
     
     tree = tree_dict['tree']
     player_code = tree_dict['player_code']
+    player=Player(player_code)#TODO playxer importieren und vlt umschreiben
+   
     if tree_height == None:
         tree_height = tree_dict['tree_height']
         
@@ -272,15 +275,15 @@ def bench_tree_search(tree_dict, tree_height=None, search_time=30, search_mode='
 #    print('==========')
     t_start = time.time()
     if search_mode == 'search':
-        best_value = search(tree.root, player_code, tree_height, search_time)
+        best_value = search(tree.root, player, tree_height, search_time)
     elif search_mode == 'minimax':
         best_value = minimax(tree.root, tree_height)
     elif search_mode == 'alpha_beta':
-        best_value = a_b_search(tree.root, player_code, tree_height, alpha=-inf, beta=inf)
+        best_value = a_b_search(tree.root, player, tree_height, alpha=-inf, beta=inf)
     elif search_mode == 'principal_variation':
-        best_value = a_b_search_principal_variation(tree.root, player_code, tree_height, alpha=-inf, beta=inf)
+        best_value = a_b_search_principal_variation(tree.root, player, tree_height, alpha=-inf, beta=inf)
     elif search_mode == 'aspiration_windows':
-        [best_value, failed_left, failed_right] = a_b_search_aspiration_window(tree.root, player_code, 0, tree_height)
+        [best_value, failed_left, failed_right] = a_b_search_aspiration_window(tree.root, player, 0, tree_height)
     else:
         print('ERROR: no search_mode found')
         pass
@@ -290,7 +293,7 @@ def bench_tree_search(tree_dict, tree_height=None, search_time=30, search_mode='
         print('search took:')
         print(t_bench)
         print('best value found: ' + str(best_value))
-        print('should have found something with sign of: ' + str(best_node(tree, player_code).value))
+        print('should have found something with sign of: ' + str(best_node(tree, player.current).value))
     return t_bench
 
 def build_bench_tree_list(FEN_list, tree_height=3, verbose=True):
@@ -298,23 +301,23 @@ def build_bench_tree_list(FEN_list, tree_height=3, verbose=True):
     return bench_tree_list
 
 def build_bench_tree(FEN, tree_height=3, verbose=True):
-    [b, player_code] = FENtoBit(FEN, True)
+    [b, player.current] = FENtoBit(FEN, True)
     if verbose:
         print('starte Baumaufbau mit FEN: ')
         print(FEN)
     tree = Tree(b)
     
-    height = build_tree(tree, player_code, depth=tree_height)
+    height = build_tree(tree, player.current, depth=tree_height)
     dep = len(tree.nodes)
     if verbose:
         print("baum fertig")
 
     for i in tree.nodes:
-        i.value = utility(i.b, player_code)
+        i.value = utility(i.b, player.current)
     if verbose:
         print('baum bewertet')
         
-    tree_dict = {'tree':tree, 'player_code':player_code, 'tree_height':tree_height}
+    tree_dict = {'tree':tree, 'player_code':player.current, 'tree_height':tree_height}
     return tree_dict
 
 # Stellung 1: 

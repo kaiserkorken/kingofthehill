@@ -104,7 +104,7 @@ class ttable(object):
         
         return self.table
 
-    def in_table(self,hash,h):
+    def in_table(self,hash,h=False):
         #if self.dict:
         try:
             value=self.table[str(hash)]
@@ -118,7 +118,7 @@ class ttable(object):
             if h<=depth:#aelterer wert bereits sicherer(tiefer)
                 return value
         else:
-            return value[1]
+            return value
         #print(value)
         #print(h,depth)
         return []
