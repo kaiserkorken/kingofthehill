@@ -141,7 +141,14 @@ class ttable(object):
         return hash(BittoByte(b,x))#BittoFEN(b))#hash=b#x=Player
       
     
+    def loadtxt():
+    with open('FEN.txt') as f:
+        leere=[]
+        mylist = f.read().splitlines()
 
+    for x in mylist:
+        leere.append(x.strip('"'))
+        
 if __name__ == "__main__":
     #tt=ttable("testtable.mymemmap")
     #tt.create_table()
@@ -157,6 +164,7 @@ if __name__ == "__main__":
         #table=tt.load_table()
         print(tt.in_table(569765,1))
         #print(tt.in_table(3531))
+        
 
     ### minimax implementation (Pseudocode): ### 
     # hash=tt.hash_value(parenthash,[x,y,"K"] bzw. "a1a2K")
