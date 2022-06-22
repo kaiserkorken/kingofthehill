@@ -1,3 +1,5 @@
+import numpy as np
+
 from bitboard import *
 import copy
 import time
@@ -12,6 +14,9 @@ bibp=["k","q","n","r","b","p"]
 ### ZUGGENERATOR ###
 
 ### https://www.chessprogramming.org/Pieces_versus_Directions
+
+def make_move_id(b_old, bb_from, bb_to):
+    pass
 
 # erstellt lesbaren String in Quasi-Schachnotation
 def make_move_name(b_old, bb_from, bb_to, short = False):
@@ -43,7 +48,7 @@ def make_move_name(b_old, bb_from, bb_to, short = False):
             piece = p
     """        
     if piece == 'p': # Bauern werden nicht spezifiziert
-        piece = 'p'#brauchen aber 
+        piece = ''#brauchen aber 
     """   
     if color == 'W': # Weiße Figuren werden groß geschrieben
         piece = piece.upper()
@@ -474,7 +479,9 @@ def gen_moves_pawn(b, player):
 
 from player import *
 def bench_movegen(FEN, iterations=100, verbose=True):
+    print('1')
     player = Player()
+    print('2')
     
     b, pl = FENtoBit(FEN, True)
     player.current = pl

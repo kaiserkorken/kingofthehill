@@ -19,15 +19,22 @@ possible_moves_2 = ['Bc1xg5', 'h4xg5', 'Ke1-d1', 'Ke1-f1', 'Ke1-e2', 'Ng1-e2', '
  'c3-c4', 'd4-d5', 'c6-c7']
 
 
+FEN_3 = "rnbqkbnr/pppppppp/8/8/8/3P4/PPP1PPPP/RNBQKBNR B"
+
+FEN_4= "rnbq1bnr/pppppppp/8/8/8/3P4/PPP1PkPP/RNBQKBNR W"
+
+#possible_moves_3 = 
+
+
 if __name__ == "__main__":
     verbose = False
     
     print('Unit Test 1:')
     print('Moves to find: ' + str(len(possible_moves_1)) + ' move(s) possible')
     print(possible_moves_1)
-    passed = unit_test(FEN_1, possible_moves_1, verbose)
+    passed = unit_test(FEN_3, possible_moves_1, verbose)
     print('Unit test passed?: ' + str(passed))
-    
+    '''
     print('------------------')
     print('------------------')
     print('------------------')
@@ -37,4 +44,4 @@ if __name__ == "__main__":
     print(possible_moves_2)
     passed = unit_test(FEN_2, possible_moves_2, verbose)
     print('Unit test passed?: ' + str(passed))
-    
+    '''

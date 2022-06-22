@@ -24,7 +24,7 @@ class Player():
         # weiß beginnt
         self.current = 1
         self.tt=ttable("hashtable")
-        self.opening=tt("opening",open=True)
+        self.opening=ttable("opening",open=True)
         #### das auskommentieren kostet 8 GB Speicherplatz!!! ####
         # self.tt=ttable("testtable.mymemmap",32)
 

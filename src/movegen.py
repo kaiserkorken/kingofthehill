@@ -374,17 +374,17 @@ def moves_king_W(b):
 def moves_king_B(b):
     # bb_from nicht nötig, da Position durch Schnittmenge mit Farbe und König eindeutig bestimmt
     # king can only move up if it is not in the upper row, etc. 
-    up    = np.roll((b['W'] & b['k'] & ~sbb['8']),   8) & ~(b['B'] )
-    down  = np.roll((b['W'] & b['k'] & ~sbb['1']),  -8) & ~(b['B'] )
-    left  = np.roll((b['W'] & b['k'] & ~sbb['la']), -1) & ~(b['B'] )
-    right = np.roll((b['W'] & b['k'] & ~sbb['lh']),  1) & ~(b['B'] )
+    up    = np.roll((b['B'] & b['k'] & ~sbb['8']),   8) & ~(b['B'] )
+    down  = np.roll((b['B'] & b['k'] & ~sbb['1']),  -8) & ~(b['B'] )
+    left  = np.roll((b['B'] & b['k'] & ~sbb['la']), -1) & ~(b['B'] )
+    right = np.roll((b['B'] & b['k'] & ~sbb['lh']),  1) & ~(b['B'] )
     
     straight = (up|down|left|right)
     
-    up_left    = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['la'])),   8-1) & ~(b['B'] )
-    up_right   = np.roll((b['W'] & b['k'] & ~(sbb['8'] | sbb['lh'])),   8+1) & ~(b['B'] )
-    down_left  = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['la'])),  -8-1) & ~(b['B'] )
-    down_right = np.roll((b['W'] & b['k'] & ~(sbb['1'] | sbb['lh'])),  -8+1) & ~(b['B'] )
+    up_left    = np.roll((b['B'] & b['k'] & ~(sbb['8'] | sbb['la'])),   8-1) & ~(b['B'] )
+    up_right   = np.roll((b['B'] & b['k'] & ~(sbb['8'] | sbb['lh'])),   8+1) & ~(b['B'] )
+    down_left  = np.roll((b['B'] & b['k'] & ~(sbb['1'] | sbb['la'])),  -8-1) & ~(b['B'] )
+    down_right = np.roll((b['B'] & b['k'] & ~(sbb['1'] | sbb['lh'])),  -8+1) & ~(b['B'] )
 
     diagonal = (up_left|up_right|down_left|down_right)
     return (straight | diagonal)
@@ -562,24 +562,26 @@ def moves_knight(b, bb_from):
     # erzeugt bb mit allen zügen von bb_from aus
     # bb_from: True an Koordinate an der Springer steht
     # first_second -> 2 in first dir, 1 in second dir
-    # up
+    #print(~(sbb['7']|sbb['8']|sbb['la']))
+    
     up_left    = np.roll((bb_from & ~(sbb['7']|sbb['8']|sbb['la'])),  16-1)
     up_right   = np.roll((bb_from & ~(sbb['7']|sbb['8']|sbb['lh'])),  16+1)
     # down
     down_left  = np.roll((bb_from & ~(sbb['1']|sbb['2']|sbb['la'])), -16-1)
     down_right = np.roll((bb_from & ~(sbb['1']|sbb['2']|sbb['lh'])), -16+1)
     # left
-    left_up    = np.roll((bb_from & ~(sbb['7']|sbb['la']|sbb['lb'])),  -2+8)
+    left_up    = np.roll((bb_from & ~(sbb['8']|sbb['la']|sbb['lb'])),  -2+8)
     left_down  = np.roll((bb_from & ~(sbb['1']|sbb['la']|sbb['lb'])),  -2-8)
     # down
-    right_up   = np.roll((bb_from & ~(sbb['7']|sbb['lg']|sbb['lh'])),   2+8)
+    right_up   = np.roll((bb_from & ~(sbb['8']|sbb['lg']|sbb['lh'])),   2+8)
     right_down = np.roll((bb_from & ~(sbb['1']|sbb['lg']|sbb['lh'])),   2-8)
+    
     
     up = up_left|up_right
     down = down_left|down_right
     left = left_up|left_down
     right = right_up|right_down
-    
+
     return up|down|left|right
 
 ### 
