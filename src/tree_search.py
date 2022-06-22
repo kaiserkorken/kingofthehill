@@ -3,6 +3,7 @@ import numpy as np
 import random
 import copy
 
+from utility import *
 from tree import *
 from bitboard import *
 from treebuild import *
@@ -126,8 +127,28 @@ def search(root_node, player, max_depth, search_time=30, old=False, verbose=Fals
 
 
 
-def minimax(node, depth=0, ismax=True):
+def minimax(node, player, depth=0):
         if depth == 0 or node.children == None:
+            if node.value == None:
+                node.value = utility(node.b, player)
+            return node.value
+        if player == 1:
+            v = -1000000
+            for x in node.children:
+                v = max(v, minimax(x, depth - 1, -player))
+                node.value = v
+            return v
+        else:
+            v = 1000000
+            for x in node.children:
+                v = min(v, minimax(x, depth - 1, -player))
+                node.value = v
+            return v
+     
+def minimax_bak(node, depth=0, ismax=True):
+        if depth == 0 or node.children == None:
+            if node.value == None:
+                node.value = utility(node.b, player)
             return node.value
         if ismax:
             v = 1000000
@@ -168,22 +189,24 @@ def a_b_search_bak(node, depth=0, ismax=True):
 
 # alpha beta
 def a_b_search(node, player, depth=0, alpha=-inf, beta=inf):
-    #print(node)
-    #print(player)
-    #print(depth)
+#    print(node)
+#    print(player)
+#    print(depth)
     if depth==0 or len(node.children)==0: 
-        if node.value == NULL:
+        if node.value == None:
             node.value = utility(node.b, player)
+        print(depth, node.value)
         return node.value
     #val=1000000
     for child in node.children:
         #print(a_b_search(child, -player, depth-1, -beta, -alpha,))
-        val = a_b_search(child, -player, depth-1, -beta, -alpha,)
-        #node.value = vals
+        val = -a_b_search(child, -player, depth-1, -beta, -alpha,)
+        node.value = val
         if (val > alpha):
             alpha = val
             if (alpha >= beta):
                 break
+    print(depth, val)
     return val
 
 
@@ -195,20 +218,21 @@ def a_b_search_principal_variation(node, player, depth=0, alpha=-inf, beta=inf):
     
     ####
     if depth==0 or node.children==None:
-        #print("player: " + str(player) + ", node_value: " + str(node.value) + ", value*player: " + str(node.value*player))
+        if node.value == None:
+            node.value = utility(node.b, player)
         return node.value
     PV_gefunden = False
     best = -inf
     for child in node.children:
         if PV_gefunden:
             val = -(a_b_search_principal_variation(child, -player, depth-1, -alpha-1, -alpha,))
-            node.value = val
+            #node.value = val
             if (val > alpha and val < beta):
                 val = -(a_b_search_principal_variation(child, -player, depth-1, -beta, -val,))
-                node.value = val
+                #node.value = val
         else:
             val = -(a_b_search_principal_variation(child, -player, depth-1, -beta, -alpha,))
-            node.value = val
+            #node.value = val
         if (val > best):
             if (val >= beta):
                 return val
@@ -219,7 +243,7 @@ def a_b_search_principal_variation(node, player, depth=0, alpha=-inf, beta=inf):
     return best
 
 # aspriation window suche 
-def a_b_search_aspiration_window(node, player, expected_value, depth=0, widening_constant=.5):
+def a_b_search_aspiration_window(node, player, expected_value, depth=0, widening_constant=1.5):
     
     alpha = expected_value - widening_constant
     beta = expected_value + widening_constant
@@ -246,9 +270,9 @@ def a_b_search_aspiration_window(node, player, expected_value, depth=0, widening
     
 def bench_tree_search_list(tree_dict_list, tree_height=None, search_time=30, search_mode='search', verbose=True):
     if verbose: 
-        print('--- initiate benchmark ---')
+        print('- initiate benchmark -')
         print('-- no. of benchmarks: ' + str(len(tree_dict_list)))
-        print('- search mode is: ' + search_mode)
+        print('--- search mode is: ' + search_mode)
     t_bench = [bench_tree_search(tree_dict, tree_height, search_time, search_mode, verbose=True) for tree_dict in tree_dict_list]
     t_avg = sum(t_bench) / len(t_bench)
     if verbose:
@@ -264,17 +288,17 @@ def bench_tree_search(tree_dict, tree_height=None, search_time=30, search_mode='
         
     if verbose:
         print('----- initiate search -----')
-        print('search mode is: ' + search_mode)
-        print('maximum search height is: ' + str(tree_height))
+        print('------ search mode is: ' + search_mode)
+        print('------ maximum search height is: ' + str(tree_height))
 #    print(tree)
 #    print(player_code)
 #    print(tree_height)
-#    print('==========')
+#   print('==========')
     t_start = time.time()
     if search_mode == 'search':
         best_value = search(tree.root, player_code, tree_height, search_time)
     elif search_mode == 'minimax':
-        best_value = minimax(tree.root, tree_height)
+        best_value = minimax(tree.root, player_code, tree_height)
     elif search_mode == 'alpha_beta':
         best_value = a_b_search(tree.root, player_code, tree_height, alpha=-inf, beta=inf)
     elif search_mode == 'principal_variation':
@@ -309,8 +333,8 @@ def build_bench_tree(FEN, tree_height=3, verbose=True):
     if verbose:
         print("baum fertig")
 
-    for i in tree.nodes:
-        i.value = utility(i.b, player_code)
+    #for i in tree.nodes:
+    #    i.value = utility(i.b, player_code)
     if verbose:
         print('baum bewertet')
         
@@ -332,20 +356,21 @@ if __name__ == "__main__":
     
     if 'tree_dict_list' in globals():
         pass
+    elif 'tree_dict_list' in locals():
+        pass
     else:
         tree_dict_list = build_bench_tree_list(FEN_list, tree_height, verbose)
         
-    """
+    
     search_mode = 'search'
     t_bench = bench_tree_search_list(copy.deepcopy(tree_dict_list), tree_height, search_time, search_mode, verbose)
-    """
+
     search_mode = 'minimax'
     t_bench = bench_tree_search_list(copy.deepcopy(tree_dict_list), tree_height, search_time, search_mode, verbose)
     search_mode = 'alpha_beta'
     t_bench = bench_tree_search_list(copy.deepcopy(tree_dict_list), tree_height, search_time, search_mode, verbose)
-    """
+    
     search_mode = 'principal_variation'
     t_bench = bench_tree_search_list(copy.deepcopy(tree_dict_list), tree_height, search_time, search_mode, verbose)
     search_mode = 'aspiration_windows'
     t_bench = bench_tree_search_list(copy.deepcopy(tree_dict_list), tree_height, search_time, search_mode, verbose)
-    """
