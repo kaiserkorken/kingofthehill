@@ -89,10 +89,15 @@ def search(root_node, player, max_depth, search_time=30, old=False, verbose=Fals
     beta = inf
     
     ### DEEP COPY TREE VON ALTER ITERATION
+    
+    tree_copy_root = copy.deepcopy(root_node)
 
     if verbose:
         print("search initiated with time to run: " + str(time_left))
     while (time_left > time_expected_next_run and depth <= max_depth): # Erhöhe Tiefe so lange wie Fertigstellung der Ebene noch realistisch
+        
+        root_node = copy.deepcopy(tree_copy_root) # lade backup
+    
         time_start = time.time()
         ### Suche
         if old:
