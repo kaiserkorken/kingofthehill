@@ -1,3 +1,4 @@
+from cgitb import reset
 from pydoc import cli
 import threading
 import socket
@@ -23,14 +24,20 @@ single=True
 bild=False
 answer=False
 full=False
+new=False
 def run_gui():
     global bild
     global answer
     global single
     global startFEN
+    global new
     bild=GUI(False)
-    bild.gs.board=FENtoBoard(startFEN)
+    bild.gs.startboard=FENtoBoard(startFEN)
+    bild.draw(bild.gs.startboard)
     while bild.running:
+        # if new:
+        #         bild.reset()
+        #         new=False
         if single:
             if answer!=False:
                 board=FENtoBoard(answer)
@@ -48,10 +55,10 @@ def run_gui():
                 broadcast(FEN)
                 bild.single=False#spieler kann nicht mehr klicken, ki ist dran
                 bild.klick=False
-                
-            bild.run()
-        else:
-            bild.run()
+                            
+       
+        
+        bild.run()
    
 
 
@@ -67,6 +74,7 @@ def handle_client(client):
     global plays
     global full
     global answer
+    global new
     while True:
         try:
             message = client.recv(1024).decode("utf-8")
@@ -86,12 +94,14 @@ def handle_client(client):
                 
         except Exception as e:
             print(e)
+            #new=True
             index = clients.index(client)
             clients.remove(client)
             client.close()
             alias = aliases[index]
             broadcast(f'{alias} has left the game!')
-            bild.draw(startFEN)
+            bild.draw(FENtoBoard(startFEN))
+           
             logging.info("Server    : disconnected player: "+str(alias))
             aliases.remove(alias)
             full=False
@@ -104,6 +114,7 @@ def receive():
     global bild
     global full
     global clients
+    global new
     gui = threading.Thread(target=run_gui, args=())
     gui.start()
     if single==False:
@@ -126,7 +137,7 @@ def receive():
                 plays=1
                 clients[1].send("-1".encode("utf-8"))
                 broadcast(startFEN)
-                bild.draw(FENtoBoard(startFEN))
+                #new=True
                 plays=0
                 print("startet Runde "+str(plays))
                 plays+=1
@@ -145,7 +156,7 @@ def receive():
             broadcast(f'{alias} has connected to the game, ')
             client.send('you are now connected!'.encode('utf-8'))
             if not full:
-                bild.reset()
+                #new=True
                 thread = threading.Thread(target=handle_client, args=(client,))
                 thread.start()
             if len(clients) == 1:
@@ -155,7 +166,7 @@ def receive():
                 bild.klick=False
                 bild.single=True
                 broadcast(startFEN)
-                bild.draw(FENtoBoard(startFEN))
+                #new=True
                 bild.player=1
                 plays=0
                 print("startet Runde "+str(plays))

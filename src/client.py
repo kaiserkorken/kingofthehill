@@ -14,7 +14,7 @@ win = True
 def client_receive():
     global win
     while True:
-        #try:
+        try:
             message = client.recv(1024).decode('utf-8')
             print("receive:"+str(message))
             if message == "alias?":
@@ -50,10 +50,10 @@ def client_receive():
             else:
                 print("else:"+str(message))
 
-        # except:
-        #      print('Error!')
-        #      client.close()
-        #      break
+        except Exception as e:
+              print(e)
+              client.close()
+              break
 
 
 def client_send():
