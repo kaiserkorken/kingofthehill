@@ -108,7 +108,7 @@ class GUI():
         
     def draw(self,board):
         self.gs.board=board
-        drawGameState(self.screen,self.gs)
+        self.drawGameState()
         self.clock.tick(MAX_FPS)
         p.display.flip()
         
@@ -143,13 +143,13 @@ class GUI():
                         self.gs.undoMove()
 
 
-            drawGameState(self.screen,self.gs)
+            self.drawGameState()
             self.clock.tick(MAX_FPS)
             p.display.flip()
 
-def drawGameState(screen,gs):
-    drawBoard(screen)
-    drawPieces(screen, gs.board)
+    def drawGameState(self):
+        drawBoard(self.screen)
+        drawPieces(self.screen, self.gs.board)
 
 
 def drawBoard(screen):

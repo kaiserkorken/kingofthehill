@@ -296,7 +296,7 @@ def FENtoBit(fen,player=False):
     #bit[63]== upper right
     #player=info[1]
     #if wh>=20 or bl>= 20:#damenumwandlung beachten
-    if player:
+    if player != False:
         if (info[1]=="W" or info[1]=="w"):
             player=1
         else:
@@ -330,7 +330,7 @@ def BittoByte(b,player):
     r=bytes(b["r"])
     bi=bytes(b["b"])
     p=bytes(b["p"])
-    return (ww,bb,k,q,n,r,bi,p,player)#hier noch rochade etc. adden
+    return str(ww)+str(bb)+str(k)+str(q)+str(n)+str(r)+str(bi)+str(p)+str(player)#hier noch rochade etc. adden
 
 def BittoArray(b):
     board = np.empty((8,8), dtype=str)
@@ -379,8 +379,6 @@ def FENtoBoard(fens):
         for countB, info in enumerate(value):
             if info == "r":
                 newBoard[countA][countB] = "bR"
-            elif info == "1":
-                newBoard[countA][countB] = "--"
             elif info == "n":
                 newBoard[countA][countB] = "bN"
             elif info == "b":
@@ -403,6 +401,10 @@ def FENtoBoard(fens):
                 newBoard[countA][countB] = "wQ"
             elif info == "K":
                 newBoard[countA][countB] = "wK"
+            else:
+                newBoard[countA][countB] = "--"
+                # for x in range(int(info)):
+                #     newBoard[countA][x] = "--"
     return newBoard
 
 
@@ -412,18 +414,19 @@ def BoardtoFEN(board,player=False):
         helpingC = 0
         for countB, info in enumerate(value):
             if (countB == 7 and helpingC != 7):
-
+        
                 if helpingC != 0:
                     result = result + str(helpingC + 1) + "/"
 
                 else:
                     result = result + convertPiece(info) + "/"
-
             elif (info == "--"):
                 if helpingC == 7:
                     result = result + str(helpingC + 1) + "/"
                 else:
                     helpingC = helpingC + 1
+            
+
             else:
                 if (helpingC != 0):
                     result = result + str(helpingC) + convertPiece(info)

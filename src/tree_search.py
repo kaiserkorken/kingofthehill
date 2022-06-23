@@ -3,7 +3,6 @@ import numpy as np
 import random
 import copy
 
-from utility import *
 from tree import *
 from bitboard import *
 from treebuild import *
@@ -16,7 +15,7 @@ inf = 100000
 
 
 
-def best_node(tree, player_code=1):
+def best_node(tree, player_code):
     #tree.print_tree()
     # nodes height 1 sammeln
     #print(tree.root.children)
@@ -79,7 +78,7 @@ def time_expected_next(time_last_run):
     return time_expected
 
 ### Hauptsuchroutine. Wählt taktisch verschiedene Suchverfahren
-def search(root_node, player, max_depth, search_time=30, old=True, verbose=False):
+def search(root_node, player, max_depth, search_time=30, old=False, verbose=False):
     # iterative Tiefensuche
     time_last_run = 0.0 # benötigte Zeit für letzten Durchlauf
     time_left = search_time - time_last_run # Zeit bis Abbruch
@@ -97,7 +96,7 @@ def search(root_node, player, max_depth, search_time=30, old=True, verbose=False
         time_start = time.time()
         ### Suche
         if old:
-            best_val = a_b_search(root_node, player, depth)
+            best_val = a_b_search(root_node, player)
         else:
             if depth > 0: # aspiration window suche um besten wert aus der letzten Tiefeniteration
                 best_val, aw_failed_left, aw_failed_right = a_b_search_aspiration_window(root_node, player, best_val, depth)
