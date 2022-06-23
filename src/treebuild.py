@@ -141,7 +141,7 @@ def build_tree(tree, player,index=0, h=0, tmove=None, depth=None,utilities=True,
             if start + tmove <= time.time():  # zeitlimit überschritten
                 print("finished till ebene: " + str((height-1)))
                  # letzte ebene nicht fertig geworden
-                return height -1
+                return height -1, gen
     if tmove==None:
         if depth > 0:
             index = altstep

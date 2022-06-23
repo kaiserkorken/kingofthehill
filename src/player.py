@@ -97,11 +97,11 @@ class Player():
                     # arr=p.set_movetree(tre,tmove)
                     # tree.print_tree()
                     logging.info("Main    : building movetree " + str(time.time() - start))
-                    height = build_tree(tree,self.current,tmove=(start + tmove - time.time()),tt=tt)  # time bzw. depth
+                    height, lefttime = build_tree(tree,self.current,tmove=(start + tmove - time.time()),tt=tt)  # time bzw. depth
                     # arr[1]=tree.h
                     self.current = play
                     tleft = time.time() - start
-                    logging.info("Main    : movetree finished with height: " + str(height+1) + " " + str(tleft))
+                    logging.info("Main    : movetree finished with height: " + str(height) + " " + str(tleft))
                     logging.info("Main    : tree build finished in:" + str(time.time() - start) + "s")
 
                     # tree.print_tree()
@@ -111,7 +111,7 @@ class Player():
                     logging.info("Main    : doing tree search " + str(tleft))
                     #tree.sort_nodes() #FEhler bei invertet=True
                     sstart = time.time()
-                    depth = search(tree.root, self, height, tsearch)
+                    depth= search(tree.root,self, height, tsearch)
                     self.current=play
                     # tree.print_node(tree.nodes[2])#teste tree nach search
                     tleft = time.time() - start

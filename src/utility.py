@@ -4,6 +4,7 @@ import time
 
 
 def utility(b,player,h,simple=True):
+    util=0
     if player.tt!= None:
         hash = player.tt.hash_value(b,player.current)
         util = player.tt.in_table(hash, h)

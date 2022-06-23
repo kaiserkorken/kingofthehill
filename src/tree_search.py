@@ -78,7 +78,7 @@ def time_expected_next(time_last_run):
     return time_expected
 
 ### Hauptsuchroutine. Wählt taktisch verschiedene Suchverfahren
-def search(root_node, player, max_depth, search_time=30, old=False, verbose=False):
+def search(root_node, player, max_depth, search_time=30, new=False, verbose=False):
     # iterative Tiefensuche
     time_last_run = 0.0 # benötigte Zeit für letzten Durchlauf
     time_left = search_time - time_last_run # Zeit bis Abbruch
@@ -95,7 +95,7 @@ def search(root_node, player, max_depth, search_time=30, old=False, verbose=Fals
     while (time_left > time_expected_next_run and depth <= max_depth): # Erhöhe Tiefe so lange wie Fertigstellung der Ebene noch realistisch
         time_start = time.time()
         ### Suche
-        if old:
+        if not new:
             best_val = a_b_search(root_node, player)
         else:
             if depth > 0: # aspiration window suche um besten wert aus der letzten Tiefeniteration
@@ -185,6 +185,7 @@ def a_b_search(node, player, depth=0, alpha=-inf, beta=inf):
             alpha = val
             if (alpha >= beta):
                 break
+    node.value=val
     return val
 
 
