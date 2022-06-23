@@ -169,6 +169,7 @@ if __name__ == "__main__":
     # FEN="rnbqkbnr/pp1p1ppp/4p3/1Pp5/8/2N5/P1PPPPPP/R1BQKBNR w"
     # FEN="8/4k3/8/8/8/8/3K4/8"
     FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"
+    FEN="rnb2bnr/pppqp2p/3pk1p1/8/3pN3/6N1/PPP1QPPP/R1B1KB1R W"
     player=Player()
     zeit = 20
     tiefe = 2

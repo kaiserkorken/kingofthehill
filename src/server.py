@@ -20,7 +20,7 @@ server.listen()
 clients = []
 aliases = []
 plays=1
-single=True
+single=False
 bild=False
 answer=False
 full=False
@@ -78,7 +78,7 @@ def handle_client(client):
     while True:
         try:
             message = client.recv(1024).decode("utf-8")
-            if message != "False":
+            if message != "False" and message!="":
                 if (FENtoBit(message)):
                     plays+=1
                     print("Starte Runde "+str(plays))
@@ -119,7 +119,7 @@ def receive():
     gui.start()
     if single==False:
         while True:
-            print('Server is running and listening ... s')
+            print('waiting for connection ... s')
             logging.info("Server    : Server is running in AI vs. AI mode ...")
             client, address = server.accept()
             logging.info("Server    : established connection with player:"+str(address))
@@ -129,7 +129,7 @@ def receive():
             aliases.append(alias)
             clients.append(client)
             client.send('you are now connected!'.encode('utf-8'))
-            thread = threading.Thread(target=handle_client, args=(client,gui))
+            thread = threading.Thread(target=handle_client, args=(client,))
             thread.start()
             if len(clients) == 1:
                 clients[0].send("1".encode("utf-8"))
@@ -143,7 +143,7 @@ def receive():
                 plays+=1
     else:
         while True:
-            print('Server is running and listening ...')
+            print('waiting for connection ...')
             logging.info("Server    : Server is running in Single Mode...")
             client, address = server.accept()
             logging.info("Server    : established connection with player:"+str(address))
@@ -168,9 +168,8 @@ def receive():
                 broadcast(startFEN)
                 #new=True
                 bild.player=1
-                plays=0
+                plays=1
                 print("startet Runde "+str(plays))
-                plays+=1
 
 if __name__ == "__main__":
     receive()
