@@ -68,8 +68,8 @@ class Player():
         logging.basicConfig(format=format, level=logging.INFO,
                             datefmt="%H:%M:%S")
         logging.info("Main    : start turn " + str(start - start))
-        tmove = (t / 10) * 9  # seconds
-        tsearch = t / 10
+        tmove = t / 2  # seconds
+        tsearch = t / 2
         
        
         [bb, play] = FENtoBit(FEN, True)

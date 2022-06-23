@@ -23,7 +23,11 @@ def best_node(tree, player_code):
     # print(children)
     # print(children)
     if len(children) > 0:  # falls Züge vorhanden
-        values = player_code * np.array([x.value for x in children])
+        values=[]
+        for x in children:
+            if x.value!= None:
+                values.append(player_code*x.value)
+        #values = player_code * np.array([x.value ])
         #"""
         #"""
         # values = [value for index,parent,b,value,h in children]
@@ -73,7 +77,7 @@ def best_node(tree, player_code):
         return children[0]
 
 def time_expected_next(time_last_run):
-    time_exponent = 10   # Exponent mit der benötigte Zeit ansteigt
+    time_exponent = 25   # Exponent mit der benötigte Zeit ansteigt
     time_expected = time_last_run*time_exponent
     return time_expected
 
@@ -212,10 +216,11 @@ def a_b_search(node, player, depth=0, alpha=-inf, beta=inf):
         player.__switch__()
         val = max(val, a_b_search(child, player, depth-1, -beta, -alpha,))
         #node.value = vals
-        node.value = val
+       
         alpha = max(val, alpha)
         if (alpha >= beta):
             break
+    node.value = val
     return val
 """
 function negamax(node, depth, α, β, color) is
