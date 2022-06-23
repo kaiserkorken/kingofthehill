@@ -7,7 +7,8 @@ from bitboard import BoardtoFEN, FENtoBit, FENtoBoard
 #TODO zeitbegrenzung schicken
 import logging
 #logging.basicConfig(filename='server.log', encoding='utf-8', level=logging.DEBUG)
-
+#startFEN="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+startFEN="rnbq1bnr/pppkpp1p/3p2p1/8/4P3/2NP4/PPP2PPP/R1BQKBNR W"
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(filename='server.conf',format=format, level=logging.DEBUG,datefmt="%H:%M:%S")
 host = '127.0.0.1'
@@ -26,7 +27,9 @@ def run_gui():
     global bild
     global answer
     global single
+    global startFEN
     bild=GUI(False)
+    bild.gs.board=FENtoBoard(startFEN)
     while bild.running:
         if single:
             if answer!=False:
@@ -88,7 +91,7 @@ def handle_client(client):
             client.close()
             alias = aliases[index]
             broadcast(f'{alias} has left the game!')
-            bild.reset()
+            bild.draw(startFEN)
             logging.info("Server    : disconnected player: "+str(alias))
             aliases.remove(alias)
             full=False
@@ -115,15 +118,15 @@ def receive():
             aliases.append(alias)
             clients.append(client)
             client.send('you are now connected!'.encode('utf-8'))
-            thread = threading.Thread(target=handle_client, args=(client,))
+            thread = threading.Thread(target=handle_client, args=(client,gui))
             thread.start()
             if len(clients) == 1:
                 clients[0].send("1".encode("utf-8"))
             if len(clients) == 2:
                 plays=1
                 clients[1].send("-1".encode("utf-8"))
-                broadcast("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-                bild.reset()
+                broadcast(startFEN)
+                bild.draw(FENtoBoard(startFEN))
                 plays=0
                 print("startet Runde "+str(plays))
                 plays+=1
@@ -151,8 +154,8 @@ def receive():
                 plays=1
                 bild.klick=False
                 bild.single=True
-                broadcast("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-                bild.reset()
+                broadcast(startFEN)
+                bild.draw(FENtoBoard(startFEN))
                 bild.player=1
                 plays=0
                 print("startet Runde "+str(plays))
