@@ -81,14 +81,15 @@ class Player():
             # bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#testFEN
             tree = Tree(bb)  # ,self.tt.starthash)#leerer baum mit b als root
             if not checkmate(bb, self.current):  # Spielende überprüfen
-                hash=self.opening.hash_value(bb,self.current)
-                info=self.opening.in_table(hash)
-                if len(info)!=0:
-                    logging.info("Main    : choosing from opening table: " + str(time.time()-start))
-                    moves=info
-                    FEN=random.choice(moves)
-                    logging.info("Main    : finished using opening table: " + str(time.time()-start))
-                    return FEN
+                if True:#openings ausschalten
+                    hash=self.opening.hash_value(bb,self.current)
+                    info=self.opening.in_table(hash)
+                    if len(info)!=0:
+                        logging.info("Main    : choosing from opening table: " + str(time.time()-start))
+                        moves=info
+                        FEN=random.choice(moves)
+                        logging.info("Main    : finished using opening table: " + str(time.time()-start))
+                        return FEN
             
                 if tt!=False:
                     tt=self.tt

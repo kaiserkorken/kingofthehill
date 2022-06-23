@@ -174,9 +174,10 @@ if __name__ == "__main__":
     tiefe = 2
     wdh = 1000
     
-    tt=ttable("testtable")
+   # tt=ttable("testtable")
     player.turn(FEN,t=zeit)
-    tt.save_table()
+    #ttables-> sucheebene 3 start 0.14 -> 0.02
+    player.tt.save_table()
         #FEN, t=None, depth=None,utilities=True,tt=False,sort=False,windows=False)
     #player.test_turn(FEN, depth=tiefe, tt=tt)
     # tt.save_table()

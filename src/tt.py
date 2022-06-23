@@ -33,10 +33,10 @@ class ttable(object):
         self.location+=".json"#".npy"
         #else:
       
-        b = init_game()#TODO wrong start board, missing black tokens
-        self.starthash = 0
-        if open ==False:
-            self.init_hash(b)
+        # b = init_game()#TODO wrong start board, missing black tokens
+        # self.starthash = 0
+        # if open ==False:
+        #     self.init_hash(b)
         # if not self.init_hash(b):
         #     return False
         #print(hashValue)
@@ -53,14 +53,14 @@ class ttable(object):
             self.table=self.create_table()
         
 
-        if self.starthash:
-            #print((2**32)-self.starthash)
-            #print(self.table[(2**self.bits)-self.starthash])
-            self.to_table(self.starthash,0,-1)
-            #self.table[(2**self.bits)-self.starthash]=[0,-1]
-            #print(self.table[(2**self.bits)-self.starthash])
-        #self.save_table(self.table)#?
-        #self.table=self.load_table()#TODO datei bereits vorhanden checken
+        # if self.starthash:
+        #     #print((2**32)-self.starthash)
+        #     #print(self.table[(2**self.bits)-self.starthash])
+        #     self.to_table(self.starthash,0,-1)
+        #     #self.table[(2**self.bits)-self.starthash]=[0,-1]
+        #     #print(self.table[(2**self.bits)-self.starthash])
+        # #self.save_table(self.table)#?
+        # #self.table=self.load_table()#TODO datei bereits vorhanden checken
     
     def init_hash(self,b):
         self.starthash=self.hash_value(b)
@@ -135,7 +135,7 @@ class ttable(object):
             return []
         #else:
             #value=self.table[hash]
-        if not open:
+        if not self.open:
             depth=value[1]
             #if depth!=0:#depth ungleich 0 (sonst nicht initialisiert)
             if h<=depth:#aelterer wert bereits sicherer(tiefer)
@@ -150,7 +150,7 @@ class ttable(object):
     def to_table(self,hash,value,depth=None):
         #if self.dict:
         if len(self.table)<=588823529:#-> kleiner 2 GB
-            if not open:
+            if not self.open:
                 self.table[str(hash)]=[int(value),int(depth)]
             else:
                 self.table[str(hash)]=value

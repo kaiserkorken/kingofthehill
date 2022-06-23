@@ -18,7 +18,7 @@ server.listen()
 clients = []
 aliases = []
 plays=1
-single=False
+single=True
 bild=False
 answer=False
 full=False
