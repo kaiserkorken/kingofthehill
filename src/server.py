@@ -69,6 +69,18 @@ def broadcast(message):
     print("message:"+str(message))
 # Function to handle clients'connections
 
+def leave(client):
+    #new=True
+    index = clients.index(client)
+    clients.remove(client)
+    client.close()
+    alias = aliases[index]
+    broadcast(f'{alias} has left the game!')
+    bild.draw(FENtoBoard(startFEN))
+    
+    logging.info("Server    : disconnected player: "+str(alias))
+    aliases.remove(alias)
+    full=False
      
 def handle_client(client):
     global plays
@@ -84,27 +96,23 @@ def handle_client(client):
                     print("Starte Runde "+str(plays))
                     logging.info("Server    : Starting round: "+str(plays))
                     if plays>=80:
-                        message="remis"
+                        leave(client)
+                        
+                        broadcast("remis")
+                        break
                     else:
                         board=FENtoBoard(message)
                         bild.draw(board)
                         answer=message
                         
-                broadcast(message)
+                    broadcast(message)
+                else:
+                    broadcast("False")
                 
         except Exception as e:
             print(e)
             #new=True
-            index = clients.index(client)
-            clients.remove(client)
-            client.close()
-            alias = aliases[index]
-            broadcast(f'{alias} has left the game!')
-            bild.draw(FENtoBoard(startFEN))
-           
-            logging.info("Server    : disconnected player: "+str(alias))
-            aliases.remove(alias)
-            full=False
+            leave(client)
             break
 # Main function to receive the clients connection
 

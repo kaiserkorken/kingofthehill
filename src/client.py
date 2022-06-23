@@ -41,6 +41,8 @@ def client_receive():
                 if message.split(" ")[2] == "lost":
                     if win:
                         print(f'{alias}: has won the game!!')
+                    player.close()
+                    client.close()
             elif message=="remis":
                 print("Unentschieden!")
                 win=False
