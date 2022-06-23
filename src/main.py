@@ -104,6 +104,13 @@ class GUI():
         self.playerClicks =  [] #keeps track of player clicks (two tuples)
        
     def reset(self):
+        
+        self.klick=False
+        self.single=False
+        self.player=1
+        self.running = True
+        self.sqSelected = () # no square is selected, keeps track of the last click on the user
+        self.playerClicks =  []
         self.draw(self.gs.startboard)
         
     def draw(self,board):

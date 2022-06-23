@@ -1,3 +1,4 @@
+from cgitb import reset
 from pydoc import cli
 import threading
 import socket
@@ -7,7 +8,8 @@ from bitboard import BoardtoFEN, FENtoBit, FENtoBoard
 #TODO zeitbegrenzung schicken
 import logging
 #logging.basicConfig(filename='server.log', encoding='utf-8', level=logging.DEBUG)
-
+#startFEN="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+startFEN="rnbq1bnr/pppkpp1p/3p2p1/8/4P3/2NP4/PPP2PPP/R1BQKBNR W"
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(filename='server.conf',format=format, level=logging.DEBUG,datefmt="%H:%M:%S")
 host = '127.0.0.1'
@@ -18,16 +20,24 @@ server.listen()
 clients = []
 aliases = []
 plays=1
-single=True
+single=False
 bild=False
 answer=False
 full=False
+new=False
 def run_gui():
     global bild
     global answer
     global single
+    global startFEN
+    global new
     bild=GUI(False)
+    bild.gs.startboard=FENtoBoard(startFEN)
+    bild.draw(bild.gs.startboard)
     while bild.running:
+        # if new:
+        #         bild.reset()
+        #         new=False
         if single:
             if answer!=False:
                 board=FENtoBoard(answer)
@@ -45,10 +55,10 @@ def run_gui():
                 broadcast(FEN)
                 bild.single=False#spieler kann nicht mehr klicken, ki ist dran
                 bild.klick=False
-                
-            bild.run()
-        else:
-            bild.run()
+                            
+       
+        
+        bild.run()
    
 
 
@@ -64,10 +74,11 @@ def handle_client(client):
     global plays
     global full
     global answer
+    global new
     while True:
         try:
             message = client.recv(1024).decode("utf-8")
-            if message != "False":
+            if message != "False" and message!="":
                 if (FENtoBit(message)):
                     plays+=1
                     print("Starte Runde "+str(plays))
@@ -83,12 +94,14 @@ def handle_client(client):
                 
         except Exception as e:
             print(e)
+            #new=True
             index = clients.index(client)
             clients.remove(client)
             client.close()
             alias = aliases[index]
             broadcast(f'{alias} has left the game!')
-            bild.reset()
+            bild.draw(FENtoBoard(startFEN))
+           
             logging.info("Server    : disconnected player: "+str(alias))
             aliases.remove(alias)
             full=False
@@ -101,11 +114,12 @@ def receive():
     global bild
     global full
     global clients
+    global new
     gui = threading.Thread(target=run_gui, args=())
     gui.start()
     if single==False:
         while True:
-            print('Server is running and listening ... s')
+            print('waiting for connection ... s')
             logging.info("Server    : Server is running in AI vs. AI mode ...")
             client, address = server.accept()
             logging.info("Server    : established connection with player:"+str(address))
@@ -122,14 +136,14 @@ def receive():
             if len(clients) == 2:
                 plays=1
                 clients[1].send("-1".encode("utf-8"))
-                broadcast("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-                bild.reset()
+                broadcast(startFEN)
+                #new=True
                 plays=0
                 print("startet Runde "+str(plays))
                 plays+=1
     else:
         while True:
-            print('Server is running and listening ...')
+            print('waiting for connection ...')
             logging.info("Server    : Server is running in Single Mode...")
             client, address = server.accept()
             logging.info("Server    : established connection with player:"+str(address))
@@ -142,7 +156,7 @@ def receive():
             broadcast(f'{alias} has connected to the game, ')
             client.send('you are now connected!'.encode('utf-8'))
             if not full:
-                bild.reset()
+                #new=True
                 thread = threading.Thread(target=handle_client, args=(client,))
                 thread.start()
             if len(clients) == 1:
@@ -151,12 +165,11 @@ def receive():
                 plays=1
                 bild.klick=False
                 bild.single=True
-                broadcast("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-                bild.reset()
+                broadcast(startFEN)
+                #new=True
                 bild.player=1
-                plays=0
+                plays=1
                 print("startet Runde "+str(plays))
-                plays+=1
 
 if __name__ == "__main__":
     receive()

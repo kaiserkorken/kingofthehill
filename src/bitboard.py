@@ -414,31 +414,38 @@ def BoardtoFEN(board,player=False):
         helpingC = 0
         for countB, info in enumerate(value):
             if (countB == 7 and helpingC != 7):
-        
-                if helpingC != 0:
-                    result = result + str(helpingC + 1) + "/"
 
+                if helpingC ==1:
+                    result = result + str(helpingC) + str(convertPiece(info) + "/")
+                elif helpingC != 0:
+                    if info == "--":
+                        result = result + str(helpingC + 1) + "/"
+                    else:
+                        result = result +str(helpingC)+str(convertPiece(info)+"/")
                 else:
-                    result = result + convertPiece(info) + "/"
+                    if info == "--":
+                        result = result + "1/"
+                    else:
+                        result = result + convertPiece(info) + "/"
+
             elif (info == "--"):
                 if helpingC == 7:
                     result = result + str(helpingC + 1) + "/"
                 else:
                     helpingC = helpingC + 1
-            
-
             else:
                 if (helpingC != 0):
                     result = result + str(helpingC) + convertPiece(info)
                     helpingC = 0
                 else:
                     result = result + convertPiece(info)
+
     ergeb = result[0:len(result) - 1]
     if player==-1:
         ergeb+=" B"
     elif player==1:
         ergeb+=" W"
-    print(ergeb)
+    #print(ergeb)
     return ergeb
 
 
