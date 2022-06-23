@@ -142,13 +142,13 @@ class ttable(object):
       
     
     def loadtxt():
-    with open('FEN.txt') as f:
-        leere=[]
-        mylist = f.read().splitlines()
-
-    for x in mylist:
-        leere.append(x.strip('"'))
-        
+        with open('FEN.txt') as f:
+            leere=[]
+            mylist = f.read().splitlines()
+    
+        for x in mylist:
+            leere.append(x.strip('"'))
+            
 if __name__ == "__main__":
     #tt=ttable("testtable.mymemmap")
     #tt.create_table()

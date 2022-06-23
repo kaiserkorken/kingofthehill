@@ -79,7 +79,7 @@ def time_expected_next(time_last_run):
     return time_expected
 
 ### Hauptsuchroutine. Wählt taktisch verschiedene Suchverfahren
-def search(root_node, player, max_depth, search_time=30, old=False, verbose=False):
+def search(root_node, player, max_depth, search_time=30, old=True, verbose=False):
     # iterative Tiefensuche
     time_last_run = 0.0 # benötigte Zeit für letzten Durchlauf
     time_left = search_time - time_last_run # Zeit bis Abbruch
@@ -97,7 +97,7 @@ def search(root_node, player, max_depth, search_time=30, old=False, verbose=Fals
         time_start = time.time()
         ### Suche
         if old:
-            best_val = a_b_search(root_node, player)
+            best_val = a_b_search(root_node, player, depth)
         else:
             if depth > 0: # aspiration window suche um besten wert aus der letzten Tiefeniteration
                 best_val, aw_failed_left, aw_failed_right = a_b_search_aspiration_window(root_node, player, best_val, depth)
@@ -132,18 +132,23 @@ def minimax(node, player, depth=0):
             if node.value == None:
                 node.value = utility(node.b, player)
             return node.value
-        if player == 1:
-            v = -1000000
-            for x in node.children:
-                v = max(v, minimax(x, depth - 1, -player))
-                node.value = v
-            return v
-        else:
-            v = 1000000
-            for x in node.children:
-                v = min(v, minimax(x, depth - 1, -player))
-                node.value = v
-            return v
+        
+        val = -inf
+        for child in node.children:
+            val = max(val, -minimax(child, depth - 1, -player))
+            #node.value = val
+        return val
+
+        
+"""
+    function negamax(node, depth, color) is
+    if depth = 0 or node is a terminal node then
+        return color × the heuristic value of node
+    value := −∞
+    for each child of node do
+        value := max(value, −negamax(child, depth − 1, −color))
+    return value
+"""
      
 def minimax_bak(node, depth=0, ismax=True):
         if depth == 0 or node.children == None:
@@ -195,21 +200,33 @@ def a_b_search(node, player, depth=0, alpha=-inf, beta=inf):
     if depth==0 or len(node.children)==0: 
         if node.value == None:
             node.value = utility(node.b, player)
-        print(depth, node.value)
+            #print(depth, player, node.value)
         return node.value
-    #val=1000000
+    val=-inf
     for child in node.children:
         #print(a_b_search(child, -player, depth-1, -beta, -alpha,))
-        val = -a_b_search(child, -player, depth-1, -beta, -alpha,)
+        val = max(val, -a_b_search(child, -player, depth-1, -beta, -alpha,))
         node.value = val
-        if (val > alpha):
-            alpha = val
-            if (alpha >= beta):
-                break
-    print(depth, val)
+        alpha = max(val, alpha)
+        if (alpha >= beta):
+            break
+    #print(depth, player, val)
     return val
+"""
+function negamax(node, depth, α, β, color) is
+    if depth = 0 or node is a terminal node then
+        return color × the heuristic value of node
 
-
+    childNodes := generateMoves(node)
+    childNodes := orderMoves(childNodes)
+    value := −∞
+    foreach child in childNodes do
+        value := max(value, −negamax(child, depth − 1, −β, −α, −color))
+        α := max(α, value)
+        if α ≥ β then
+            break (* cut-off *)
+    return value
+"""
 
 # principal variation
 def a_b_search_principal_variation(node, player, depth=0, alpha=-inf, beta=inf):
@@ -242,6 +259,41 @@ def a_b_search_principal_variation(node, player, depth=0, alpha=-inf, beta=inf):
                 PV_gefunden = True
     return best
 
+"""
+int AlphaBeta(int tiefe, int alpha, int beta)
+{
+    if (tiefe == 0)
+        return Bewerten();
+    BOOL PVgefunden = FALSE;
+    best = -unendlich;
+    Zugliste = GeneriereMoeglicheZuege();
+    for each (Zug in Zugliste)
+    {
+        FuehreZugAus(Zug);
+        if (PVgefunden)
+        {
+            wert = -AlphaBeta(tiefe-1, -alpha-1, -alpha);
+            if (wert > alpha && wert < beta)
+                wert = -AlphaBeta(tiefe-1, -beta, -wert);
+        } else
+            wert = -AlphaBeta(tiefe-1, -beta, -alpha);
+        MacheZugRueckgaengig(Zug);
+        if (wert > best)
+        {
+            if (wert >= beta)
+                return wert;
+            best = wert;
+            if (wert > alpha)
+            {
+                alpha = wert;
+                PVgefunden = TRUE;
+            }
+        }
+    }
+    return best;
+}
+"""
+
 # aspriation window suche 
 def a_b_search_aspiration_window(node, player, expected_value, depth=0, widening_constant=1.5):
     
@@ -252,7 +304,7 @@ def a_b_search_aspiration_window(node, player, expected_value, depth=0, widening
     a_w_window_too_small = True
     while a_w_window_too_small:
 
-        best = a_b_search(node, player, depth, alpha, beta)
+        best = a_b_search_principal_variation(node, player, depth, alpha, beta)
         
         if best < alpha: # tief gescheitert
             a_w_failed_alpha += 1
@@ -268,7 +320,7 @@ def a_b_search_aspiration_window(node, player, expected_value, depth=0, widening
     
     
     
-def bench_tree_search_list(tree_dict_list, tree_height=None, search_time=30, search_mode='search', verbose=True):
+def bench_tree_search_list(tree_dict_list, tree_height=None, search_time=15, search_mode='search', verbose=True):
     if verbose: 
         print('- initiate benchmark -')
         print('-- no. of benchmarks: ' + str(len(tree_dict_list)))
@@ -279,7 +331,7 @@ def bench_tree_search_list(tree_dict_list, tree_height=None, search_time=30, sea
         print("AVERAGE TIME IN seconds: " + str(t_avg))
     return t_avg
 
-def bench_tree_search(tree_dict, tree_height=None, search_time=30, search_mode='search', verbose=True):
+def bench_tree_search(tree_dict, tree_height=None, search_time=15, search_mode='search', verbose=True):
     
     tree = tree_dict['tree']
     player_code = tree_dict['player_code']
@@ -311,10 +363,9 @@ def bench_tree_search(tree_dict, tree_height=None, search_time=30, search_mode='
     t_bench = time.time() - t_start
     
     if verbose:
-        print('search took:')
-        print(t_bench)
-        print('best value found: ' + str(best_value))
-        print('should have found something with sign of: ' + str(best_node(tree, player_code).value))
+        print('------- search took:' +str(t_bench))
+        print('------- best value found: ' + str(best_value))
+        print('------- should have found something with sign of: ' + str(best_node(tree, player_code).value))
     return t_bench
 
 def build_bench_tree_list(FEN_list, tree_height=3, verbose=True):
@@ -332,11 +383,13 @@ def build_bench_tree(FEN, tree_height=3, verbose=True):
     dep = len(tree.nodes)
     if verbose:
         print("baum fertig")
+        
 
-    #for i in tree.nodes:
-    #    i.value = utility(i.b, player_code)
+    for i in tree.nodes:
+        i.value = utility(i.b, player_code)
     if verbose:
         print('baum bewertet')
+        #tree.print_tree()
         
     tree_dict = {'tree':tree, 'player_code':player_code, 'tree_height':tree_height}
     return tree_dict
@@ -349,8 +402,8 @@ FEN_2 = 'r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w'
 if __name__ == "__main__":
     FEN_list = [FEN_1, FEN_2]
     
-    tree_height = 3
-    search_time = 30
+    tree_height = 2
+    search_time = 15
     verbose = True
 
     
