@@ -22,7 +22,7 @@ class Tree(object):
     def __init__(self,bb,starthash=False) -> None:
         self.nodes=[]
         self.value=None
-        self.root=Node(0,None,bb,0,0,"Wstart",starthash)
+        self.root=Node(0,None,bb,self.value,0,"Wstart",starthash)
         self.nodes.append(self.root)
         self.index=1
         self.h=1

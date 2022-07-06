@@ -24,7 +24,7 @@ def utility(b,player,h,simple=True):
                 util= spielBewertung(b,player.current)         
     
     
-    return util
+    return util, hash
         
            
 

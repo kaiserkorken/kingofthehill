@@ -171,14 +171,14 @@ if __name__ == "__main__":
     FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"
     FEN="rnb2bnr/pppqp2p/3pk1p1/8/3pN3/6N1/PPP1QPPP/R1B1KB1R W"
     player=Player()
-    zeit = 20
+    zeit = 2
     tiefe = 2
     wdh = 1000
     
    # tt=ttable("testtable")
     player.turn(FEN,t=zeit)
     #ttables-> sucheebene 3 start 0.14 -> 0.02
-    player.tt.save_table()
+    player.close()
         #FEN, t=None, depth=None,utilities=True,tt=False,sort=False,windows=False)
     #player.test_turn(FEN, depth=tiefe, tt=tt)
     # tt.save_table()

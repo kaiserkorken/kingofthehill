@@ -111,7 +111,9 @@ class Player():
                     logging.info("Main    : doing tree search " + str(tleft))
                     #tree.sort_nodes() #FEhler bei invertet=True
                     sstart = time.time()
-                    depth= search(tree.root,self, height, tsearch)
+                    #tree.print_tree()
+                    depth,tree= search(tree,self, height, tsearch)
+                    tree.print_node(tree.root.children[0])
                     self.current=play
                     # tree.print_node(tree.nodes[2])#teste tree nach search
                     tleft = time.time() - start

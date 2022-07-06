@@ -82,7 +82,8 @@ def time_expected_next(time_last_run):
     return time_expected
 
 ### Hauptsuchroutine. Wählt taktisch verschiedene Suchverfahren
-def search(root_node, player, max_depth, search_time=30, new=False, verbose=False):
+def search(tree, player, max_depth, search_time=30, new=False, verbose=False):
+    root_node=tree.root
     # iterative Tiefensuche
     time_last_run = 0.0 # benötigte Zeit für letzten Durchlauf
     time_left = search_time - time_last_run # Zeit bis Abbruch
@@ -98,14 +99,14 @@ def search(root_node, player, max_depth, search_time=30, new=False, verbose=Fals
 
     if verbose:
         print("search initiated with time to run: " + str(time_left))
-    while (time_left > time_expected_next_run and depth <= max_depth): # Erhöhe Tiefe so lange wie Fertigstellung der Ebene noch realistisch
+    while (depth <= max_depth):# and time_left > time_expected_next_run ): # Erhöhe Tiefe so lange wie Fertigstellung der Ebene noch realistisch
         
         root_node = copy.deepcopy(tree_copy_root) # lade backup
     
         time_start = time.time()
         ### Suche
         if not new:
-            best_val = a_b_search(root_node, player)
+            best_val = a_b_search(root_node, player, depth)
         else:
             if depth > 0: # aspiration window suche um besten wert aus der letzten Tiefeniteration
                 best_val, aw_failed_left, aw_failed_right = a_b_search_aspiration_window(root_node, player, best_val, depth)
@@ -131,7 +132,10 @@ def search(root_node, player, max_depth, search_time=30, new=False, verbose=Fals
         print("search completed at depth: " + str(depth) + " with total time left: " + str(time_left))
         print("best value found: " + str(best_val))
         
-    return depth#best_val
+    if depth>max_depth:
+        depth-=1
+    tree.root=root_node
+    return depth, tree#best_val
 
 
 
@@ -207,14 +211,15 @@ def a_b_search(node, player, depth=0, alpha=-inf, beta=inf):
 #    print(depth)
     if depth==0 or len(node.children)==0: 
         if node.value == None:
-            node.value = utility(node.b, player)
+            node.value , node.hash= utility(node.b, player,node.h)
             #print(depth, player, node.value)
         return node.value
-    val=-inf
+    val=alpha
+    player.__switch__()
     for child in node.children:
         #print(a_b_search(child, -player, depth-1, -beta, -alpha,))
-        player.__switch__()
-        val = max(val, a_b_search(child, player, depth-1, -beta, -alpha,))
+        
+        val = max(val, a_b_search(child, player, depth-1, alpha,beta))
         #node.value = vals
        
         alpha = max(val, alpha)
