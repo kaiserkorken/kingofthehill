@@ -95,18 +95,18 @@ def search(tree, player, max_depth, search_time=30, new=False, verbose=False):
     
     ### DEEP COPY TREE VON ALTER ITERATION
     
-    tree_copy_root = copy.deepcopy(root_node)
+    tree_copy = copy.deepcopy(tree)
 
     if verbose:
         print("search initiated with time to run: " + str(time_left))
-    while (depth <= max_depth):# and time_left > time_expected_next_run ): # Erhöhe Tiefe so lange wie Fertigstellung der Ebene noch realistisch
+    while (depth <= max_depth and time_left > time_expected_next_run ): # Erhöhe Tiefe so lange wie Fertigstellung der Ebene noch realistisch
         
-        root_node = copy.deepcopy(tree_copy_root) # lade backup
+        tree = copy.deepcopy(tree_copy) # lade backup
     
         time_start = time.time()
         ### Suche
         if not new:
-            best_val = a_b_search(root_node, player, depth)
+            best_val = a_b_search(tree.root, player, depth)
         else:
             if depth > 0: # aspiration window suche um besten wert aus der letzten Tiefeniteration
                 best_val, aw_failed_left, aw_failed_right = a_b_search_aspiration_window(root_node, player, best_val, depth)
@@ -134,7 +134,7 @@ def search(tree, player, max_depth, search_time=30, new=False, verbose=False):
         
     if depth>max_depth:
         depth-=1
-    tree.root=root_node
+    #tree.root=root_node
     return depth, tree#best_val
 
 
@@ -205,7 +205,7 @@ def a_b_search_bak(node, depth=0, ismax=True):
 
 
 # alpha beta
-def a_b_search(node, player, depth=0, alpha=-inf, beta=inf):
+def a_b_search(node, player, depth=0, alpha=-inf, beta=inf,ismax=True):
 #    print(node)
 #    print(player)
 #    print(depth)
@@ -214,19 +214,34 @@ def a_b_search(node, player, depth=0, alpha=-inf, beta=inf):
             node.value , node.hash= utility(node.b, player,node.h)
             #print(depth, player, node.value)
         return node.value
-    val=alpha
-    player.__switch__()
-    for child in node.children:
-        #print(a_b_search(child, -player, depth-1, -beta, -alpha,))
+    #player.__switch__()
+    if ismax:
+        val=alpha
         
-        val = max(val, a_b_search(child, player, depth-1, alpha,beta))
-        #node.value = vals
-       
-        alpha = max(val, alpha)
-        if (alpha >= beta):
-            break
-    node.value = val
-    return val
+        for child in node.children:
+            #print(a_b_search(child, -player, depth-1, -beta, -alpha,))
+            
+            val = max(val, a_b_search(child, player, depth-1, val,beta,False))
+            #node.value = vals
+        
+            
+            if (val >= beta):
+                break
+        node.value = val
+        return val
+    else:
+        val=beta
+        
+        for child in node.children:
+            #print(a_b_search(child, -player, depth-1, -beta, -alpha,))
+            
+            val = min(val, a_b_search(child, player, depth-1, alpha,val,True))
+            #node.value = vals
+        
+            if (alpha >= val):
+                break
+        node.value = val
+        return val
 """
 function negamax(node, depth, α, β, color) is
     if depth = 0 or node is a terminal node then
