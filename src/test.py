@@ -171,7 +171,7 @@ if __name__ == "__main__":
     FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"
     FEN="rnb2bnr/pppqp2p/3pk1p1/8/3pN3/6N1/PPP1QPPP/R1B1KB1R W"
     player=Player()
-    zeit = 2
+    zeit = 1.5
     tiefe = 2
     wdh = 1000
     

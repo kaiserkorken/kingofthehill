@@ -69,7 +69,8 @@ class Player():
                             datefmt="%H:%M:%S")
         logging.info("Main    : start turn " + str(start - start))
         tmove = t / 2  # seconds
-        tsearch = t / 2
+        #tmove=tmove*0.997# 3 % slippage in time
+        #tsearch = t / 2
         
        
         [bb, play] = FENtoBit(FEN, True)
@@ -99,6 +100,14 @@ class Player():
                     logging.info("Main    : building movetree " + str(time.time() - start))
                     height, lefttime = build_tree(tree,self.current,tmove=(start + tmove - time.time()),tt=tt)  # time bzw. depth
                     # arr[1]=tree.h
+                    tsearch=t-tmove+lefttime
+                    if tsearch<0:
+                        return BittoFEN(tree.root.children[0].b,play)
+                    if tsearch<0.2:#random wert
+                        node=best_node(tree,play,time=False)
+                        FEN = BittoFEN(node.b, play)
+                        return FEN
+                    
                     self.current = play
                     tleft = time.time() - start
                     logging.info("Main    : movetree finished with height: " + str(height) + " " + str(tleft))
@@ -113,7 +122,8 @@ class Player():
                     sstart = time.time()
                     #tree.print_tree()
                     depth,tree= search(tree,self, height, tsearch)
-                    tree.print_node(tree.root.children[0])
+                    #tree.print_node(tree.root.children[0])
+                    #tree.print_tree()
                     self.current=play
                     # tree.print_node(tree.nodes[2])#teste tree nach search
                     tleft = time.time() - start

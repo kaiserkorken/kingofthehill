@@ -70,7 +70,9 @@ def moves_to_node(tree, player, h=0, index=0, tt=False, utilities=True, t=False)
     moves = generate_moves(node.b, player)  # generiere alle Züge aus Position b
     if t !=False:
         fin =time.time()-start
-        t=(t+fin)
+        #t=(t+fin)
+        if (start + t <=time.time()):
+            return h+1,start + t - time.time()
     # moves=[["a1a2",move(b)],["a2a4",b],...]
     # print("moves")
     #alphabet = ["a", "b", "c", "d", "e", "f", "g", "h"]
@@ -110,7 +112,7 @@ def moves_to_node(tree, player, h=0, index=0, tt=False, utilities=True, t=False)
             print("leerer move")
             moves.remove(moves[b])
 
-    return h+1,t  # h nötig?
+    return h+1,start + t - time.time()  # h nötig?
 
 def build_tree(tree, player,index=0, h=0, tmove=None, depth=None,utilities=True,tt=False, zob=False,gen=False):  # tree ebenen erstellen bis tiefe d
     # tmove=height[4]
@@ -134,7 +136,7 @@ def build_tree(tree, player,index=0, h=0, tmove=None, depth=None,utilities=True,
         if zob:
             height = moves_to_node_h(tree,player, h, z,utilities=utilities,tt=tt)
         else:
-            height,tim  = moves_to_node(tree,player, h, z,utilities=utilities,tt=tt,t=gen)
+            height,tim  = moves_to_node(tree,player, h, z,utilities=utilities,tt=tt,t=start + tmove - time.time())
             gen=tim
 
         if depth==None:
@@ -153,6 +155,6 @@ def build_tree(tree, player,index=0, h=0, tmove=None, depth=None,utilities=True,
         if tmove >= time.time() - start:
             index = altstep
         #__switch__()  # neue ebene für gegner
-            return build_tree(tree,player, index,h + 1,utilities=utilities,tt=tt,tmove=tmove,depth=depth,gen=gen)
+            return build_tree(tree,player, index,h + 1,utilities=utilities,tt=tt,tmove=gen,depth=depth,gen=gen)
     print("finished with ebene: " , height)
     return height,gen

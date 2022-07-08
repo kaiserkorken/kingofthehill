@@ -15,7 +15,9 @@ inf = 100000
 
 
 
-def best_node(tree, player_code):
+def best_node(tree, player_code, time=False):
+    if time:
+        return random.choice(tree.root.children)
     #tree.print_tree()
     # nodes height 1 sammeln
     #print(tree.root.children)
