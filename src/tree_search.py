@@ -15,8 +15,8 @@ inf = 100000
 
 
 
-def best_node(tree, player_code, time=False):
-    if time:
+def best_node(tree, player_code, time=True):
+    if not time:
         return random.choice(tree.root.children)
     #tree.print_tree()
     # nodes height 1 sammeln
@@ -39,7 +39,11 @@ def best_node(tree, player_code, time=False):
         best_nodes = []
         # print(children)
         while len(children) > 0:
-            possible_best_node = children[np.argmax(values)]
+            try: 
+                possible_best_node = children[np.argmax(values)]
+            except Exception as e: #all children have value none
+                print(e)
+                return random.choice(children)
             children.pop(np.argmax(values))  # bzw. values.remove(node.index)
             # print(children)
             values = player_code * np.array([x.value for x in children])
@@ -78,14 +82,19 @@ def best_node(tree, player_code, time=False):
         print("else: ", children[0])
         return children[0]
 
-def time_expected_next(time_last_run):
-    time_exponent = 25   # Exponent mit der benötigte Zeit ansteigt
+def time_expected_next(time_last_run, depth=0):
+    time_exponent = 25  # Exponent mit der benötigte Zeit ansteigt
     time_expected = time_last_run*time_exponent
+    #time_expected = time_last_run/time_exponent**depth
+    # 2 -> y
+    # 1= x + 70* y
+    # 70*y =x
+    
     return time_expected
 
 ### Hauptsuchroutine. Wählt taktisch verschiedene Suchverfahren
 def search(tree, player, max_depth, search_time=30, new=False, verbose=False):
-    root_node=tree.root
+    #root_node=tree.root
     # iterative Tiefensuche
     time_last_run = 0.0 # benötigte Zeit für letzten Durchlauf
     time_left = search_time - time_last_run # Zeit bis Abbruch
@@ -97,13 +106,13 @@ def search(tree, player, max_depth, search_time=30, new=False, verbose=False):
     
     ### DEEP COPY TREE VON ALTER ITERATION
     
-    tree_copy = copy.deepcopy(tree)
-
+    #tree_copy = copy.deepcopy(tree)
+    
     if verbose:
         print("search initiated with time to run: " + str(time_left))
     while (depth <= max_depth and time_left > time_expected_next_run ): # Erhöhe Tiefe so lange wie Fertigstellung der Ebene noch realistisch
         
-        tree = copy.deepcopy(tree_copy) # lade backup
+        #tree = copy.deepcopy(tree_copy) # lade backup
     
         time_start = time.time()
         ### Suche
@@ -134,8 +143,8 @@ def search(tree, player, max_depth, search_time=30, new=False, verbose=False):
         print("search completed at depth: " + str(depth) + " with total time left: " + str(time_left))
         print("best value found: " + str(best_val))
         
-    if depth>max_depth:
-        depth-=1
+    #if depth!=max_depth+1:#suche ist nicht komplett durchgegangen
+    depth-=1
     #tree.root=root_node
     return depth, tree#best_val
 

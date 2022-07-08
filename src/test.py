@@ -171,10 +171,24 @@ if __name__ == "__main__":
     FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"
     FEN="rnb2bnr/pppqp2p/3pk1p1/8/3pN3/6N1/PPP1QPPP/R1B1KB1R W"
     player=Player()
-    zeit = 1.5
+    zeit = 2
     tiefe = 2
     wdh = 1000
+    #Suche:
+    #0,001s -> Tiefe 1
+    #0,02s -> Tiefe 2 (*20)
+    #0,5 s -> Tiefe 3 (*25)
+    #gesamt: ca. Faktor 25
+    #Generator:
+    #1 s -> ebene 1
+    #1*35 -> ebene 2
+    #1*35*35 -> ebene 3
+    # ca. Faktor 35 (startfen) -> *40
+    #
     
+    #Verhaeltnis Ebene2: 92/8 move/search
+    #-> allgemein: 2,3/0,32
+    # 1: 0,1%; 2: 0,05%; 3: 0,04%
    # tt=ttable("testtable")
     player.turn(FEN,t=zeit)
     #ttables-> sucheebene 3 start 0.14 -> 0.02

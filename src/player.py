@@ -63,13 +63,15 @@ class Player():
         self.opening.save_table()
     def turn(self, FEN, t=10,tt=True):  # ein kompletter zug der ki
         # print(FEN)
+        t-=0.5#buffer ping etc
         start = time.time()
         format = "%(asctime)s: %(message)s"
         logging.basicConfig(format=format, level=logging.INFO,
                             datefmt="%H:%M:%S")
         logging.info("Main    : start turn " + str(start - start))
-        tmove = t / 2  # seconds
-        #tmove=tmove*0.997# 3 % slippage in time
+        tmove = t*0.999  # 99.9% move time 0.1% search and choose time -> 0.3% - 2% time unused
+        #tmove = (t/100)*90  # seconds
+        tmove=tmove*0.98# 2 % slippage in time
         #tsearch = t / 2
         
        
@@ -103,7 +105,7 @@ class Player():
                     tsearch=t-tmove+lefttime
                     if tsearch<0:
                         return BittoFEN(tree.root.children[0].b,play)
-                    if tsearch<0.2:#random wert
+                    if tsearch<0.005:#dauer bis zu ebene 1 zu suchen/bewerten
                         node=best_node(tree,play,time=False)
                         FEN = BittoFEN(node.b, play)
                         return FEN
@@ -122,6 +124,8 @@ class Player():
                     sstart = time.time()
                     #tree.print_tree()
                     depth,tree= search(tree,self, height, tsearch)
+                    if tsearch<0:
+                        return BittoFEN(tree.root.children[0].b,play)
                     #tree.print_node(tree.root.children[0])
                     #tree.print_tree()
                     self.current=play
