@@ -1,4 +1,3 @@
-from ctypes import util
 from bitboard import FENtoBit,BittoFEN
 from tree import Tree
 import logging
@@ -69,9 +68,9 @@ class Player():
         logging.basicConfig(format=format, level=logging.INFO,
                             datefmt="%H:%M:%S")
         logging.info("Main    : start turn " + str(start - start))
-        tmove = t*0.999  # 99.9% move time 0.1% search and choose time -> 0.3% - 2% time unused
+        tmove = t*0.999  # 99.9% move time, 0.1% search and choose time -> 0.3% - 2% time unused
         #tmove = (t/100)*90  # seconds
-        tmove=tmove*0.98# 2 % slippage in time
+        tmove=tmove*0.98# 2 % slippage in time in movetree function
         #tsearch = t / 2
         
        
@@ -79,10 +78,14 @@ class Player():
         
         # tt=ttable("testtable.mymemmap",32)#erstellen falls noetig, sonst in build tree
         if self.current == play and FENtoBit(FEN,True) != False:  # spieler am zug und fen bekommen
-            
-                
+             
             # bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#testFEN
             tree = Tree(bb)  # ,self.tt.starthash)#leerer baum mit b als root
+            if t<=0:#panic mode
+                moves, names = generate_moves_verbose(node.b, self.current)
+                move=random.choice(moves)
+                return BittoFEN(move)
+               
             if not checkmate(bb, self.current):  # Spielende überprüfen
                 if True:#openings ausschalten
                     hash=self.opening.hash_value(bb,self.current)
@@ -103,7 +106,7 @@ class Player():
                     height, lefttime = build_tree(tree,self.current,tmove=(start + tmove - time.time()),tt=tt)  # time bzw. depth
                     # arr[1]=tree.h
                     tsearch=t-tmove+lefttime
-                    if tsearch<0:
+                    if tsearch<=0:
                         return BittoFEN(tree.root.children[0].b,play)
                     if tsearch<0.005:#dauer bis zu ebene 1 zu suchen/bewerten
                         node=best_node(tree,play,time=False)

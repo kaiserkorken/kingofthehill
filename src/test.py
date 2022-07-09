@@ -186,8 +186,8 @@ if __name__ == "__main__":
     # ca. Faktor 35 (startfen) -> *40
     #
     
-    #Verhaeltnis Ebene2: 92/8 move/search
-    #-> allgemein: 2,3/0,32
+    #altes Verhaeltnis Ebene2: 92/8 move/search
+    #-> allgemein:
     # 1: 0,1%; 2: 0,05%; 3: 0,04%
    # tt=ttable("testtable")
     player.turn(FEN,t=zeit)
