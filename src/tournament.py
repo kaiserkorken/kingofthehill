@@ -8,7 +8,7 @@ from websockets import connect
 class Game(Player):
     def __init__(self,websocket, current=1):
         super().__init__(current)
-        self.name="GruppeAN"
+        self.name="gruppeAN"
         self.ID=48265171
         self.playertype=0
         self.stage=1
@@ -18,7 +18,7 @@ class Game(Player):
     def step(self):
         return 0
     def login(self):
-        self.ID=random.randint(0,99999999)
+        #self.ID=random.randint(0,99999999)
         data=["type","0","username",self.name,"playerID",self.ID]
         return data
     def create (self):
@@ -47,9 +47,13 @@ class Game(Player):
                 self.zug=self.ID==d["currentPlayer"]["playerID"]
                 self.fen=d["fen"]
                 if self.zug:
-                    self.t=d["timeLeft"][self.playertype]
+                    try:
+                        self.t=d["timeLeft"][self.playertype]
+                    except:
+                        self.t=20;
             self.gameID=d["ID"]
-           
+            if len(d["activePlayerList"])<2:
+                return "empty"
             return True
         else:
             return False
@@ -60,7 +64,8 @@ class Game(Player):
         move=self.turn(self.fen,self.t)
         if move ==False:
             move= self.turn(self.fen,t=0)
-        data=["type","4","username",self.name,"playerID",self.ID,"gameID",self.gameID,"move",move]
+        self.fen=move
+        data=["type","4","username",self.name,"playerID",self.ID,"gameID",self.gameID,"move",self.fen]
         return data
     # message= "{"type":"0","stamp?=""}"
 def response(message):
@@ -113,23 +118,23 @@ async def hello(uri):
         error= await handle(data,game)
         if error==False:
             return True
-        print("error: "+error)
+        print("error: "+messaging(error))
         #return False
         #game zu ende
         
         #game.reset()
     print("connection lost")
 
-async def handle(data,game):
-    data=int(data["type"])
+async def handle(resp,game):
+    data=int(resp["type"])
     count=0
-    wait=True
+    
     while( count<=5):# mehr als 5 mal in folge fehler -> abbruch
         while(data<0 or data>4):#fehler -> nochmal versuchen
             if data>4:#nachricht nicht an uns/irrelevant
                 count-=1
                 if data==8: #game started
-                    wait=False
+                    game.zug=True
             if count >=5:
                 return data
             if game.stage==3:
@@ -138,6 +143,7 @@ async def handle(data,game):
             if game.stage==2:
                 if(data<=-10):#kein game mehr zum joinen
                     break
+                
                 count-=1
             
             resp= await sending(game)
@@ -146,16 +152,18 @@ async def handle(data,game):
             data=response(resp)["type"]
             count+=1
         count=0
-        if game.stage<4 or not wait:
+        if game.stage==2:#join erfolgreich -> move
+            game.stage+=1 
+        if game.stage<4:# or game.zug:
             game.stage+=1
-            wait=True
+            #game.zug=False
             
         resp= await sending(game)
         data=response(resp)["type"]
         if resp=="over":
                 return False
 
-    return data
+    return resp
 
         #TODO type 6, tournament started, type 8, game started
         #do reset
@@ -176,7 +184,7 @@ async def sending(game):
                 print("login")
                 await game.websocket.send(messaging(game.login()))
                 
-        elif game.stage==2:#create game
+        elif game.stage==2:#join game
             print("join game")
             x= await getinfo(game,new=False)
             if x!=False:
@@ -187,10 +195,13 @@ async def sending(game):
                 d["type"]=-10#no game found
                 return d
 
-        elif game.stage==3:#join game
+        elif game.stage==3:#create game
+            
             print("create game")
+            #x= await getinfo(game)
             await game.websocket.send(messaging(game.create())) 
             game.playertype=0
+            game.stage-=2#wieder joinen
         
         elif game.stage==4:#make move
             print("move")
@@ -201,8 +212,12 @@ async def sending(game):
                     print("Keinem Spiel verbunden")
                 if x=="over":
                     print("spiel zu ende")    
-                    return "over"                
-            await game.websocket.send(messaging(game.move()))
+                    return "over" 
+                if x=="empty":
+                    print("no player joined yet")   
+            z= messaging(game.move())
+            print(z)
+            await game.websocket.send(z)
           
         
         

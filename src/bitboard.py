@@ -1,3 +1,4 @@
+from importlib.machinery import FrozenImporter
 import numpy as np
 from distutils.log import error
 from traitlets import Dict#maybe overkill
@@ -213,10 +214,19 @@ def BittoFEN(b,player=False):#turns bitboard into FEN Strings
     #print(FEN)
     if player==1:
         player="W"
-        FEN+=" "+str(player) 
+        #FEN+=" "+str(player) 
+        
     elif player==-1:
         player="B"
-        FEN+=" "+str(player) 
+        #FEN+=" "+str(player) 
+    b["color"]=player
+    b["clock"]=int(b["clock"])+1
+    
+    features=["color","cast","ep","hm","clock"]
+    for x in features:
+        FEN+=" "+str(b[str(x)]) 
+        
+    
     return FEN
 
 def serialize_bb(bb):
@@ -296,6 +306,13 @@ def FENtoBit(fen,player=False):
     #bit[63]== upper right
     #player=info[1]
     #if wh>=20 or bl>= 20:#damenumwandlung beachten
+    features=["color","cast","ep","hm","clock"]
+    default=["w","KQkq", "-", "0" ,"1"]
+    #default=["w","-", "-", "0" ,"1"]
+    for x in range (1,len(info)):
+        b[str(features[x-1])]=info[x]
+    for x in range (len(info),len(features)):
+         b[str(features[x])]=default[x]
     if player != False:
         if (info[1]=="W" or info[1]=="w"):
             player=1
@@ -304,6 +321,8 @@ def FENtoBit(fen,player=False):
         return [b,player]#gib player mit aus
     else:
         return b#,player
+    
+
 #test str:
 #bench
 # rnbq1bnr/pppQkpp1/3p3p/8/3p4/2P5/PP2PPPP/RNB1KBNR

@@ -14,14 +14,15 @@ def make_move(b_old, bb_from, bb_to):
     b_new = copy.deepcopy(b_old) # Tiefkopie wegen call-by-reference
     #if (bb_from | bb_to).any():
     for bb_key, bb in b_old.items():
+        if len (bb_key)<=1:
         #print(bb_key)
         #print("FROM")
         #print(b_new[bb_key])
-        if (bb & bb_to).any() : # falls gegnerische figur auf ziel auf bitboard verhanden
-            b_new[bb_key] = bb  ^ bb_to # update bitboard: Schlag: Feld auf bb_to verschwindet
+            if (bb & bb_to).any() : # falls gegnerische figur auf ziel auf bitboard verhanden
+                b_new[bb_key] = bb  ^ bb_to # update bitboard: Schlag: Feld auf bb_to verschwindet
 
-        if (bb & bb_from).any() : # falls eigene figur auf bitboard verhanden
-            b_new[bb_key] = (bb | bb_to) ^ bb_from # update bitboard : Feld auf bb_to entsteht, Feld auf bb_from verschwindet
+            if (bb & bb_from).any() : # falls eigene figur auf bitboard verhanden
+                b_new[bb_key] = (bb | bb_to) ^ bb_from # update bitboard : Feld auf bb_to entsteht, Feld auf bb_from verschwindet
     #print("TO")
     #print(b_new[bb_key])  
     #print(print_board(b_new))
