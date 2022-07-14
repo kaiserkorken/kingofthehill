@@ -61,9 +61,9 @@ class Game(Player):
         a=["type","3","username",self.name,"playerID",self.ID,"joinAsPlayer","1","gameID",self.gameID]
         return a
     def move(self):
-        move=self.turn(self.fen,self.t)
+        move=self.turn(self.fen,self.t,name=True)
         if move ==False:
-            move= self.turn(self.fen,t=0)
+            move= self.turn(self.fen,t=0,name=True)
         self.fen=move
         data=["type","4","username",self.name,"playerID",self.ID,"gameID",self.gameID,"move",self.fen]
         return data
@@ -224,7 +224,7 @@ async def sending(game):
         resp= await game.websocket.recv()
         data= response(resp)
         
-        while (data["type"]==4 and data["playerID"]!=game.ID):#nicht an uns
+        while (data["type"]==4 and data["activePlayerList"]["playerID"]!=game.ID):#nicht an uns
             print("wrong recv")
             resp= await game.websocket.recv()
             data= response(resp)

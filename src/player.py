@@ -60,7 +60,7 @@ class Player():
     def close(self):
         self.tt.save_table()
         self.opening.save_table()
-    def turn(self, FEN, t=10,tt=True):  # ein kompletter zug der ki
+    def turn(self, FEN, t=10,tt=True,name=False):  # ein kompletter zug der ki
         # print(FEN)
         t-=0.5#buffer ping etc
         start = time.time()
@@ -68,10 +68,13 @@ class Player():
         logging.basicConfig(format=format, level=logging.INFO,
                             datefmt="%H:%M:%S")
         logging.info("Main    : start turn " + str(start - start))
-        tmove = t*0.999  # 99.9% move time, 0.1% search and choose time -> 0.3% - 2% time unused
-        #tmove = (t/100)*90  # seconds
+        # tmove = t*0.999  # 99.9% move time, 0.1% search and choose time -> 0.3% - 2% time unused
+        # #tmove = (t/100)*90  # seconds
+        tmove=t*0.99
+        
         tmove=tmove*0.98# 2 % slippage in time in movetree function
-        #tsearch = t / 2
+        # #tsearch = t / 2
+        
         
        
         [bb, play] = FENtoBit(FEN, True)
@@ -142,7 +145,11 @@ class Player():
                     # logging.info("Main    : finished turn "+str(start+t))
                     finish = time.time()
                     self.__switch__()
-                    FEN = BittoFEN(node.b, self.current)
+                    if name:
+                        #move=node.name.split("-")
+                        FEN=node.name#move[1]
+                    else:
+                        FEN = BittoFEN(node.b, self.current)
                     self.__switch__()
                     logging.info("Main    : finished turn in " + str(finish - start) + "s")
                     logging.info("Main    : time remaining: " + str(start + t - time.time()))
@@ -151,6 +158,7 @@ class Player():
         else:  # Spieler nicht dran
             FEN = False
         # self.__switch__()#Spieler wechseln (egal ob zug gemacht odeer nicht
+        logging.info("Main    : chosen move: " +str(FEN)+ str(start + t - time.time()))
         return FEN
     
     

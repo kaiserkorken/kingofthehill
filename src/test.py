@@ -171,15 +171,30 @@ if __name__ == "__main__":
     FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"
     FEN="rnb2bnr/pppqp2p/3pk1p1/8/3pN3/6N1/PPP1QPPP/R1B1KB1R W"
     player=Player()
-    zeit = 2
+    zeit = 10
     tiefe = 2
     wdh = 1000
-    #Suche:
+    
+    
+    #Suche:#mid utility
+    #0,002s -> Tiefe 1
+    #0,008s -> Tiefe 2 (*5)
+    #0,2 s -> Tiefe 3 (*20)
+    #gesamt: ca. Faktor 25
+    #Generator:#names in nodes h 1
+    #0,1 s -> ebene 1
+    #7 -> ebene 2
+    #29 -> ebene 3 (*4,5)
+    # ca. Faktor 35 (startfen) -> *40
+    #
+    
+    
+    #Suche:#slim utility
     #0,001s -> Tiefe 1
     #0,02s -> Tiefe 2 (*20)
     #0,5 s -> Tiefe 3 (*25)
     #gesamt: ca. Faktor 25
-    #Generator:
+    #Generator:#no names in nodes h 1
     #1 s -> ebene 1
     #1*35 -> ebene 2
     #1*35*35 -> ebene 3

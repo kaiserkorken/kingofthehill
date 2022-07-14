@@ -3,7 +3,7 @@ from tt import ttable
 import time
 
 
-def utility(b,player,h,simple=True):
+def utility(b,player,h,simple=False):
     util=0
     if player.tt!= None:
         hash = player.tt.hash_value(b,player.current)

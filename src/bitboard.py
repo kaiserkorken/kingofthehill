@@ -309,9 +309,9 @@ def FENtoBit(fen,player=False):
     features=["color","cast","ep","hm","clock"]
     default=["w","KQkq", "-", "0" ,"1"]
     #default=["w","-", "-", "0" ,"1"]
-    for x in range (1,len(info)):
-        b[str(features[x-1])]=info[x]
-    for x in range (len(info),len(features)):
+    for x in range (0,len(info)-1):
+        b[str(features[x])]=info[x+1]
+    for x in range (len(info)-1,len(features)):
          b[str(features[x])]=default[x]
     if player != False:
         if (info[1]=="W" or info[1]=="w"):

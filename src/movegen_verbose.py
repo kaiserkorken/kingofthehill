@@ -35,11 +35,11 @@ def make_move_name(b_old, bb_from, bb_to, short = False):
         color_opponent = 'W'
         
     # Schlag oder Still
-    if np.any(bb_to & b_old[color_opponent]):
-        strike_or_quiet = 'x' # Schlag
-    else:
-        strike_or_quiet = '-' # Still
-        
+    # if np.any(bb_to & b_old[color_opponent]):
+    #     strike_or_quiet = 'x' # Schlag
+    # else:
+    #     strike_or_quiet = '-' # Still
+    strike_or_quiet = ""
     # Figur
     piece="null"
     for p in bibp:

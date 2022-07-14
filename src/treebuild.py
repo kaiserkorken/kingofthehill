@@ -67,50 +67,62 @@ def moves_to_node(tree, player, h=0, index=0, tt=False, utilities=True, t=False)
     node = tree.find_node(index)
     if t !=False:
         start=time.time()
-    moves = generate_moves(node.b, player)  # generiere alle Züge aus Position b
+    if node.h<2:
+        moves, name= generate_moves_verbose(node.b,player)
+    else:
+        moves = generate_moves(node.b, player)  # generiere alle Züge aus Position b
     if t !=False:
         fin =time.time()-start
         #t=(t+fin)
         if (start + t <=time.time()):
             return h+1,start + t - time.time()
+    if node.h<2:
+         for b in range(len(moves)):
+            if moves[b]:
+                  tree.insert_node(node, moves[b], None, h+1, name[b])
+                
+            else:
+                print("leerer move")
+                moves.remove(moves[b])
+    else:
     # moves=[["a1a2",move(b)],["a2a4",b],...]
     # print("moves")
     #alphabet = ["a", "b", "c", "d", "e", "f", "g", "h"]
-    for b in range(len(moves)):
-        # for b in range (len(moves)):
-        if moves[b]:
-            # if b[0] and b[1]:
-            ### Test der names aus movegen verbose ###
-            # if not tt:
+        for b in range(len(moves)):
+            # for b in range (len(moves)):
+            if moves[b]:
+                # if b[0] and b[1]:
+                ### Test der names aus movegen verbose ###
+                # if not tt:
 
-            #     if utilities:
-            #         util=utility(moves[b],player)
-            #     else:
-            #         util=None
-            tree.insert_node(node, moves[b], None, h+1, index+b)  # in Node mit bitboard und wertung einsetzen
-            # else:
+                #     if utilities:
+                #         util=utility(moves[b],player)
+                #     else:
+                #         util=None
+                tree.insert_node(node, moves[b], None, h+1, index+b)  # in Node mit bitboard und wertung einsetzen
+                # else:
 
-            #         hash = tt.hash_value(moves[b],player)
-            #         util = tt.in_table(hash, h + 1)
-            #         if len(util) != 2:
-            #             # print(hash)
-            #             if utilities:
-            #                 util = utility(moves[b],player)
-            #             else:
-            #                 util=None
-            #             tt.to_table(hash, util, h + 1)
-            #             tree.insert_node(node, moves[b], util, h + 1, index+b, hash)
-            #         else:
-            #             tree.insert_node(node, moves[b], util[0], h + 1, index+b, hash)  # in Node mit bitboard und wertung einsetzen
+                #         hash = tt.hash_value(moves[b],player)
+                #         util = tt.in_table(hash, h + 1)
+                #         if len(util) != 2:
+                #             # print(hash)
+                #             if utilities:
+                #                 util = utility(moves[b],player)
+                #             else:
+                #                 util=None
+                #             tt.to_table(hash, util, h + 1)
+                #             tree.insert_node(node, moves[b], util, h + 1, index+b, hash)
+                #         else:
+                #             tree.insert_node(node, moves[b], util[0], h + 1, index+b, hash)  # in Node mit bitboard und wertung einsetzen
 
-            # # auch in insert node auskommentieren! (tree.py)
-            # # print("u:")
-            # # print(utility(b))
-            # # print(utility(b))
-            # # tree.print_tree()
-        else:
-            print("leerer move")
-            moves.remove(moves[b])
+                # # auch in insert node auskommentieren! (tree.py)
+                # # print("u:")
+                # # print(utility(b))
+                # # print(utility(b))
+                # # tree.print_tree()
+            else:
+                print("leerer move")
+                moves.remove(moves[b])
 
     return h+1,start + t - time.time()  # h nötig?
 
@@ -141,7 +153,7 @@ def build_tree(tree, player,index=0, h=0, tmove=None, depth=None,utilities=True,
 
         if depth==None:
             if start + tmove <= time.time():  # zeitlimit überschritten
-                print("finished till ebene: " + str((height-1)))
+                print("finished till ebene: " + str((height)))
                  # letzte ebene nicht fertig geworden
                 return height -1, gen
     if tmove==None:
