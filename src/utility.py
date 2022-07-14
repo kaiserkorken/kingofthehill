@@ -37,7 +37,90 @@ def simple_utility(b,player_code):
     values_B = np.sum([np.sum(b[key] & b['B'])*piece_values[key] for key in piece_values])
     return player_code*(values_W - values_B)
     
+pawn_table = [[0,  0,  0,  0,  0,  0,  0,  0],
+    [50, 50, 50, 50, 50, 50, 50, 50],
+    [10, 10, 20, 30, 30, 20, 10, 10],
+     [5,  5, 10, 25, 25, 10,  5,  5],
+     [0,  0,  0, 20, 20,  0,  0,  0],
+     [5, -5,-10,  0,  0,-10, -5,  5],
+     [5, 10, 10,-20,-20, 10, 10,  5],
+     [0,  0,  0,  0,  0,  0,  0,  0]]
+knight_table = [[-50,-40,-30,-30,-30,-30,-40,-50],
+    [-40,-20,  0,  0,  0,  0,-20,-40],
+    [-30,  0, 10, 15, 15, 10,  0,-30],
+    [-30,  5, 15, 20, 20, 15,  5,-30],
+    [-30,  0, 15, 20, 20, 15,  0,-30],
+    [-30,  5, 10, 15, 15, 10,  5,-30],
+    [-40,-20,  0,  5,  5,  0,-20,-40],
+    [-50,-90,-30,-30,-30,-30,-90,-50]]
+bishop_table = [[-20,-10,-10,-10,-10,-10,-10,-20],
+    [-10,  0,  0,  0,  0,  0,  0,-10],
+    [-10,  0,  5, 10, 10,  5,  0,-10],
+    [-10,  5,  5, 10, 10,  5,  5,-10],
+    [-10,  0, 10, 10, 10, 10,  0,-10],
+    [-10, 10, 10, 10, 10, 10, 10,-10],
+    [-10,  5,  0,  0,  0,  0,  5,-10],
+    [-20,-10,-90,-10,-10,-90,-10,-20]]
+rook_table = [[0,  0,  0,  0,  0,  0,  0,  0],
+      [5, 10, 10, 10, 10, 10, 10,  5],
+     [-5,  0,  0,  0,  0,  0,  0, -5],
+     [-5,  0,  0,  0,  0,  0,  0, -5],
+     [-5,  0,  0,  0,  0,  0,  0, -5],
+     [-5,  0,  0,  0,  0,  0,  0, -5],
+     [-5,  0,  0,  0,  0,  0,  0, -5],
+     [0,  0,  0,  5,  5,  0,  0,  0]]
+queen_table = [[-20,-10,-10, -5, -5,-10,-10,-20],
+    [-10,  0,  0,  0,  0,  0,  0,-10],
+    [-10,  0,  5,  5,  5,  5,  0,-10],
+     [-5,  0,  5,  5,  5,  5,  0, -5],
+      [0,  0,  5,  5,  5,  5,  0, -5],
+    [-10,  5,  5,  5,  5,  5,  0,-10],
+    [-10,  0,  5,  0,  0,  0,  0,-10],
+    [-20,-10,-10, 70, -5,-10,-10,-20]]
+queen_table_reverse = [[-20, -10, -10, 70, -5, -10, -10, -20],
+                       [-10, 0, 5, 0, 0, 0, 0, -10],
+                       [-10, 5, 5, 5, 5, 5, 0, -10],
+                       [0, 0, 5, 5, 5, 5, 0, -5],
+                       [-5, 0, 5, 5, 5, 5, 0, -5],
+                       [-10, 0, 5, 5, 5, 5, 0, -10],
+                       [-10, 0, 0, 0, 0, 0, 0, -10],
+                       [-20, -10, -10, -5, -5, -10, -10, -20]]
 
+king_table = [[-30,-40,-40,-50,-50,-40,-40,-30],
+    [-30,-40,-40,-50,-50,-40,-40,-30],
+    [-30,-40,-40,-50,-50,-40,-40,-30],
+    [-30,-40,-40,-50,-50,-40,-40,-30],
+    [-20,-30,-30,-40,-40,-30,-30,-20],
+    [-10,-20,-20,-20,-20,-20,-20,-10],
+     [20, 20,  0,  0,  0,  0, 20, 20],
+     [20, 30, 10,  0,  0, 10, 30, 20]]
+
+def chessPositionValue(x,y,piece,color):
+
+
+    if color =="b" and piece!="Queen":
+        x = 7-x
+        y = 7-y
+
+
+    if piece == "Rook":
+        return rook_table[x][y]
+    elif piece == "Pawn":
+        return pawn_table[x][y]
+    elif piece == "Knight":
+        return knight_table[x][y]
+    elif piece == "Bishop":
+        return bishop_table[x][y]
+    elif piece == "Queen":
+        if color == "w":
+            return queen_table[x][y]
+        else:
+            return queen_table_reverse[x][y]
+    elif piece == "King":
+        return king_table[x][y]
+    
+    
+    
 # erstellt ein array mit String values der position der Weißen oder Schwarzen Figuren
 
 #neue Bewertungsfunktion
@@ -150,14 +233,79 @@ def seitenWert(board,player):
 
     else:
         return summe
+    
+def seitenWert2(board,player):
+    summe = 0
+    color =""
+    if player == 1:
+        color = "w"
+    elif player ==-1:
+        color = "b"
+
+
+    for x, value in enumerate(board):
+        for y, info in enumerate(value):
+                if info == color+'R':
+                    zwisch = chessPositionValue(x,y,"Rook",color)
+                  #  print("Player:"+color+" Rook Value Position: x:"+str(x)+" y:"+str(y)+" Value:"+str(zwisch))
+                    summe+=5+zwisch
+                    zwisch = 0
+                elif info ==color+'N':
+                    zwisch = chessPositionValue(x, y, "Knight", color)
+                  #  print("Player:" + color + " Knight Value Position: x:" + str(x) + " y:" + str(y) + " Value:" + str(
+                   #     zwisch))
+                    summe+=3+zwisch
+                    zwisch = 0
+                elif info ==color+'B':
+                    zwisch = chessPositionValue(x, y, "Bishop", color)
+                  #  print("Player:" + color + " Bishop Value Position: x:" + str(x) + " y:" + str(y) + " Value:" + str(
+                  #      zwisch))
+                    summe+=3+zwisch
+                    zwisch = 0
+                elif info ==color+'Q':
+                    zwisch = chessPositionValue(x, y, "Queen", color)
+                  #  print("Player:" + color + " Queen Value Position: x:" + str(x) + " y:" + str(y) + " Value:" + str(
+                  #      zwisch))
+                    summe+=9+zwisch
+                    zwisch = 0
+                elif info ==color+'K':
+                    zwisch = chessPositionValue(x, y, "King", color)
+                 #   print("Player:" + color + " King Value Position: x:" + str(x) + " y:" + str(y) + " Value:" + str(
+                  #      zwisch))
+                    summe+=100+zwisch
+                    zwisch = 0
+                elif info ==color+'p':
+                    zwisch = chessPositionValue(x, y, "Pawn", color)
+                 #   print("Player:" + color + " Pawn Value Position: x:" + str(x) + " y:" + str(y) + " Value:" + str(
+                  #      zwisch))
+                    summe+=1+zwisch
+                    zwisch = 0
+
+    if board[3][3]==color+'K' or board[3][4]==color+'K' or board[4][3]==color+'K' or board[4][4]==color+'K':
+        return 1000
+
+    else:
+        return summe
 
 def spielBewertung(BitBoard,Player):
     nesBoard = FENtoBoard(BittoFEN(BitBoard))
-    valuesW = seitenWert(nesBoard,1)
-    valuesB = seitenWert(nesBoard,-1)
+    valuesW = seitenWert2(nesBoard,1)
+    valuesB = seitenWert2(nesBoard,-1)
     valuesP = pawnP(nesBoard,Player)
 
     if Player ==1:
         return valuesW-valuesB+valuesP
     elif Player ==-1:
         return valuesB-valuesW+valuesP
+    
+#print(spielBewertung(FENtoBit("rnbqkbnr/ppp1pppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"),1))
+
+guh = FENtoBit("rnbqkbnr/ppp1pppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+
+def testZeit():
+    start_time = time.time()
+    for x in range(10000):
+        #spielBewertung(guh,1)
+        print("time elapsed: {:.8f}s".format(time.time() - start_time))
+
+#testZeit()
