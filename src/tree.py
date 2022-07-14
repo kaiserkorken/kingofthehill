@@ -1,11 +1,11 @@
-from anytree import NodeMixin, RenderTree
+#from anytree import NodeMixin, RenderTree
 
-class knoten(object):  # Just an example of a base class
-    foo=0
+# class knoten(object):  # Just an example of a base class
+#     foo=0
         
-class Node(knoten, NodeMixin):  # Add Node feature
+class Node(object):  # Add Node feature
     def __init__(self, index,parent,bitb,util,h,name,hash=None):
-        super(knoten, self).__init__()
+        #super(knoten, self).__init__()
         self.parent = parent
         # if children:
         #     self.children = children
@@ -15,6 +15,9 @@ class Node(knoten, NodeMixin):  # Add Node feature
         self.h=h
         self.hash=hash
         self.name=name
+        self.children=()
+        if self.parent != None:
+            self.parent.children+=self,
         #TODO aus bitboard rauslesen
         #self.name
         #self.name=value[4]
@@ -26,6 +29,7 @@ class Tree(object):
         self.nodes.append(self.root)
         self.index=1
         self.h=1
+        #self.children=None
         #self.name="root"
         #print(RenderTree(self.root))
         #self.node beinhaltet festen index, value und dict
@@ -48,16 +52,16 @@ class Tree(object):
     def delete_node(self,node):
         node.parent=None
 
-    def print_tree(self):
-        print("tree:")
-        for pre, fill, node in RenderTree(self.root):
-            print((u"%s%s"%(pre,node.name)).ljust(8),node.value,node.h)
-            # print((u"%s%s"%(pre,node.name)).ljust(8),node.value,node.h)
-    def print_node(self,node):
-        print("node",node.index,": ")
-        for pre, fill, n in RenderTree(node):
-            print((u"%s%s"%(pre,n.name)).ljust(8),n.value,n.h)
-            # print((u"%s%s"%(pre,node.name)).ljust(8),node.value,node.h)
+    # def print_tree(self):
+    #     print("tree:")
+    #     for pre, fill, node in RenderTree(self.root):
+    #         print((u"%s%s"%(pre,node.name)).ljust(8),node.value,node.h)
+    #         # print((u"%s%s"%(pre,node.name)).ljust(8),node.value,node.h)
+    # def print_node(self,node):
+    #     print("node",node.index,": ")
+    #     for pre, fill, n in RenderTree(node):
+    #         print((u"%s%s"%(pre,n.name)).ljust(8),n.value,n.h)
+    #         # print((u"%s%s"%(pre,node.name)).ljust(8),node.value,node.h)
     def sort_nodes(self):
         for x in self.nodes:
             #sortiere tupel x.children

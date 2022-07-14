@@ -171,7 +171,7 @@ if __name__ == "__main__":
     FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"
     FEN="rnb2bnr/pppqp2p/3pk1p1/8/3pN3/6N1/PPP1QPPP/R1B1KB1R W"
     player=Player()
-    zeit = 10
+    zeit = 27
     tiefe = 2
     wdh = 1000
     
@@ -183,8 +183,8 @@ if __name__ == "__main__":
     #gesamt: ca. Faktor 25
     #Generator:#names in nodes h 1
     #0,1 s -> ebene 1
-    #7 -> ebene 2
-    #29 -> ebene 3 (*4,5)
+    #1,6 -> ebene 2
+    #25,7 -> ebene 3 (*4,5)
     # ca. Faktor 35 (startfen) -> *40
     #
     

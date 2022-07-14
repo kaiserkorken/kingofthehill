@@ -110,11 +110,17 @@ class Player():
                     # arr[1]=tree.h
                     tsearch=t-tmove+lefttime
                     if tsearch<=0:
-                        return BittoFEN(tree.root.children[0].b,play)
+                        if not name:
+                            return BittoFEN(tree.root.children[0].b,play)
+                        else:
+                            return tree.root.children[0].name
                     if tsearch<0.005:#dauer bis zu ebene 1 zu suchen/bewerten
                         node=best_node(tree,play,time=False)
                         FEN = BittoFEN(node.b, play)
-                        return FEN
+                        if not name:
+                            return FEN
+                        else:
+                            return node.name
                     
                     self.current = play
                     tleft = time.time() - start

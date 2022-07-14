@@ -151,7 +151,7 @@ def search(tree, player, max_depth, search_time=30, new=False, verbose=False):
 
 
 def minimax(node, player, depth=0):
-        if depth == 0 or node.children == None:
+        if depth == 0 or len(node.children)==0:
             if node.value == None:
                 node.value = utility(node.b, player)
             return node.value
@@ -174,7 +174,7 @@ def minimax(node, player, depth=0):
 """
      
 def minimax_bak(node, depth=0, ismax=True):
-        if depth == 0 or node.children == None:
+        if depth == 0 or len(node.children)==0:
             if node.value == None:
                 node.value = utility(node.b, player)
             return node.value
@@ -197,7 +197,7 @@ def minimax_bak(node, depth=0, ismax=True):
 def a_b_search_bak(node, depth=0, ismax=True):
     #print("depth: " + str(depth) + ", player: " + str(ismax) + ", node_value: " + str(node.value) + ", value*player: " + str(node.value*ismax))
 
-    if depth == 0 or node.children == None:
+    if depth == 0 or len(node.children)==0:
         player = -(-1**ismax)
         #print("player: " + str(player) + ", node_value: " + str(node.value) + ", value*player: " + str(node.value*player))
         return node.value
