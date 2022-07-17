@@ -73,12 +73,19 @@ class Tree(object):
             values=[]
             for index, z in enumerate(x.children):
                 values.append((z.value,index))
-                
-            if x.h%2==0:#max spieler
-                values=sorted(values,reverse=True)#TODO implement eigene schnellere sortieragorithmen
-            else: #min spieler
-                values=sorted(values)
-            del x.children
+           
+            for i in range(len(values)):
+                min_idx = i
+                for j in range(i + 1, len(values)):
+                        if values[i][0] > values[j][0]:
+                                min_idx = j
+                                values[i],values[min_idx] = values[min_idx],values[i]
+        
+           # if x.h%2==0:#max spieler
+           #     values=sorted(values,reverse=True)#TODO implement eigene schnellere sortieragorithmen
+           # else: #min spieler
+           #     values=sorted(values)
+           # del x.children
             x.children=[]
             for y in values:
                 x.children+=(oldchilds[y[1]],)
