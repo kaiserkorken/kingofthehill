@@ -1,5 +1,3 @@
-#from http.client import responses
-from re import T
 from player import *
 #from tt import ttable
 #from json import *
@@ -7,35 +5,55 @@ import asyncio
 from websockets import connect
 import time
 
+#play=0
+
 class Game(Player):
     def __init__(self,websocket, current=1):
         super().__init__(current)
         self.name="gruppeAN"+str(current)
-        self.ID=48265171
+        self.ID=48265171+current
         self.playertype=0
         self.stage=1
         self.websocket=websocket
         self.zug=False
-        self.look=False
+        self.check=False
+        #self.look=False
+        self.started=False
     def step(self):
         return 0
     def create (self):
         data=["type","2","username",self.name,"playerID",self.ID]
         return data
     
-    def info(self, data,new=True):
+    def info(self, data, new=False):
         d=[]
-        if not new:# find first game with less than 2 player
-            for x in data["games"]:
-                if len(x["activePlayerList"])<2:
+        #if new:# find first game with less than 2 player
+        for x in data["games"]:
+            for y in x["activePlayerList"]:
+                if y["playerID"]==self.ID:
+                    self.gameID=x["ID"]
+                    self.fen=x["fen"]
+                    if new:
+                        return "already"#bereits einem game zugeweisen
                     d=x
                     break
-        else:
-            for x in data["games"]:
-                if x["ID"]==self.gameID:
+        if d==[]:
+            for x in data["games"]:        
+                if len(x["activePlayerList"])<2 and new:
+                    self.gameID=x["ID"]
+                    self.fen=x["fen"]
+                    return True
                     d=x
                     break
-            
+        # else:
+        #     for x in data["games"]:
+        #         if x["ID"]==self.gameID:
+        #             d=x
+        #             break
+        # if new:
+        #      self.gameID=d["ID"]
+        #      self.fen=x["fen"]
+        #      return True
         
         #data=response(resp)
         if d!=[]:
@@ -46,7 +64,12 @@ class Game(Player):
                     self.zug=self.ID==d["currentPlayer"]["playerID"]
                 except:
                     self.zug=False
-                self.fen=d["fen"]
+                self.check=d["check"]
+                if self.zug and len(d["activePlayerList"])==d["maxPlayerNumber"]:
+                    self.started=True
+                fen=d["fen"]
+                if fen!="":
+                    self.fen=fen
                 if self.zug:
                     try:
                         self.t=d["timeLeft"][self.playertype]
@@ -62,7 +85,7 @@ class Game(Player):
         a=["type","3","username",self.name,"playerID",self.ID,"joinAsPlayer","1","gameID",self.gameID]
         return a
     def move(self):
-        move=self.turn(self.fen,self.t,name=True)
+        move=self.turn(self.fen,self.t,name=True,check=self.check)
         if move ==False:
             move= self.turn(self.fen,t=0,name=True)
         self.fen=move
@@ -93,35 +116,42 @@ class Game(Player):
         self.stamp=time.time()
         di["stamp?"]=self.stamp
         #str="\"type\":{},\"stamp?\":{}".format(type,stamp)
-        str=json.dumps(di)
-        return str
+        #str=json.dumps(di)
+        return di
     def messaging(self,dic):
         # m=""
-        d=dict()
-        for x in range(0,len(dic)-1,2):
-            d[dic[x]]=dic[x+1]
-        self.stamp=time.time()
-        dic["stamp?"]=self.stamp    
-        return json.dumps(d)
+        if type(dic)!=dict:
+            d=dict()
+            for x in range(0,len(dic)-1,2):
+                d[dic[x]]=dic[x+1]
+            self.stamp=time.time()
+            if d.get("stamp?")==None:
+                d["stamp?"]=self.stamp    
+        else:
+            d=dic
+        x=json.dumps(d)
+        print(x)
+        return x
 
-async def hello(uri):
+async def hello(uri,play):
     async with connect(uri) as websocket:
-        try:
-            game=Game(websocket,current=0)#player 1
+        #try:
+            game=Game(websocket,current=play)#player 1
             resp="{\"type\":\"-1\"}"
             data=response(resp)
             error= await handle(data,game)
+            game.close()
             if error==False:
                 return True
-            print("error: "+game.messaging(error))
-        except:
-            game=Game(websocket)#player 2
-            resp="{\"type\":\"-1\"}"
-            data=response(resp)
-            error= await handle(data,game)
-            if error==False:
-                return True
-            print("error: "+game.messaging(error))
+            print("error: "+str(error))
+        # except:
+        #     game=Game(websocket)#player 2
+        #     resp="{\"type\":\"-1\"}"
+        #     data=response(resp)
+        #     error= await handle(data,game)
+        #     if error==False:
+        #         return True
+        #     print("error: "+str(error))
         #return False
         #game zu ende
         
@@ -146,12 +176,17 @@ async def handle(resp,game):
     data=int(resp["type"])
     count=0
     
-    while( count<=5):# mehr als 5 mal in folge fehler -> abbruch
+    while( count<=3):# mehr als 5 mal in folge fehler -> abbruch
         while(data<0 or data>4):#fehler -> nochmal versuchen
+            print("error: ")
+            game.messaging(resp)
+            if data==8:#game started
+                game.started=True
+                game.stage=4#move stage
             if data>4:#nachricht nicht an uns/irrelevant
                 count-=1
-                if data==8: #game started
-                    game.zug=True
+                #if data==8: #game started
+                    #game.zug=True
             if count >=5:
                 return data
             if game.stage==3:
@@ -197,14 +232,15 @@ async def getinfo(game, new=False):#aktualisiere aktuelle game infos
             resp= await game.websocket.recv()
             data= response(resp)
         else:
-            if new:
-                return "ready"
+            game.started=True
     return game.info(data,new)
 
     
 async def sending(game):
+
         if game.stage==1:#login
                 print("login")
+                
                 await game.websocket.send(game.messaging(game.login()))
                 
         elif game.stage==2:#join game
@@ -213,9 +249,12 @@ async def sending(game):
             if x==True:
                 await game.websocket.send(game.messaging(game.join()))
                 game.playertype=1
-            elif x=="ready":
+            elif x=="ready" or x==False:
                 d=dict()
                 d["type"]=-10#no game found
+                return d
+            elif x=="already":
+                d=dict()
                 d["type"]=-11#game automatically initiated
                 return d
 
@@ -223,24 +262,30 @@ async def sending(game):
             
             print("create game")
             #x= await getinfo(game)
-            await game.websocket.send(game.messaging(game.create())) 
+            z= game.messaging(game.create())
+            #print(z)
+            await game.websocket.send(z)
             game.playertype=0
             game.stage-=2#wieder joinen
         
         elif game.stage==4:#make move
             print("move")
             x= await getinfo(game)
-            while not game.zug:
+            while not game.zug or not game.started:
                 x= await getinfo(game)
                 if x==False:
                     print("Keinem Spiel verbunden")
-                if x=="over":
+                elif x=="over":
                     print("spiel zu ende")    
                     return "over" 
-                if x=="empty":
-                    print("no player joined yet")   
+                elif x=="empty":
+                    print("no player joined yet")  
+                elif game.zug==False:
+                    print("not our turn")
+                time.sleep(2)
             z= game.messaging(game.move())
-            print(z)
+            #print(z)
+            game.zug==False
             await game.websocket.send(z)
           
         
@@ -248,11 +293,14 @@ async def sending(game):
         resp= await game.websocket.recv()
         data= response(resp)
         
-        while (data["type"]==4 and data["activePlayerList"]["playerID"]!=game.ID):#nicht an uns
+        while (data.get("type")==None and data.get("ID")!=game.ID):#nicht an uns#data.get("type")==4 and 
             print("wrong recv")
             resp= await game.websocket.recv()
             data= response(resp)
         return data
         
-asyncio.run(hello("ws://koth.df1ash.de:8026"))
+#asyncio.run(hello("ws://koth.df1ash.de:8026",0))
+#asyncio.run(hello("ws://koth.df1ash.de:8026",2))
+asyncio.run(hello("ws://koth.df1ash.de:8026",1))
+
 #asyncio.run(hello("ws://chess.df1ash.de:8025"))

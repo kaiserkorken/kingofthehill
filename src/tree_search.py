@@ -15,31 +15,56 @@ inf = 100000
 
 
 
-def best_node(tree, player_code, time=True):
+def best_node(tree, player_code, check=False,time=True):
     if not time:
         return random.choice(tree.root.children)
     #tree.print_tree()
     # nodes height 1 sammeln
     #print(tree.root.children)
     children = list(tree.root.children)
+
     # print(children)
     # print(children)
     if len(children) > 0:  # falls Züge vorhanden
         values=[]
+        # if check:
+        #     for x in (children):
+        #         if check:
+        #             if x.name[0].lower()=="k":
+        #                 if x.value!= None:
+        #                     values.append(x)
+        #     return random.choice(values)
         for x in children:
             if x.value!= None:
-                values.append(player_code*x.value)
+                values.append(x.value)
+        i= random.randint(0,1)
+        try:
+            if i<3/5:
+                p=np.argmax(values)
+                return children[p]
+            else:
+                values.remove(values[p])
+                p=np.argmax(values)
+                if i>4/5:
+                    values.remove(values[p])
+                    p=np.argmax(values)
+                return children[p]
+                    
+                #return random.choice(children)
+        except:
+            print("random choice")
+            return random.choice(children)
         #values = player_code * np.array([x.value ])
         #"""
         #"""
         # values = [value for index,parent,b,value,h in children]
         # print(tree)
         # print(children)
-        # return best node of nodes of tree height 1 
+        # return best node of nodes of tree height 1
         best_nodes = []
         # print(children)
         while len(children) > 0:
-            try: 
+            try:
                 possible_best_node = children[np.argmax(values)]
             except Exception as e: #all children have value none
                 print(e)
@@ -89,7 +114,7 @@ def time_expected_next(time_last_run, depth=0):
     # 2 -> y
     # 1= x + 70* y
     # 70*y =x
-    
+
     return time_expected
 
 ### Hauptsuchroutine. Wählt taktisch verschiedene Suchverfahren
@@ -99,21 +124,21 @@ def search(tree, player, max_depth, search_time=30, new=False, verbose=False):
     time_last_run = 0.0 # benötigte Zeit für letzten Durchlauf
     time_left = search_time - time_last_run # Zeit bis Abbruch
     time_expected_next_run = time_expected_next(time_last_run) # Zeit, die voraussichtlich für nächste Ebene benötigt wird
-    
+
     depth = 0
     alpha = -inf
     beta = inf
-    
+
     ### DEEP COPY TREE VON ALTER ITERATION
-    
+
     #tree_copy = copy.deepcopy(tree)
-    
+
     if verbose:
         print("search initiated with time to run: " + str(time_left))
     while (depth <= max_depth and time_left > time_expected_next_run ): # Erhöhe Tiefe so lange wie Fertigstellung der Ebene noch realistisch
-        
+
         #tree = copy.deepcopy(tree_copy) # lade backup
-    
+
         time_start = time.time()
         ### Suche
         if not new:
@@ -125,11 +150,11 @@ def search(tree, player, max_depth, search_time=30, new=False, verbose=False):
                     print("     aspiration bounds failed [left/right]: " + str(aw_failed_left) + " / " + str(aw_failed_right))
             else: # kein aspiration window, da Wert geraten werden müsste
                 best_val = a_b_search_principal_variation(root_node, player, depth, alpha, beta)
-        
-        
+
+
         time_stop = time.time()
         time_last_run = time_stop - time_start # benötigte Zeit für letzten Durchlauf
-        
+
         time_left -= time_last_run # Zeit bis Abbruch
         time_expected_next_run = time_expected_next(time_last_run) # Zeit, die voraussichtlich für nächste Ebene benötigt wird
         if verbose:
@@ -137,12 +162,12 @@ def search(tree, player, max_depth, search_time=30, new=False, verbose=False):
             print("  best value found: " + str(best_val))
             print("  time left: " + str(time_left) + ". next estimate: " + str(time_expected_next_run))
         depth += 1
-           
-        
+
+
     if verbose:
         print("search completed at depth: " + str(depth) + " with total time left: " + str(time_left))
         print("best value found: " + str(best_val))
-        
+
     #if depth!=max_depth+1:#suche ist nicht komplett durchgegangen
     depth-=1
     #tree.root=root_node
@@ -155,14 +180,14 @@ def minimax(node, player, depth=0):
             if node.value == None:
                 node.value = utility(node.b, player)
             return node.value
-        
+
         val = -inf
         for child in node.children:
             val = max(val, -minimax(child, depth - 1, -player))
             #node.value = val
         return val
 
-        
+
 """
     function negamax(node, depth, color) is
     if depth = 0 or node is a terminal node then
@@ -172,7 +197,7 @@ def minimax(node, player, depth=0):
         value := max(value, −negamax(child, depth − 1, −color))
     return value
 """
-     
+
 def minimax_bak(node, depth=0, ismax=True):
         if depth == 0 or len(node.children)==0:
             if node.value == None:
@@ -190,8 +215,8 @@ def minimax_bak(node, depth=0, ismax=True):
                 v = min(v, minimax(x, depth - 1, True))
                 node.value = v
             return v
-        
-        
+
+
 
 
 def a_b_search_bak(node, depth=0, ismax=True):
@@ -220,7 +245,7 @@ def a_b_search(node, player, depth=0, alpha=-inf, beta=inf,ismax=True):
 #    print(node)
 #    print(player)
 #    print(depth)
-    if depth==0 or len(node.children)==0: 
+    if depth==0 or len(node.children)==0:
         if node.value == None:
             node.value , node.hash= utility(node.b, player,node.h)
             #print(depth, player, node.value)
@@ -228,27 +253,27 @@ def a_b_search(node, player, depth=0, alpha=-inf, beta=inf,ismax=True):
     #player.__switch__()
     if ismax:
         val=alpha
-        
+
         for child in node.children:
             #print(a_b_search(child, -player, depth-1, -beta, -alpha,))
-            
+
             val = max(val, a_b_search(child, player, depth-1, val,beta,False))
             #node.value = vals
-        
-            
+
+
             if (val >= beta):
                 break
         node.value = val
         return val
     else:
         val=beta
-        
+
         for child in node.children:
             #print(a_b_search(child, -player, depth-1, -beta, -alpha,))
-            
+
             val = min(val, a_b_search(child, player, depth-1, alpha,val,True))
             #node.value = vals
-        
+
             if (alpha >= val):
                 break
         node.value = val
@@ -273,7 +298,7 @@ function negamax(node, depth, α, β, color) is
 def a_b_search_principal_variation(node, player, depth=0, alpha=-inf, beta=inf):
     ###TEST
     #return a_b_search(node, player, depth)
-    
+
     ####
     if depth==0 or node.children==None:
         if node.value == None:
@@ -335,9 +360,9 @@ int AlphaBeta(int tiefe, int alpha, int beta)
 }
 """
 
-# aspriation window suche 
+# aspriation window suche
 def a_b_search_aspiration_window(node, player, expected_value, depth=0, widening_constant=1.5):
-    
+
     alpha = expected_value - widening_constant
     beta = expected_value + widening_constant
     a_w_failed_alpha = 0
@@ -346,7 +371,7 @@ def a_b_search_aspiration_window(node, player, expected_value, depth=0, widening
     while a_w_window_too_small:
 
         best = a_b_search_principal_variation(node, player, depth, alpha, beta)
-        
+
         if best < alpha: # tief gescheitert
             a_w_failed_alpha += 1
             alpha -= widening_constant**a_w_failed_alpha
@@ -356,13 +381,13 @@ def a_b_search_aspiration_window(node, player, expected_value, depth=0, widening
         else:
             a_w_window_too_small = False
     return best, a_w_failed_alpha, a_w_failed_beta
-            
-    
-    
-    
-    
+
+
+
+
+
 def bench_tree_search_list(tree_dict_list, tree_height=None, search_time=15, search_mode='search', verbose=True):
-    if verbose: 
+    if verbose:
         print('- initiate benchmark -')
         print('-- no. of benchmarks: ' + str(len(tree_dict_list)))
         print('--- search mode is: ' + search_mode)
@@ -373,12 +398,12 @@ def bench_tree_search_list(tree_dict_list, tree_height=None, search_time=15, sea
     return t_avg
 
 def bench_tree_search(tree_dict, tree_height=None, search_time=15, search_mode='search', verbose=True):
-    
+
     tree = tree_dict['tree']
     player_code = tree_dict['player_code']
     if tree_height == None:
         tree_height = tree_dict['tree_height']
-        
+
     if verbose:
         print('----- initiate search -----')
         print('------ search mode is: ' + search_mode)
@@ -402,7 +427,7 @@ def bench_tree_search(tree_dict, tree_height=None, search_time=15, search_mode='
         print('ERROR: no search_mode found')
         pass
     t_bench = time.time() - t_start
-    
+
     if verbose:
         print('------- search took:' +str(t_bench))
         print('------- best value found: ' + str(best_value))
@@ -419,43 +444,43 @@ def build_bench_tree(FEN, tree_height=3, verbose=True):
         print('starte Baumaufbau mit FEN: ')
         print(FEN)
     tree = Tree(b)
-    
+
     height = build_tree(tree, player_code, depth=tree_height)
     dep = len(tree.nodes)
     if verbose:
         print("baum fertig")
-        
+
 
     for i in tree.nodes:
         i.value = utility(i.b, player_code)
     if verbose:
         print('baum bewertet')
         #tree.print_tree()
-        
+
     tree_dict = {'tree':tree, 'player_code':player_code, 'tree_height':tree_height}
     return tree_dict
 
-# Stellung 1: 
+# Stellung 1:
 FEN_1 = 'rnbqkbnr/p4ppp/1p1pp3/2p5/3P4/NQP1PNPB/PP3P1P/R1B1K2R b'
-# Stellung 2: 
+# Stellung 2:
 FEN_2 = 'r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w'
 
 if __name__ == "__main__":
     FEN_list = [FEN_1, FEN_2]
-    
+
     tree_height = 2
     search_time = 15
     verbose = True
 
-    
+
     if 'tree_dict_list' in globals():
         pass
     elif 'tree_dict_list' in locals():
         pass
     else:
         tree_dict_list = build_bench_tree_list(FEN_list, tree_height, verbose)
-        
-    
+
+
     search_mode = 'search'
     t_bench = bench_tree_search_list(copy.deepcopy(tree_dict_list), tree_height, search_time, search_mode, verbose)
 
@@ -463,7 +488,7 @@ if __name__ == "__main__":
     t_bench = bench_tree_search_list(copy.deepcopy(tree_dict_list), tree_height, search_time, search_mode, verbose)
     search_mode = 'alpha_beta'
     t_bench = bench_tree_search_list(copy.deepcopy(tree_dict_list), tree_height, search_time, search_mode, verbose)
-    
+
     search_mode = 'principal_variation'
     t_bench = bench_tree_search_list(copy.deepcopy(tree_dict_list), tree_height, search_time, search_mode, verbose)
     search_mode = 'aspiration_windows'

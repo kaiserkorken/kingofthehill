@@ -60,7 +60,8 @@ class Player():
     def close(self):
         self.tt.save_table()
         self.opening.save_table()
-    def turn(self, FEN, t=10,tt=True,name=False):  # ein kompletter zug der ki
+    def turn(self, FEN, t=10,tt=True,name=False,check=False):  # ein kompletter zug der ki
+        
         # print(FEN)
         t-=0.5#buffer ping etc
         start = time.time()
@@ -80,23 +81,41 @@ class Player():
         [bb, play] = FENtoBit(FEN, True)
         
         # tt=ttable("testtable.mymemmap",32)#erstellen falls noetig, sonst in build tree
-        if self.current == play and FENtoBit(FEN,True) != False:  # spieler am zug und fen bekommen
-             
+        if not name:
+            if self.current != play:
+                return False
+            #and FENtoBit(FEN,True) != False:  # spieler am zug und fen bekommen
+        
+        if FENtoBit(FEN,True) != False:
             # bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#testFEN
             tree = Tree(bb)  # ,self.tt.starthash)#leerer baum mit b als root
             if t<=0:#panic mode
-                moves, names = generate_moves_verbose(node.b, self.current)
+                moves, names = generate_moves_verbose(bb, play)
+                if name:
+                    return random.choice(names)
                 move=random.choice(moves)
                 return BittoFEN(move)
                
-            if not checkmate(bb, self.current):  # Spielende überprüfen
+            if not checkmate(bb, play):  # Spielende überprüfen
                 if True:#openings ausschalten
-                    hash=self.opening.hash_value(bb,self.current)
+                    hash=self.opening.hash_value(bb,play)
                     info=self.opening.in_table(hash)
                     if len(info)!=0:
                         logging.info("Main    : choosing from opening table: " + str(time.time()-start))
                         moves=info
+                         
                         FEN=random.choice(moves)
+                        
+                        if name:
+                            b=FEN.split(" ")[0]
+                            move, names = generate_moves_verbose(bb, play)
+                            for x in range(len(move)):
+                                if BittoFEN(move[x]).split(" ")[0]==b:
+                                    #moves=x
+                                    break
+                            FEN= names[x]
+                                    
+                            
                         logging.info("Main    : finished using opening table: " + str(time.time()-start))
                         return FEN
             
@@ -106,7 +125,7 @@ class Player():
                     # arr=p.set_movetree(tre,tmove)
                     # tree.print_tree()
                     logging.info("Main    : building movetree " + str(time.time() - start))
-                    height, lefttime = build_tree(tree,self.current,tmove=(start + tmove - time.time()),tt=tt)  # time bzw. depth
+                    height, lefttime = build_tree(tree,play,tmove=(start + tmove - time.time()),tt=tt)  # time bzw. depth
                     # arr[1]=tree.h
                     tsearch=t-tmove+lefttime
                     if tsearch<=0:
@@ -115,7 +134,7 @@ class Player():
                         else:
                             return tree.root.children[0].name
                     if tsearch<0.005:#dauer bis zu ebene 1 zu suchen/bewerten
-                        node=best_node(tree,play,time=False)
+                        node=best_node(tree,play,time=False,check=check)
                         FEN = BittoFEN(node.b, play)
                         if not name:
                             return FEN
@@ -146,7 +165,7 @@ class Player():
                     logging.info("Main    : tree search finished with depth: " + str(depth) + " in " + str(
                         time.time() - sstart) + "s")
                     logging.info("Main    : choosing good move " + str(tleft))
-                    node = best_node(tree,self.current)  # besten zug auswaehlen
+                    node = best_node(tree,self.current,check)  # besten zug auswaehlen
                     # move=tree.find_node(node.index)
                     # logging.info("Main    : finished turn "+str(start+t))
                     finish = time.time()
@@ -165,7 +184,7 @@ class Player():
         else:  # Spieler nicht dran
             FEN = False
         # self.__switch__()#Spieler wechseln (egal ob zug gemacht odeer nicht
-        logging.info("Main    : chosen move: " +str(FEN)+ str(start + t - time.time()))
+        logging.info("Main    : chosen move: " +str(FEN)+" "+ str(start + t - time.time()))
         return FEN
     
     
@@ -263,7 +282,7 @@ class Player():
                     time.time() - sstart) + "s")
                 tleft = time.time() - start
                 logging.info("Main    : choosing good move " + str(tleft))
-                node = best_node(tree,self.current)  # besten zug auswaehlen
+                node = best_node(tree,self.current,check=check)  # besten zug auswaehlen
                 # move=tree.find_node(node.index)
                 # logging.info("Main    : finished turn "+str(start+t))
                 finish = time.time()

@@ -167,13 +167,13 @@ def gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player
         bb_capture_list = serialize_bb(bb_capture)
         bb_quiet_list = serialize_bb(bb_quiet)
         
-        if pawn_to_queen: # spezieller Zugsimulator für Damenumwandlung
-            capture_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_capture_list]
-            quiet_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_quiet_list]
-        else:
+        # if pawn_to_queen: # spezieller Zugsimulator für Damenumwandlung
+        #     capture_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_capture_list]
+        #     quiet_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_quiet_list]
+        #else:
             # simuliert Züge -> Elemente sind Dictionaries mit Folgezuständen
-            capture_list = [make_move(b, bb_from, bb_to) for bb_to in bb_capture_list]
-            quiet_list = [make_move(b, bb_from, bb_to) for bb_to in bb_quiet_list]
+        capture_list = [make_move(b, bb_from, bb_to) for bb_to in bb_capture_list]
+        quiet_list = [make_move(b, bb_from, bb_to) for bb_to in bb_quiet_list]
         
         # füge keine leeren elemente ein
         if capture_list:

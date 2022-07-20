@@ -1,7 +1,5 @@
 import numpy as np
-
 from bitboard import *
-import copy
 import time
 
 from movegen import *
@@ -79,7 +77,7 @@ def make_move_name(b_old, bb_from, bb_to, short = False):
     
 
 
-def generate_moves_verbose(b, player):
+def generate_moves_verbose(b, player,king=False):
 
     # king moves
     # queen moves
@@ -88,62 +86,68 @@ def generate_moves_verbose(b, player):
     # bishop moves
     # pawn moves
     
-    t_start = time.time()
+    #t_start = time.time()
     ### erstelle Liste aller möglichen Züge durch Simulation ###
 
     # pawn to queen
 #    print('pawn to queen')
-    move_list_capture_pawn_to_queen, move_list_quiet_pawn_to_queen, name_list_capture_pawn_to_queen, name_list_quiet_pawn_to_queen = gen_moves_pawn_to_queen(b, player) 
-    move_list_capture_king, move_list_quiet_king, name_list_capture_king, name_list_quiet_king = gen_moves_king(b, player)
-    move_list_capture_queen, move_list_quiet_queen, name_list_capture_queen, name_list_quiet_queen = gen_moves_queen(b, player)
-    move_list_capture_knight, move_list_quiet_knight, name_list_capture_knight, name_list_quiet_knight = gen_moves_knight(b, player) 
-    move_list_capture_rook, move_list_quiet_rook, name_list_capture_rook, name_list_quiet_rook = gen_moves_rook(b, player) 
-    move_list_capture_bishop, move_list_quiet_bishop, name_list_capture_bishop, name_list_quiet_bishop = gen_moves_bishop(b, player) 
-    move_list_capture_pawn, move_list_quiet_pawn, name_list_capture_pawn, name_list_quiet_pawn = gen_moves_pawn(b, player) 
-    
-    #t_piece = time.time() - t_start
-    #print("t_piece: " + str(t_piece))
-#    """    
-    move_list_capture = np.concatenate((move_list_capture_pawn_to_queen, 
-                                        move_list_capture_king,
-                                        move_list_capture_queen,
-                                        move_list_capture_knight,
-                                        move_list_capture_rook,
-                                        move_list_capture_bishop,
-                                        move_list_capture_pawn,
+    if king:
+         move_list_capture_king, move_list_quiet_king, name_list_capture_king, name_list_quiet_king = gen_moves_king(b, player)
+         move_list = np.concatenate((move_list_capture_king, move_list_quiet_king))
+         name_list = np.concatenate((name_list_capture_king, name_list_quiet_king))
+    else:
+        move_list_capture_pawn_to_queen, move_list_quiet_pawn_to_queen, name_list_capture_pawn_to_queen, name_list_quiet_pawn_to_queen = gen_moves_pawn_to_queen(b, player) 
+        move_list_capture_king, move_list_quiet_king, name_list_capture_king, name_list_quiet_king = gen_moves_king(b, player)
+        move_list_capture_queen, move_list_quiet_queen, name_list_capture_queen, name_list_quiet_queen = gen_moves_queen(b, player)
+        move_list_capture_knight, move_list_quiet_knight, name_list_capture_knight, name_list_quiet_knight = gen_moves_knight(b, player) 
+        move_list_capture_rook, move_list_quiet_rook, name_list_capture_rook, name_list_quiet_rook = gen_moves_rook(b, player) 
+        move_list_capture_bishop, move_list_quiet_bishop, name_list_capture_bishop, name_list_quiet_bishop = gen_moves_bishop(b, player) 
+        move_list_capture_pawn, move_list_quiet_pawn, name_list_capture_pawn, name_list_quiet_pawn = gen_moves_pawn(b, player) 
+        
+        #t_piece = time.time() - t_start
+        #print("t_piece: " + str(t_piece))
+    #    """    
+        
+        move_list_capture = np.concatenate((move_list_capture_pawn_to_queen, 
+                                            move_list_capture_king,
+                                            move_list_capture_queen,
+                                            move_list_capture_knight,
+                                            move_list_capture_rook,
+                                            move_list_capture_bishop,
+                                            move_list_capture_pawn,
+                                            ))
+                                        
+        # add quiet moves
+        move_list_quiet = np.concatenate((move_list_quiet_pawn_to_queen, 
+                                        move_list_quiet_king,
+                                        move_list_quiet_queen,
+                                        move_list_quiet_knight,
+                                        move_list_quiet_rook,
+                                        move_list_quiet_bishop,
+                                        move_list_quiet_pawn,
                                         ))
-                                       
-    # add quiet moves
-    move_list_quiet = np.concatenate((move_list_quiet_pawn_to_queen, 
-                                      move_list_quiet_king,
-                                      move_list_quiet_queen,
-                                      move_list_quiet_knight,
-                                      move_list_quiet_rook,
-                                      move_list_quiet_bishop,
-                                      move_list_quiet_pawn,
-                                      ))
-      
-    # corresponding move names
-    name_list_capture = np.concatenate((name_list_capture_pawn_to_queen, 
-                                        name_list_capture_king,
-                                        name_list_capture_queen,
-                                        name_list_capture_knight,
-                                        name_list_capture_rook,
-                                        name_list_capture_bishop,
-                                        name_list_capture_pawn,
+        
+        # corresponding move names
+        name_list_capture = np.concatenate((name_list_capture_pawn_to_queen, 
+                                            name_list_capture_king,
+                                            name_list_capture_queen,
+                                            name_list_capture_knight,
+                                            name_list_capture_rook,
+                                            name_list_capture_bishop,
+                                            name_list_capture_pawn,
+                                            ))
+        
+        name_list_quiet = np.concatenate((name_list_quiet_pawn_to_queen, 
+                                        name_list_quiet_king,
+                                        name_list_quiet_queen,
+                                        name_list_quiet_knight,
+                                        name_list_quiet_rook,
+                                        name_list_quiet_bishop,
+                                        name_list_quiet_pawn,
                                         ))
-    
-    name_list_quiet = np.concatenate((name_list_quiet_pawn_to_queen, 
-                                      name_list_quiet_king,
-                                      name_list_quiet_queen,
-                                      name_list_quiet_knight,
-                                      name_list_quiet_rook,
-                                      name_list_quiet_bishop,
-                                      name_list_quiet_pawn,
-                                      ))
-    
-    move_list = np.concatenate((move_list_capture, move_list_quiet))
-    name_list = np.concatenate((name_list_capture, name_list_quiet))
+        
+        move_list = np.concatenate((move_list_capture, move_list_quiet))
+        name_list = np.concatenate((name_list_capture, name_list_quiet))
     
     #t_cat = time.time() - t_start - t_piece
     #print("t_cat: " + str(t_cat))
@@ -273,14 +277,14 @@ def gen_capture_quiet_lists_from_all_moves(b, bb_from_and_all_moves_list, player
         #print(time.time() - t)
         #t = time.time()
                 
-        if pawn_to_queen: # spezieller Zugsimulator für Damenumwandlung
-            capture_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_capture_list]
-            quiet_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_quiet_list]
+        # if pawn_to_queen: # spezieller Zugsimulator für Damenumwandlung
+        #     capture_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_capture_list]
+        #     quiet_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_quiet_list]
             
-        else:      
+        # else:      
             # simuliert Züge -> Elemente sind Dictionaries mit Folgezuständen
-            capture_list = [make_move(b, bb_from, bb_to) for bb_to in bb_capture_list]
-            quiet_list = [make_move(b, bb_from, bb_to) for bb_to in bb_quiet_list]
+        capture_list = [make_move(b, bb_from, bb_to) for bb_to in bb_capture_list]
+        quiet_list = [make_move(b, bb_from, bb_to) for bb_to in bb_quiet_list]
             
         #print('make move: ')
         #print(time.time() - t)
@@ -349,14 +353,14 @@ def gen_capture_quiet_lists_from_all_moves_bak(b, bb_from_and_all_moves_list, pl
         bb_quiet_list = serialize_bb(bb_quiet)
         
                 
-        if pawn_to_queen: # spezieller Zugsimulator für Damenumwandlung
-            capture_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_capture_list]
-            quiet_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_quiet_list]
+        # if pawn_to_queen: # spezieller Zugsimulator für Damenumwandlung
+        #     capture_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_capture_list]
+        #     quiet_list = [make_move_pawn_to_queen(b, bb_from, bb_to) for bb_to in bb_quiet_list]
             
-        else:      
+        # else:      
             # simuliert Züge -> Elemente sind Dictionaries mit Folgezuständen
-            capture_list = [make_move(b, bb_from, bb_to) for bb_to in bb_capture_list]
-            quiet_list = [make_move(b, bb_from, bb_to) for bb_to in bb_quiet_list]
+        capture_list = [make_move(b, bb_from, bb_to) for bb_to in bb_capture_list]
+        quiet_list = [make_move(b, bb_from, bb_to) for bb_to in bb_quiet_list]
             
         # erstelle entsprechende Zugnotation
         capture_names = [make_move_name(b, bb_from, bb_to) for bb_to in bb_capture_list]
