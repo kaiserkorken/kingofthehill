@@ -1,14 +1,16 @@
-from http.client import responses
+#from http.client import responses
+from re import T
 from player import *
 #from tt import ttable
 #from json import *
 import asyncio
 from websockets import connect
+import time
 
 class Game(Player):
     def __init__(self,websocket, current=1):
         super().__init__(current)
-        self.name="gruppeAN"
+        self.name="gruppeAN"+str(current)
         self.ID=48265171
         self.playertype=0
         self.stage=1
@@ -17,10 +19,6 @@ class Game(Player):
         self.look=False
     def step(self):
         return 0
-    def login(self):
-        #self.ID=random.randint(0,99999999)
-        data=["type","0","username",self.name,"playerID",self.ID]
-        return data
     def create (self):
         data=["type","2","username",self.name,"playerID",self.ID]
         return data
@@ -44,7 +42,10 @@ class Game(Player):
             if d["over"]:
                 return "over"
             if len(d["activePlayerList"])>0:
-                self.zug=self.ID==d["currentPlayer"]["playerID"]
+                try:#falls currentPlaer leer
+                    self.zug=self.ID==d["currentPlayer"]["playerID"]
+                except:
+                    self.zug=False
                 self.fen=d["fen"]
                 if self.zug:
                     try:
@@ -68,62 +69,78 @@ class Game(Player):
         data=["type","4","username",self.name,"playerID",self.ID,"gameID",self.gameID,"move",self.fen]
         return data
     # message= "{"type":"0","stamp?=""}"
-def response(message):
-    dic = message
-    if type(message)!=dict:
-        dic=json.loads(message)
-    # message=message.replace("\"","")
-    # message=message[1:-1]
-    # message= message.split(",")
-    # dic=dict()
-    # s=[]
-    # for x in range(0,len(message)):
-    #     s.append(message[x].split(":"))
-    # for y in range(len(s)):
-    #     dic[s[y][0]]=s[y][1]
-    return dic
-
-def message(type,stamp=""):
-    di= dict()
-    di["type"]=type
-    di["stamp?"]=""
-    #str="\"type\":{},\"stamp?\":{}".format(type,stamp)
-    str=json.dumps(di)
-    return str
-        
-def login(name,ID=""):
-    # str=message(0)[:-1]
    
-    # str=str+"username:{},playerID?:{}".format(name,int(ID))+"}"
-    # return str
-    di= dict()
-    di["type"]=0
-    di["username"]=name
-    di["playerID"]=ID
-    #str="\"type\":{},\"stamp?\":{}".format(type,stamp)
-    str=json.dumps(di)
-    return str
-def messaging(dic):
-    # m=""
-    d=dict()
-    for x in range(0,len(dic)-1,2):
-         d[dic[x]]=dic[x+1]
-    return json.dumps(d)
+
+    def message(self,type,stamp=""):
+        di= dict()
+        di["type"]=type
+        
+        self.stamp=time.time()
+        di["stamp?"]=self.stamp
+        #str="\"type\":{},\"stamp?\":{}".format(type,stamp)
+        str=json.dumps(di)
+        return str
+            
+    def login(self):
+        # str=message(0)[:-1]
+    
+        # str=str+"username:{},playerID?:{}".format(name,int(ID))+"}"
+        # return str
+        di= dict()
+        di["type"]=0
+        di["username"]=self.name
+        di["playerID"]=self.ID
+        self.stamp=time.time()
+        di["stamp?"]=self.stamp
+        #str="\"type\":{},\"stamp?\":{}".format(type,stamp)
+        str=json.dumps(di)
+        return str
+    def messaging(self,dic):
+        # m=""
+        d=dict()
+        for x in range(0,len(dic)-1,2):
+            d[dic[x]]=dic[x+1]
+        self.stamp=time.time()
+        dic["stamp?"]=self.stamp    
+        return json.dumps(d)
 
 async def hello(uri):
     async with connect(uri) as websocket:
-        game=Game(websocket)
-        resp="{\"type\":\"-1\"}"
-        data=response(resp)
-        error= await handle(data,game)
-        if error==False:
-            return True
-        print("error: "+messaging(error))
+        try:
+            game=Game(websocket,current=0)#player 1
+            resp="{\"type\":\"-1\"}"
+            data=response(resp)
+            error= await handle(data,game)
+            if error==False:
+                return True
+            print("error: "+game.messaging(error))
+        except:
+            game=Game(websocket)#player 2
+            resp="{\"type\":\"-1\"}"
+            data=response(resp)
+            error= await handle(data,game)
+            if error==False:
+                return True
+            print("error: "+game.messaging(error))
         #return False
         #game zu ende
         
         #game.reset()
     print("connection lost")
+def response(message):
+        dic = message
+        if type(message)!=dict:
+            dic=json.loads(message)
+        # message=message.replace("\"","")
+        # message=message[1:-1]
+        # message= message.split(",")
+        # dic=dict()
+        # s=[]
+        # for x in range(0,len(message)):
+        #     s.append(message[x].split(":"))
+        # for y in range(len(s)):
+        #     dic[s[y][0]]=s[y][1]
+        return dic
 
 async def handle(resp,game):
     data=int(resp["type"])
@@ -141,7 +158,9 @@ async def handle(resp,game):
                 if(data<=-5):#sonstige fehlerbehandlung
                     return data#create game hat nicht funktioniert
             if game.stage==2:
-                if(data<=-10):#kein game mehr zum joinen
+                if(data==-10):#kein game mehr zum joinen
+                    break
+                elif(data==-11):#game started
                     break
                 
                 count-=1
@@ -152,7 +171,7 @@ async def handle(resp,game):
             data=response(resp)["type"]
             count+=1
         count=0
-        if game.stage==2:#join erfolgreich -> move
+        if game.stage==2 and data!=-10:#join erfolgreich -> move
             game.stage+=1 
         if game.stage<4:# or game.zug:
             game.stage+=1
@@ -168,38 +187,43 @@ async def handle(resp,game):
         #TODO type 6, tournament started, type 8, game started
         #do reset
         
-async def getinfo(game, new=True):#aktualisiere aktuelle game infos
-    await game.websocket.send(message(1))
+async def getinfo(game, new=False):#aktualisiere aktuelle game infos
+    await game.websocket.send(game.message(1))
     resp= await game.websocket.recv()
     data= response(resp)
     while (data["type"]!=1):
-        print("wrong recv")
-        resp= await game.websocket.recv()
-        data= response(resp)
+        if data["type"]!=8:
+            print("wrong recv")
+            resp= await game.websocket.recv()
+            data= response(resp)
+        else:
+            if new:
+                return "ready"
     return game.info(data,new)
 
     
 async def sending(game):
         if game.stage==1:#login
                 print("login")
-                await game.websocket.send(messaging(game.login()))
+                await game.websocket.send(game.messaging(game.login()))
                 
         elif game.stage==2:#join game
             print("join game")
-            x= await getinfo(game,new=False)
-            if x!=False:
-                await game.websocket.send(messaging(game.join()))
+            x= await getinfo(game,new=True)
+            if x==True:
+                await game.websocket.send(game.messaging(game.join()))
                 game.playertype=1
-            else:
+            elif x=="ready":
                 d=dict()
                 d["type"]=-10#no game found
+                d["type"]=-11#game automatically initiated
                 return d
 
         elif game.stage==3:#create game
             
             print("create game")
             #x= await getinfo(game)
-            await game.websocket.send(messaging(game.create())) 
+            await game.websocket.send(game.messaging(game.create())) 
             game.playertype=0
             game.stage-=2#wieder joinen
         
@@ -215,7 +239,7 @@ async def sending(game):
                     return "over" 
                 if x=="empty":
                     print("no player joined yet")   
-            z= messaging(game.move())
+            z= game.messaging(game.move())
             print(z)
             await game.websocket.send(z)
           

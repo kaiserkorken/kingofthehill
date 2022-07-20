@@ -1,7 +1,6 @@
-from importlib.machinery import FrozenImporter
 import numpy as np
-from distutils.log import error
-from traitlets import Dict#maybe overkill
+
+
 
 def bitboard(indices=[]):
     # defines basic bitboard of type int8/boolean
@@ -152,7 +151,7 @@ def print_board_list(b_list, flip=False):
 def BittoFEN(b,player=False):#turns bitboard into FEN Strings
     #if len(b)!=8:
     if type(b)!=dict:
-        error("BittoFEN only takes one argument of type dict and not" +str(type(b)))
+        print("error: BittoFEN only takes one argument of type dict and not" +str(type(b)))
         return False
     #b=b[0]#name=b[1]
     # FENboard=np.zeros((8,8))

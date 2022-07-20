@@ -159,6 +159,7 @@ class Player():
                     self.__switch__()
                     logging.info("Main    : finished turn in " + str(finish - start) + "s")
                     logging.info("Main    : time remaining: " + str(start + t - time.time()))
+                    print("size: ",len(tree.nodes))
             else:
                 FEN=False
         else:  # Spieler nicht dran
