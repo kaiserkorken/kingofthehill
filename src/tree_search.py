@@ -107,8 +107,9 @@ def best_node(tree, player_code, check=False,time=True):
         print("else: ", children[0])
         return children[0]
 
+# Zeitberechnung für nächste Iteration in Tiefensuche
 def time_expected_next(time_last_run, depth=0):
-    time_exponent = 25  # Exponent mit der benötigte Zeit ansteigt
+    time_exponent = 25  # Multiplikator mit der benötigte Zeit ansteigt
     time_expected = time_last_run*time_exponent
     #time_expected = time_last_run/time_exponent**depth
     # 2 -> y
@@ -131,13 +132,13 @@ def search(tree, player, max_depth, search_time=30, new=False, verbose=False):
 
     ### DEEP COPY TREE VON ALTER ITERATION
 
-    #tree_copy = copy.deepcopy(tree)
+    tree_copy = copy.deepcopy(tree)
 
     if verbose:
         print("search initiated with time to run: " + str(time_left))
     while (depth <= max_depth and time_left > time_expected_next_run ): # Erhöhe Tiefe so lange wie Fertigstellung der Ebene noch realistisch
 
-        #tree = copy.deepcopy(tree_copy) # lade backup
+        tree = copy.deepcopy(tree_copy) # lade backup
 
         time_start = time.time()
         ### Suche
@@ -148,7 +149,7 @@ def search(tree, player, max_depth, search_time=30, new=False, verbose=False):
                 best_val, aw_failed_left, aw_failed_right = a_b_search_aspiration_window(root_node, player, best_val, depth)
                 if verbose:
                     print("     aspiration bounds failed [left/right]: " + str(aw_failed_left) + " / " + str(aw_failed_right))
-            else: # kein aspiration window, da Wert geraten werden müsste
+            else: # kein aspiration window, da kein Anhaltswert aus letzter Iteration verfügbar
                 best_val = a_b_search_principal_variation(root_node, player, depth, alpha, beta)
 
 
@@ -363,8 +364,8 @@ int AlphaBeta(int tiefe, int alpha, int beta)
 # aspriation window suche
 def a_b_search_aspiration_window(node, player, expected_value, depth=0, widening_constant=1.5):
 
-    alpha = expected_value - widening_constant
-    beta = expected_value + widening_constant
+    alpha = expected_value - (widening_constant-1)
+    beta = expected_value + (widening_constant-1)
     a_w_failed_alpha = 0
     a_w_failed_beta = 0
     a_w_window_too_small = True
