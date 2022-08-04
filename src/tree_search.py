@@ -1,4 +1,3 @@
-from optparse import TitledHelpFormatter
 import time
 import numpy as np
 import random
@@ -40,7 +39,7 @@ def best_node(tree, player_code, name=False,time=True,opening=False):
         best_val=children[0].value
         choice=[children[0]]
         for x in range (1,np.argmin([3,len(children)])-1):
-            if np.abs(children[x].value-best_val)==0:#gleich bewertet#maximal ein bauernschlag unterschied
+            if np.abs(children[x].value-best_val)<1:#gleich bewertet#maximal ein bauernschlag unterschied
                 choice.append(children[x])
         node=random.choice(choice)#random aus ersten 4 besten moves
         return node

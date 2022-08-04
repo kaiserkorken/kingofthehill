@@ -170,8 +170,10 @@ if __name__ == "__main__":
     # FEN="8/4k3/8/8/8/8/3K4/8"
     FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"
     FEN="rnb2bnr/pppqp2p/3pk1p1/8/3pN3/6N1/PPP1QPPP/R1B1KB1R W"
-    player=Player()
-    zeit = 0#27
+    FEN="r1b1k2r/bp1pp1np/2n5/Q4p1B/2P1N3/3P3N/P3PPPP/R4RK1 b"#checkmate entgehung testen
+    
+    player=Player(-1)
+    zeit = 2#27
     tiefe = 2
     wdh = 1000
     
@@ -205,7 +207,8 @@ if __name__ == "__main__":
     #-> allgemein:
     # 1: 0,1%; 2: 0,05%; 3: 0,04%
    # tt=ttable("testtable")
-    player.turn(FEN,t=zeit,name=True)
+    for x in range (5):
+        player.do_move(FEN,t=zeit,name=True)
     #ttables-> sucheebene 3 start 0.14 -> 0.02
     player.close()
         #FEN, t=None, depth=None,utilities=True,tt=False,sort=False,windows=False)
