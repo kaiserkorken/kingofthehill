@@ -1,10 +1,10 @@
 # from anytree import NodeMixin, RenderTree
-
+import numpy as np
 # class knoten(object):  # Just an example of a base class
 #     foo=0
 
 class Node(object):  # Add Node feature
-    def __init__(self, index, parent, bitb, util, h, name, hash=None):
+    def __init__(self, index, parent, bitb, util, h, name=None, hash=None):
         # super(knoten, self).__init__()
         self.parent = parent
         # if children:
@@ -26,10 +26,14 @@ def partition(l, r, nums):
     # Last element will be the pivot and the first element the pointer
     pivot, ptr = nums[r][0], l
     for i in range(l, r):
-        if nums[i][0] <= pivot:
-            # Swapping values smaller than the pivot to the front
-            nums[i], nums[ptr] = nums[ptr], nums[i]
-            ptr += 1
+        if nums[i][0]!=None:
+            if pivot==None:
+                nums[i], nums[ptr] = nums[ptr], nums[i]
+                ptr += 1
+            elif nums[i][0] <= pivot:
+                # Swapping values smaller than the pivot to the front
+                nums[i], nums[ptr] = nums[ptr], nums[i]
+                ptr += 1
     # Finally swapping the last element with the pointer indexed number
     nums[ptr], nums[r] = nums[r], nums[ptr]
     return ptr
@@ -45,12 +49,13 @@ def quicksort(l, r, nums):
 
 class Tree(object):
     def __init__(self, bb, starthash=False) -> None:
-        self.nodes = []
+        
         self.value = None
         self.root = Node(0, None, bb, self.value, 0, "Wstart", starthash)
-        self.nodes.append(self.root)
+        #np.append(self.nodes,self.root)
         self.index = 1
         self.h = 1
+        self.nodes = 1 #np.asarray([self.root])
         # self.children=None
         # self.name="root"
         # print(RenderTree(self.root))
@@ -64,16 +69,23 @@ class Tree(object):
         new_node = Node(self.index, parent, bitb, util, h, name, hash)
         # print(parent.children)
         # parent.children+=(new_node,)
-        self.nodes.append(new_node)
+        self.nodes+=1#np.append(self.nodes,new_node)
         self.index += 1
         return new_node
 
-    def find_node(self, index):
-        return self.nodes[index]
+    # def find_node(self, index):
+    #     return self.nodes[index]
 
     def delete_node(self, node):
-        node.parent = None
-
+        l=list(node.parent.children)
+        l.remove(node)
+        t=tuple(l)
+        node.parent.children=t
+        self.nodes-=1#.remove(node)
+       # del node
+    def reset(self):
+        for x in self.nodes:
+            x.value=None
     # def print_tree(self):
     #     print("tree:")
     #     for pre, fill, node in RenderTree(self.root):
@@ -84,34 +96,46 @@ class Tree(object):
     #     for pre, fill, n in RenderTree(node):
     #         print((u"%s%s"%(pre,n.name)).ljust(8),n.value,n.h)
     #         # print((u"%s%s"%(pre,node.name)).ljust(8),node.value,node.h)
-    def sort_nodes(self):
-        for x in self.nodes:
-            # sortiere tupel x.children
-            # if x.h%2==0:#max spieler
-            #     x.children=sorted(x.children,reverse=True)#TODO implement eigene schnellere sortieragorithmen
-            # else: #min spieler
-            #     x.children=sorted(x.children)
-            oldchilds = x.children
-            values = []
-            for index, z in enumerate(x.children):
-                values.append((z.value, index))
+    def sort_nodes(self,index,inverted=False,all=True):
+        
+            if len(index.children)>0:
+                if all:
+                    for x in index.children:
+                        self.sort_nodes(x,inverted,all)
+                # sortiere tupel x.children
+                # if x.h%2==0:#max spieler
+                #     x.children=sorted(x.children,reverse=True)#TODO implement eigene schnellere sortieragorithmen
+                # else: #min spieler
+                #     x.children=sorted(x.children)
+                oldchilds = index.children
+                values = []
+                for i, z in enumerate(index.children):
+                    values.append((z.value, z))
+                #values=np.asarray(values)
+                #sort=np.delete([None,int])
+                values=quicksort(0, len(values) - 1, values)
+                
+                if not inverted:
+                    
+                    values= values[::-1]
+                #index.children=values
+                #for i in range(len(values)):
+                #    min_idx = i
+                #    for j in range(i + 1, len(values)):
+                #        if values[i][0] > values[j][0]:
+                #            min_idx = j
+                #            values[i], values[min_idx] = values[min_idx], values[i]
 
-            quicksort(0, len(values) - 1, values)
-
-            #for i in range(len(values)):
-            #    min_idx = i
-            #    for j in range(i + 1, len(values)):
-            #        if values[i][0] > values[j][0]:
-            #            min_idx = j
-            #            values[i], values[min_idx] = values[min_idx], values[i]
-
-            # if x.h%2==0:#max spieler
-            #     values=sorted(values,reverse=True)#TODO implement eigene schnellere sortieragorithmen
-            # else: #min spieler
-            #     values=sorted(values)
-            # del x.children
-            x.children = []
-            for y in values:
-                x.children += (oldchilds[y[1]],)
-            x.children = list(x.children)
+                # if x.h%2==0:#max spieler
+                #     values=sorted(values,reverse=True)#TODO implement eigene schnellere sortieragorithmen
+                # else: #min spieler
+                #     values=sorted(values)
+                # del x.children
+                # x.children = []
+                index.children=()
+                for y in values:
+                    index.children += (y[1],)
+                # x.children = list(x.children)
+                # if index != None:
+                #     break
 
