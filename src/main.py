@@ -175,6 +175,6 @@ def drawPieces(screen, board):
                 screen.blit(IMAGES[piece], p.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
 if __name__ == "__main__":
-    bild =gui()
+    bild = GUI()
     while bild.running:
         bild.run()
