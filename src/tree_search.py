@@ -271,7 +271,7 @@ def a_b_search_bak(node, depth=0, ismax=True):
 
 # alpha beta
 def a_b_search(node, player, depth=0,height=0, alpha=-inf, beta=inf,ismax=True):
-#    print(node)
+    #    print(node)
 #    print(player)
 #    print(depth)
     global buildtime
@@ -423,7 +423,56 @@ def a_b_search_aspiration_window(node, player, expected_value, depth=0, widening
 
 
 
+def null_move(node, player, depth=0,height=0, alpha=-inf, beta=inf,ismax=True):
+    #    print(node)
+#    print(player)
+#    print(depth)
+    global buildtime
+    if buildtime<0:
+        return 0
+    if depth==0:
+        if node.value == None:
+            node.value , node.hash= utility(node.b, player,node.h)
+            #print(depth, player, node.value)
+        
+        return node.value
+    #player.__switch__()
+    #moves generieren
+    start=time.time()
+    if len(node.children)<=0:
+        tiefe=height-depth
+        if (tiefe)%2==0:
+            moves_to_node(player.tree,node,player.current,h=tiefe,index=node.index,tt=player.tt)
+        else:
+            moves_to_node(player.tree,node,-player.current,h=tiefe,index=node.index,tt=player.tt)#anderer spieler am zug
+    buildtime+=time.time()-start
+    if ismax:
+        val=alpha
+        
+        for child in node.children:
+            #print(a_b_search(child, -player, depth-1, -beta, -alpha,))
 
+            val = max(val, a_b_search(child, player, depth-1,height, val,beta,False))
+            #node.value = vals
+
+
+            if (val >= beta):
+                break
+        node.value = val
+        return val
+    else:
+        val=beta
+
+        for child in node.children:
+            #print(a_b_search(child, -player, depth-1, -beta, -alpha,))
+
+            val = min(val, a_b_search(child, player, depth-1,height, alpha,val,True))
+            #node.value = vals
+
+            if (alpha >= val):
+                break
+        node.value = val
+        return val
 
 def bench_tree_search_list(tree_dict_list, tree_height=None, search_time=15, search_mode='search', verbose=True):
     if verbose:
