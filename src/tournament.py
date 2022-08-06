@@ -9,7 +9,7 @@ import time
 
 
 class Game(Player):
-    def __init__(self,websocket, current=0):
+    def __init__(self,websocket, current=0,alone=False):
         super().__init__(current)
         self.name="gruppeAN"
         if current>0:

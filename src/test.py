@@ -158,11 +158,15 @@ def bench_utility(FEN):
 if __name__ == "__main__":
     ## DEMO ## TODO andere Demos auf aktualität überprüfen ung ggf. removen
     #                   ich brauch davon nichts mehr
-
+    def teste(FEN,zeit,wdh=5):
+        for x in range (wdh):
+            player.do_move(FEN,t=zeit,name=True)
     # inputs:#
-
+    zeit = 2#27
+    tiefe = 2
+    wdh = 1000
+    elo=True
     #p = Player()
-    
     # FEN="r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR W"
     # FEN="rnb1kbnr/p4ppp/1p1pp3/2p3q1/3P4/NQP1PNPB/PP3P1P/R1B1K2R w"
     # FEN="3q3r/1pp2pb1/3pkn2/1B6/3P4/4PN1P/5K1P/7R b"
@@ -172,10 +176,33 @@ if __name__ == "__main__":
     FEN="rnb2bnr/pppqp2p/3pk1p1/8/3pN3/6N1/PPP1QPPP/R1B1KB1R W"
     FEN="r1b1k2r/bp1pp1np/2n5/Q4p1B/2P1N3/3P3N/P3PPPP/R4RK1 b"#checkmate entgehung testen
     
-    player=Player(-1)
-    zeit = 2#27
-    tiefe = 2
-    wdh = 1000
+    #elo test http://www.chessmaniac.com/ELORating/ELO_Chess_Rating.shtml -> 1470 w/o Koth
+    if elo:
+        FEN="r1b3k1/6p1/P1n1pr1p/q1p5/1b1P4/2N2N2/PP1QBPPP/R3K2R b"
+        player=Player(-1)
+        teste(FEN,zeit,5)
+        FEN="2nq1nk1/5p1p/4p1pQ/pb1pP1NP/1p1P2P1/1P4N1/P4PB1/6K1 w"
+        player.current=1
+        teste(FEN,zeit,5)
+        FEN="8/3r2p1/pp1Bp1p1/1kP5/1nb1K3/6R1/1P3P2/8 w - - 0 1"
+        teste(FEN,zeit,5)
+        FEN="8/4kb1p/2p3pP/1pP1P1P1/1P3K2/1B6/8/8 w - - 0 1"
+        teste(FEN,zeit,5)
+        FEN="b1R2nk1/5ppp/1p3n2/5N2/1b2p3/1P2BP2/q3BQPP/6K1 w"
+        teste(FEN,zeit,5)
+        FEN="3rr1k1/pp3pbp/2bp1np1/q3p1B1/2B1P3/2N4P/PPPQ1PP1/3RR1K1 w Qq - 0 1"
+        player.current=-1
+        teste(FEN,zeit,5)
+        FEN="r1b1qrk1/1ppn1pb1/p2p1npp/3Pp3/2P1P2B/2N5/PP1NBPPP/R2Q1RK1 b Qq - 0 1"
+        player.current=1
+        teste(FEN,zeit,5)
+        FEN="2R1r3/5k2/pBP1n2p/6p1/8/5P1P/2P3P1/7K w e - 0 1"
+        teste(FEN,zeit,5)
+        FEN="2r2rk1/1p1R1pp1/p3p2p/8/4B3/3QB1P1/q1P3KP/8 w q - 0 1"
+        player.current=-1
+        teste(FEN,zeit,5)
+        FEN="r1bq1rk1/p4ppp/1pnp1n2/2p5/2PPpP2/1NP1P3/P3B1PP/R1BQ1RK1 b Qq - 0 1"
+        teste(FEN,zeit,5)
     
     
     #Suche:#mid utility
@@ -207,8 +234,8 @@ if __name__ == "__main__":
     #-> allgemein:
     # 1: 0,1%; 2: 0,05%; 3: 0,04%
    # tt=ttable("testtable")
-    for x in range (5):
-        player.do_move(FEN,t=zeit,name=True)
+    if not elo:
+        teste(FEN,zeit,5)
     #ttables-> sucheebene 3 start 0.14 -> 0.02
     player.close()
         #FEN, t=None, depth=None,utilities=True,tt=False,sort=False,windows=False)

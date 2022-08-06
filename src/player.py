@@ -142,9 +142,11 @@ class Player():
         # #tsearch = t / 2
         
         
-       
-        [bb, play] = FENtoBit(FEN, True)
-        
+        try:
+            [bb, play] = FENtoBit(FEN, True)
+        except:
+            print("illegal fen")
+            return False, False
         # tt=ttable("testtable.mymemmap",32)#erstellen falls noetig, sonst in build tree
         # if not name:
         if self.current != play:#TODO player current richtig setzen
@@ -165,7 +167,7 @@ class Player():
             #     move=random.choice(moves)
             #     return BittoFEN(move)
                
-            if not checkmate(bb, play):  # Spielende überprüfen
+            if not checkmate(bb, play) or checkmate(bb,play):  # Spielende überprüfen
                 if opening:#opening table verwenden
                     hash=self.opening.hash_value(bb,play)
                     info=self.opening.in_table(hash)
