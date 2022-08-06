@@ -1,7 +1,5 @@
 import numpy as np
 
-
-
 def bitboard(indices=[]):
     # defines basic bitboard of type int8/boolean
     # gibt bitboard mit 1en für jeden index in indices und ansonsten 0en aus

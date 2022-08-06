@@ -1,8 +1,6 @@
-from cgitb import reset
-from pydoc import cli
 import threading
 import socket
-from main import *
+from game import *
 from bitboard import BoardtoFEN, FENtoBit, FENtoBoard
 #TODO checkmate integrieren
 #TODO zeitbegrenzung schicken

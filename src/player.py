@@ -1,12 +1,6 @@
-from bitboard import FENtoBit,BittoFEN
-from tree import Tree
 import logging
-import time
-from treebuild import *#build_tree
-from tree_search import search, best_node
-from checkmate import checkmate
-from utility import utility
-from tt import ttable
+from tree_search import *
+from tt import *
 
 
 def timer(function):
@@ -24,6 +18,7 @@ class Player():
         self.current = current
         self.tt=ttable("hashtable")
         self.opening=ttable("opening",open=True)
+        self.ergebnis=[]
         #### das auskommentieren kostet 8 GB Speicherplatz!!! ####
         # self.tt=ttable("testtable.mymemmap",32)
 
@@ -41,7 +36,7 @@ class Player():
             print("Du hast gewonnen!")
         else:
             print("Du hast verloren!")
-            # TODO remis implement
+            # TODO remis implementfor local tests
 
     def __get__(self):
         # extrahiert aktuellen Spieler als String
@@ -55,20 +50,236 @@ class Player():
         # alphabetasearch
         # Node = findNode(ergebnis)
         # return tree with updated values
-
-    # TODO insert functions in class
+        
     def close(self):
         self.tt.save_table()
         self.opening.save_table()
-    def turn(self, FEN, t=10,tt=True,name=False,check=False):  # ein kompletter zug der ki
+    
+    def reset(self):
+        self.ergebnis=[]
         
+    def do_move(self, FEN, t=10,tt=True,name=False,check=False,fast=False):
+        opening=False#bisher kein zug aus den opening tables
+        start = time.time()
+        tchoose=t
+        if type(self.ergebnis)!=Tree:
+        #len(self.ergebnis.root.children)<=0:
+            
+            format = "%(asctime)s: %(message)s"
+            logging.basicConfig(format=format, level=logging.INFO,
+                                datefmt="%H:%M:%S")
+            logging.info("Main    : start turn " + str(start - start))
+            ergebnis,tchoose=self.turn(FEN,t,tt,name,check)
+            if ergebnis==False:
+                return False
+            if name:
+                names=[]    
+            moves=[]
+            if type(ergebnis)!=Tree:#[move,name] from opening table
+                if name:
+                    test=FENtoBit(ergebnis)
+                    for x,y in generate_moves_verbose(FENtoBit(FEN),self.current):
+                        if x==test:
+                            first=y
+                            if fast:
+                                return first
+                            else:
+                                moves.append(test)
+                                names.append(first)
+                            break
+                else:
+                    if fast:
+                        return ergebnis
+                    else:
+                        moves.append(ergebnis)
+                opening=[moves,names]
+                ergebnis,tchoose=self.turn(FEN,t,tt,name,check,opening=False)
+                if ergebnis==False:
+                    return False
+                    
+            self.ergebnis=ergebnis
+        tleft =start-time.time()
+        logging.info("Main    : choosing good move " + str(tchoose))
+        node=best_node(self.ergebnis,self.current,name,tchoose,opening)
+        self.ergebnis.delete_node(node)
+        #FEN=node.name
+        finish = time.time()
+        logging.info("Main    : chosen move: " +str(node.name)+" in "+ str(finish - start) + "s")
+        logging.info("Main    : time remaining: " + str(start + t - finish))
+        if name:
+            #move=node.name.split("-")
+            return node.name#move[1]
+        else:
+            #self.__switch__()
+            return BittoFEN(node.b, -self.current)
+        self.__switch__()
+        
+        print("size: ",len(ergebnis.nodes))
+        if name:
+            return names
+        return move
+        
+    def turn(self, FEN, t=10,tt=True,name=False,check=False,opening=True):  # ein kompletter zug der ki
+        print("time: "+str(t))
+        # print(FEN)
+        #t-=0.5#buffer ping etc
+        start = time.time()
+        # format = "%(asctime)s: %(message)s"
+        # logging.basicConfig(format=format, level=logging.INFO,
+        #                     datefmt="%H:%M:%S")
+        # logging.info("Main    : start turn " + str(start - start))
+        # tmove = t*0.999  # 99.9% move time, 0.1% search and choose time -> 0.3% - 2% time unused
+        # #tmove = (t/100)*90  # seconds
+        tmove=t*0.99
+        
+        tmove=tmove*0.98# 2 % slippage in time in movetree function
+        # #tsearch = t / 2
+        
+        
+        try:
+            [bb, play] = FENtoBit(FEN, True)
+        except:
+            print("illegal fen")
+            return False, False
+        # tt=ttable("testtable.mymemmap",32)#erstellen falls noetig, sonst in build tree
+        # if not name:
+        if self.current != play:#TODO player current richtig setzen
+            return False, False
+            #and FENtoBit(FEN,True) != False:  # spieler am zug und fen bekommen
+        
+        if FENtoBit(FEN,True) != False:
+            # bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#testFEN
+            tree = Tree(bb)  # ,self.tt.starthash)#leerer baum mit b als root
+            if t<=0:#panic mode
+                #TODO test
+                #treebuild until height 1 w/o utility
+                build_tree(tree,self.current,depth=1,tt=self.tt)
+                return tree
+            #     moves, names = generate_moves_verbose(bb, play)
+            #     if name:
+            #         return random.choice(names)
+            #     move=random.choice(moves)
+            #     return BittoFEN(move)
+               
+            if not checkmate(bb, play) or checkmate(bb,play):  # Spielende überprüfen
+                if opening:#opening table verwenden
+                    hash=self.opening.hash_value(bb,play)
+                    info=self.opening.in_table(hash)
+                    if len(info)!=0:
+                        logging.info("Main    : choosing from opening table: " + str(time.time()-start))
+                        FEN=[]
+                        moves=info
+                        FEN.append(moves)
+                        #FEN=random.choice(moves)
+                        
+                        if name:
+                            b=[]
+                            for y in range(len(moves)):
+                                b.append(moves[y].split(" ")[0])
+                            move, names = generate_moves_verbose(bb, play)
+                            for x in range(len(move)):
+                                for y in range(len(moves)):
+                                    if BittoFEN(move[x]).split(" ")[0]==b[y]:
+                                        FEN.append(names[x])
+                                        #break
+                            
+                                    
+                            
+                        logging.info("Main    : finished using opening table: " + str(time.time()-start))
+                        return FEN,time.time()-start
+            
+                if tt!=False:
+                    tt=self.tt
+                    # tre.print_tree()
+                    # arr=p.set_movetree(tre,tmove)
+                    # tree.print_tree()
+                    #logging.info("Main    : building movetree " + str(time.time() - start))
+                    #height, lefttime = build_tree(tree,play,tmove=(start + tmove - time.time()),tt=tt)  # time bzw. depth
+                    # arr[1]=tree.h
+                    #tree.sort_nodes()
+                    tsearch=t-tmove#+lefttime
+                    if tsearch<=0:
+                        #if not name:
+                            return tree,tsearch#BittoFEN(tree.root.children[0].b,play)
+                        # else:
+                        #     return tree.root.children[0].name
+                    if tsearch<0.005:#dauer bis zu ebene 1 zu suchen/bewerten
+                        
+                        return tree, tsearch
+                        # node=best_node(tree,play,time=False,check=check)
+                        # FEN = BittoFEN(node.b, play)
+                        # if not name:
+                        #     return FEN
+                        # else:
+                        #     return node.name
+                    
+                    self.current = play
+                    # tleft = time.time() - start
+                    # logging.info("Main    : movetree finished with height: " + str(height) + " " + str(tleft))
+                    # logging.info("Main    : tree build finished in:" + str(time.time() - start) + "s")
+
+                    # tree.print_tree()
+                    # print(tree)  
+                    # utility auf root?
+                    #depth = 1
+                    tleft=time.time()-start
+                    logging.info("Main    : doing tree search " + str(tleft))
+                    #tree.sort_nodes() #FEhler bei invertet=True
+                    sstart = time.time()
+                    self.tree=tree
+                    #tree.print_tree()
+                    depth,tree= search(self, tmove, tsearch)
+                    self.tree=tree
+                    if tsearch<0:
+                        tleft= (time.time()-sstart)
+                        
+                        return tree,t-tleft#BittoFEN(tree.root.children[0].b,play)
+                    #tree.print_node(tree.root.children[0])
+                    #tree.print_tree()
+                    self.current=play
+                    # tree.print_node(tree.nodes[2])#teste tree nach search
+                    tleft = time.time() - start
+                    logging.info("Main    : tree search finished with depth: " + str(depth)+" and "+ str((tree.nodes))+ " Nodes in " + str(
+                        time.time() - sstart) + "s")
+                    # logging.info("Main    : sorting nodes " + str(tleft))
+                    # sstart= time.time()
+                    # tree.sort_nodes(tree.root)
+                    # fin=time.time()
+                    # logging.info("Main    : finished sorting "+str((tree.nodes))+" in " + str(fin-sstart))
+                    tleft= time.time()-start
+                    return tree, t-tleft
+                    node = best_node(tree,self.current,check)  # besten zug auswaehlen
+                    # move=tree.find_node(node.index)
+                    # logging.info("Main    : finished turn "+str(start+t))
+                    finish = time.time()
+                    self.__switch__()
+                    if name:
+                        #move=node.name.split("-")
+                        FEN=node.name#move[1]
+                    else:
+                        FEN = BittoFEN(node.b, self.current)
+                    self.__switch__()
+                    logging.info("Main    : finished turn in " + str(finish - start) + "s")
+                    logging.info("Main    : time remaining: " + str(start + t - time.time()))
+                    print("size: ",len(tree.nodes))
+            else:
+                return False, False#FEN=False
+        else:  # Spieler nicht dran
+            return False, False#FEN = False
+        # self.__switch__()#Spieler wechseln (egal ob zug gemacht odeer nicht
+        # logging.info("Main    : chosen move: " +str(FEN)+" "+ str(start + t - time.time()))
+        # return tree
+    
+    
+    def test_turn(self, FEN, t=10,tt=True,name=False,check=False,opening=True):  # ein kompletter zug der ki
+        print("time: "+str(t))
         # print(FEN)
         t-=0.5#buffer ping etc
         start = time.time()
-        format = "%(asctime)s: %(message)s"
-        logging.basicConfig(format=format, level=logging.INFO,
-                            datefmt="%H:%M:%S")
-        logging.info("Main    : start turn " + str(start - start))
+        # format = "%(asctime)s: %(message)s"
+        # logging.basicConfig(format=format, level=logging.INFO,
+        #                     datefmt="%H:%M:%S")
+        # logging.info("Main    : start turn " + str(start - start))
         # tmove = t*0.999  # 99.9% move time, 0.1% search and choose time -> 0.3% - 2% time unused
         # #tmove = (t/100)*90  # seconds
         tmove=t*0.99
@@ -81,43 +292,51 @@ class Player():
         [bb, play] = FENtoBit(FEN, True)
         
         # tt=ttable("testtable.mymemmap",32)#erstellen falls noetig, sonst in build tree
-        if not name:
-            if self.current != play:
-                return False
+        # if not name:
+        if self.current != play:#TODO player current richtig setzen
+            return False, False
             #and FENtoBit(FEN,True) != False:  # spieler am zug und fen bekommen
         
         if FENtoBit(FEN,True) != False:
             # bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#testFEN
             tree = Tree(bb)  # ,self.tt.starthash)#leerer baum mit b als root
             if t<=0:#panic mode
-                moves, names = generate_moves_verbose(bb, play)
-                if name:
-                    return random.choice(names)
-                move=random.choice(moves)
-                return BittoFEN(move)
+                #TODO test
+                #treebuild until height 1 w/o utility
+                build_tree(tree,self.current,depth=1,tt=self.tt)
+                return tree
+            #     moves, names = generate_moves_verbose(bb, play)
+            #     if name:
+            #         return random.choice(names)
+            #     move=random.choice(moves)
+            #     return BittoFEN(move)
                
             if not checkmate(bb, play):  # Spielende überprüfen
-                if True:#openings ausschalten
+                if opening:#opening table verwenden
                     hash=self.opening.hash_value(bb,play)
                     info=self.opening.in_table(hash)
                     if len(info)!=0:
                         logging.info("Main    : choosing from opening table: " + str(time.time()-start))
+                        FEN=[]
                         moves=info
-                         
-                        FEN=random.choice(moves)
+                        FEN.append(moves)
+                        #FEN=random.choice(moves)
                         
                         if name:
-                            b=FEN.split(" ")[0]
+                            b=[]
+                            for y in range(len(moves)):
+                                b.append(moves[y].split(" ")[0])
                             move, names = generate_moves_verbose(bb, play)
                             for x in range(len(move)):
-                                if BittoFEN(move[x]).split(" ")[0]==b:
-                                    #moves=x
-                                    break
-                            FEN= names[x]
+                                for y in range(len(moves)):
+                                    if BittoFEN(move[x]).split(" ")[0]==b[y]:
+                                        FEN.append(names[x])
+                                        #break
+                            
                                     
                             
                         logging.info("Main    : finished using opening table: " + str(time.time()-start))
-                        return FEN
+                        return FEN,time.time()-start
             
                 if tt!=False:
                     tt=self.tt
@@ -127,19 +346,22 @@ class Player():
                     logging.info("Main    : building movetree " + str(time.time() - start))
                     height, lefttime = build_tree(tree,play,tmove=(start + tmove - time.time()),tt=tt)  # time bzw. depth
                     # arr[1]=tree.h
+                    tree.sort_nodes()
                     tsearch=t-tmove+lefttime
                     if tsearch<=0:
-                        if not name:
-                            return BittoFEN(tree.root.children[0].b,play)
-                        else:
-                            return tree.root.children[0].name
+                        #if not name:
+                            return tree,tsearch#BittoFEN(tree.root.children[0].b,play)
+                        # else:
+                        #     return tree.root.children[0].name
                     if tsearch<0.005:#dauer bis zu ebene 1 zu suchen/bewerten
-                        node=best_node(tree,play,time=False,check=check)
-                        FEN = BittoFEN(node.b, play)
-                        if not name:
-                            return FEN
-                        else:
-                            return node.name
+                        
+                        return tree, tsearch
+                        # node=best_node(tree,play,time=False,check=check)
+                        # FEN = BittoFEN(node.b, play)
+                        # if not name:
+                        #     return FEN
+                        # else:
+                        #     return node.name
                     
                     self.current = play
                     tleft = time.time() - start
@@ -156,7 +378,9 @@ class Player():
                     #tree.print_tree()
                     depth,tree= search(tree,self, height, tsearch)
                     if tsearch<0:
-                        return BittoFEN(tree.root.children[0].b,play)
+                        tleft= (time.time()-sstart)
+                        
+                        return tree,t-tleft#BittoFEN(tree.root.children[0].b,play)
                     #tree.print_node(tree.root.children[0])
                     #tree.print_tree()
                     self.current=play
@@ -164,7 +388,13 @@ class Player():
                     tleft = time.time() - start
                     logging.info("Main    : tree search finished with depth: " + str(depth) + " in " + str(
                         time.time() - sstart) + "s")
-                    logging.info("Main    : choosing good move " + str(tleft))
+                    logging.info("Main    : sorting nodes " + str(tleft))
+                    sstart= time.time()
+                    tree.sort_nodes()
+                    fin=time.time()
+                    logging.info("Main    : finished sorting "+str((tree.nodes))+" in " + str(fin-sstart))
+                    tleft= time.time()-start
+                    return tree, t-tleft
                     node = best_node(tree,self.current,check)  # besten zug auswaehlen
                     # move=tree.find_node(node.index)
                     # logging.info("Main    : finished turn "+str(start+t))
@@ -180,122 +410,12 @@ class Player():
                     logging.info("Main    : time remaining: " + str(start + t - time.time()))
                     print("size: ",len(tree.nodes))
             else:
-                FEN=False
+                return False, False#FEN=False
         else:  # Spieler nicht dran
-            FEN = False
+            return False, False#FEN = False
         # self.__switch__()#Spieler wechseln (egal ob zug gemacht odeer nicht
-        logging.info("Main    : chosen move: " +str(FEN)+" "+ str(start + t - time.time()))
-        return FEN
+        # logging.info("Main    : chosen move: " +str(FEN)+" "+ str(start + t - time.time()))
+        # return tree
     
     
-    def test_turn(self, FEN, t=None, depth=None,utilities=True,tt=False,sort=False,windows=False,zob=False):  # ein kompletter zug der ki
-        # print(FEN)
-        # if depth!=None:
-        #     depth-=1
-        start = time.time()
-        format = "%(asctime)s: %(message)s"
-        logging.basicConfig(format=format, level=logging.INFO,
-                            datefmt="%H:%M:%S")
-        logging.info("Main    : start turn " + str(start - start))
-        if t==None:
-            tmove=None
-            tsearch=1000
-        else:
-            tmove = (t / 10) * 9  # seconds
-            tsearch = t / 10
-        [bb, play] = FENtoBit(FEN, True)
-        # tt=ttable("testtable.mymemmap",32)#erstellen falls noetig, sonst in build tree
-        if self.current == play and FENtoBit(FEN,True) != False:  # spieler am zug und fen bekommen
-
-            # bb=FENtoBit("r1b1kbnr/pN2pp1p/2P5/1p4qp/3P3P/2P5/PP3PP1/R1B1K1NR w")#testFEN
-            if tt!=False:
-                
-                tree = Tree(bb,tt.starthash)  # ,self.tt.starthash)#leerer baum mit b als root
-            else:
-                tree=Tree(bb)
-            if not checkmate(bb, self.current):  # Spielende überprüfen
-                # tre.print_tree()
-                # arr=p.set_movetree(tre,tmove)
-                # tree.print_tree()
-                logging.info("Main    : building movetree " + str(time.time() - start))
-                if t:
-                    tmove=(start + tmove - time.time())
-                height = build_tree(tree,self.current,tmove=tmove,depth=depth,utilities=True,tt=tt,zob=zob)  # time bzw. depth
-                # arr[1]=tree.h
-                
-                utilities=True
-                self.current = play
-                tleft = time.time() - start
-                logging.info("Main    : movetree finished with height: " + str(height) + " " + str(tleft))
-                logging.info("Main    : tree build finished in: " + str(time.time() - start) + "s")
-                if utilities==False:
-                    alphabet = ["a", "b", "c", "d", "e", "f", "g", "h"]
-                    logging.info("Main    : start utility "+str(tleft))
-                    sstart=time.time()
-                    if tt!=False:
-                        tree.nodes[0].hash=tt.starthash
-                    for x in tree.nodes[1:]:
-                        if tt!=False:
-                            k = -1
-                            for z in range(len(alphabet)):
-                                if alphabet[z] == x.name[4].lower():
-                                    k = z
-                                    break
-                            if k == -1:
-                                print(x.name, "has wrong syntax")
-                                print(x.name[4], "is not an column index")
-                                break
-                            else:
-                                y = int(x.name[5]) - 1
-                                # x=np.where(alphabet==names[b][4])#a->1
-                                token = x.name[0]
-                                hash = tt.hash_value(x.parent.hash, k, y, token)
-                                util = tt.in_table(hash, x.h + 1)
-                                if len(util) != 2:
-                                    # print(hash)
-                                    
-                                    util = utility(x.b,self.current)
-                                    tt.to_table(hash, util, x.h)
-                                x.value=util    
-                                x.hash=hash
-                        else:
-                            x.value=utility(x.b,self.current)
-                    tt=False
-                    fin=time.time()-sstart
-                    logging.info("Main    : utility finished in: " +str(fin) + "s")
-                # tree.print_tree()
-                # print(tree)  
-                # utility auf root?
-                #depth = 1
-                if sort:
-                    logging.info("Main    : sorting nodes " + str(tleft))
-                    sstart=time.time()
-                    tree.sort_nodes() 
-                    logging.info("Main    : finished sorting in: " + str(time.time() - sstart) + "s")
-                logging.info("Main    : doing tree search " + str(tleft))
-                sstart = time.time()
-                # if t==None:
-                #     tsearch=1000
-                depth = search(tree.root, self.current, height, tsearch,old=windows)
-                # tree.print_node(tree.nodes[2])#teste tree nach search
-                logging.info("Main    : tree search finished with depth: " + str(depth) + " in " + str(
-                    time.time() - sstart) + "s")
-                tleft = time.time() - start
-                logging.info("Main    : choosing good move " + str(tleft))
-                node = best_node(tree,self.current,check=check)  # besten zug auswaehlen
-                # move=tree.find_node(node.index)
-                # logging.info("Main    : finished turn "+str(start+t))
-                finish = time.time()
-                self.__switch__()
-                FEN = BittoFEN(node.b, self.current)
-                self.__switch__()
-                logging.info("Main    : finished turn in " + str(finish - start) + "s")
-                if t==None:
-                    depth -= 1
-                    t=0
-                logging.info("Main    : time remaining: " + str(start + t - time.time()))
-                print("lenge: ",len(tree.nodes))
-        else:  # Spieler nicht dran
-            FEN = False
-        # self.__switch__()#Spieler wechseln (egal ob zug gemacht odeer nicht
-        return FEN
+    

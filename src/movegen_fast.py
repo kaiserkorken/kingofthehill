@@ -1,5 +1,4 @@
 from bitboard import *
-import copy
 import time
 
 from movegen import *

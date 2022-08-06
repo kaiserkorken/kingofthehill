@@ -1,7 +1,6 @@
 import threading
 import socket
 from player import *
-from tt import ttable
 alias = input('Choose an alias >>> ')
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(('127.0.0.1', 59566))

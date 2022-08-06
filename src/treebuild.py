@@ -1,6 +1,5 @@
 from movegen import generate_moves
 from movegen_verbose import generate_moves_verbose
-from utility import utility
 from tt import *
 import time
 
@@ -62,9 +61,9 @@ def moves_to_node_h(tree, player, h=0, index=0, tt=False, utilities=True):  # ad
 
     return h+1  # h nötig?
 
-def moves_to_node(tree, player, h=0, index=0, tt=False, utilities=True, t=False):  # added züge an node(index) mit nodes.value=None
+def moves_to_node(tree,node, player, h=0, index=0, tt=False, utilities=True, t=False):  # added züge an node(index) mit nodes.value=None
     # while (time-(tmax/2)>0):
-    node = tree.find_node(index)
+    #node = tree.find_node(index)
     if t !=False:
         start=time.time()
     if node.h<2:
@@ -123,8 +122,10 @@ def moves_to_node(tree, player, h=0, index=0, tt=False, utilities=True, t=False)
             else:
                 print("leerer move")
                 moves.remove(moves[b])
-
-    return h+1,start + t - time.time()  # h nötig?
+    if t:
+        return h+1,start + t - time.time()  # h nötig?
+    else:
+        return h+1, None
 
 def build_tree(tree, player,index=0, h=0, tmove=None, depth=None,utilities=True,tt=False, zob=False,gen=False):  # tree ebenen erstellen bis tiefe d
     # tmove=height[4]

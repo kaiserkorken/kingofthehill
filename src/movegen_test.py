@@ -1,4 +1,3 @@
-import numpy as np
 from player import *
 from movegen_verbose import *
 import time

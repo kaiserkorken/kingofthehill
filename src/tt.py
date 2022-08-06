@@ -5,7 +5,6 @@ import hashlib
 import random
 from bitboard import *
 import json
-import sys
 # try: 
 #     import cpickle as pickle
     

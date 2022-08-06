@@ -1,4 +1,3 @@
-import numpy as np
 from bitboard import *
 import time
 
@@ -100,8 +99,8 @@ def generate_moves_verbose(b, player,king=False):
         move_list_capture_king, move_list_quiet_king, name_list_capture_king, name_list_quiet_king = gen_moves_king(b, player)
         move_list_capture_queen, move_list_quiet_queen, name_list_capture_queen, name_list_quiet_queen = gen_moves_queen(b, player)
         move_list_capture_knight, move_list_quiet_knight, name_list_capture_knight, name_list_quiet_knight = gen_moves_knight(b, player) 
-        move_list_capture_rook, move_list_quiet_rook, name_list_capture_rook, name_list_quiet_rook = gen_moves_rook(b, player) 
         move_list_capture_bishop, move_list_quiet_bishop, name_list_capture_bishop, name_list_quiet_bishop = gen_moves_bishop(b, player) 
+        move_list_capture_rook, move_list_quiet_rook, name_list_capture_rook, name_list_quiet_rook = gen_moves_rook(b, player) 
         move_list_capture_pawn, move_list_quiet_pawn, name_list_capture_pawn, name_list_quiet_pawn = gen_moves_pawn(b, player) 
         
         #t_piece = time.time() - t_start
@@ -112,8 +111,8 @@ def generate_moves_verbose(b, player,king=False):
                                             move_list_capture_king,
                                             move_list_capture_queen,
                                             move_list_capture_knight,
-                                            move_list_capture_rook,
                                             move_list_capture_bishop,
+                                            move_list_capture_rook,
                                             move_list_capture_pawn,
                                             ))
                                         
@@ -122,8 +121,8 @@ def generate_moves_verbose(b, player,king=False):
                                         move_list_quiet_king,
                                         move_list_quiet_queen,
                                         move_list_quiet_knight,
-                                        move_list_quiet_rook,
                                         move_list_quiet_bishop,
+                                        move_list_quiet_rook,
                                         move_list_quiet_pawn,
                                         ))
         
@@ -132,8 +131,8 @@ def generate_moves_verbose(b, player,king=False):
                                             name_list_capture_king,
                                             name_list_capture_queen,
                                             name_list_capture_knight,
-                                            name_list_capture_rook,
                                             name_list_capture_bishop,
+                                            name_list_capture_rook,
                                             name_list_capture_pawn,
                                             ))
         
@@ -141,8 +140,8 @@ def generate_moves_verbose(b, player,king=False):
                                         name_list_quiet_king,
                                         name_list_quiet_queen,
                                         name_list_quiet_knight,
-                                        name_list_quiet_rook,
                                         name_list_quiet_bishop,
+                                        name_list_quiet_rook,
                                         name_list_quiet_pawn,
                                         ))
         

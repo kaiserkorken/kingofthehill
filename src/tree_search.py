@@ -1,8 +1,8 @@
 import time
-import numpy as np
 import random
 import copy
 
+from utility import *
 from tree import *
 from bitboard import *
 from treebuild import *
@@ -13,20 +13,36 @@ from checkmate import checkmate
 ### constants
 inf = 100000
 
+buildtime=0
 
-
-def best_node(tree, player_code, check=False,time=True):
-    if not time:
-        return random.choice(tree.root.children)
+def best_node(tree, player_code, name=False,time=True,opening=False):
+    tree.sort_nodes(tree.root,all=False)
+    if not time or time<0.005:
+        choice=random.choice(tree.root.children)
+        return choice
+        # if name:
+        #     return choice.name
+        # return BittoFEN(choice.b,-player_code)
     #tree.print_tree()
     # nodes height 1 sammeln
     #print(tree.root.children)
-    children = list(tree.root.children)
-
+    children = np.asarray(tree.root.children)#list(tree.root.children)
+    if opening!=False:#opening dazu adden
+       # for x in opening[0]:
+            np.where(children!=opening[0],children.value,children.value*2)
     # print(children)
     # print(children)
     if len(children) > 0:  # falls Züge vorhanden
+    
         values=[]
+        #children=np.sort(children)
+        best_val=children[0].value
+        choice=[children[0]]
+        for x in range (1,np.argmin([3,len(children)])-1):
+            if np.abs(children[x].value-best_val)<1:#gleich bewertet#maximal ein bauernschlag unterschied
+                choice.append(children[x])
+        node=random.choice(choice)#random aus ersten 4 besten moves
+        return node
         # if check:
         #     for x in (children):
         #         if check:
@@ -54,6 +70,10 @@ def best_node(tree, player_code, check=False,time=True):
         except:
             print("random choice")
             return random.choice(children)
+    else:
+        print('kein Zug vorhanden!')
+        print("else: ", children[0])
+        return children[0]
         #values = player_code * np.array([x.value ])
         #"""
         #"""
@@ -102,28 +122,28 @@ def best_node(tree, player_code, check=False,time=True):
         node = random.choice(children)
         return node
 
-    else:
-        print('kein Zug vorhanden!')
-        print("else: ", children[0])
-        return children[0]
+    
 
 # Zeitberechnung für nächste Iteration in Tiefensuche
 def time_expected_next(time_last_run, depth=0):
-    time_exponent = 25  # Multiplikator mit der benötigte Zeit ansteigt
+    if depth==0:
+        return 1# ca. 1 s for first iteration
+    time_exponent = 5  # Exponent mit der benötigte Zeit ansteigt
     time_expected = time_last_run*time_exponent
-    #time_expected = time_last_run/time_exponent**depth
-    # 2 -> y
-    # 1= x + 70* y
-    # 70*y =x
-
+    #Ebene 1-4
+    #0.07
+    #1.6
+    #4.4
+    #33
+   
     return time_expected
 
 ### Hauptsuchroutine. Wählt taktisch verschiedene Suchverfahren
-def search(tree, player, max_depth, search_time=30, new=False, verbose=False):
+def search(player, movetime=20, search_time=2, new=False, verbose=False):
     #root_node=tree.root
     # iterative Tiefensuche
     time_last_run = 0.0 # benötigte Zeit für letzten Durchlauf
-    time_left = search_time - time_last_run # Zeit bis Abbruch
+    time_left = movetime + search_time - time_last_run # Zeit bis Abbruch
     time_expected_next_run = time_expected_next(time_last_run) # Zeit, die voraussichtlich für nächste Ebene benötigt wird
 
     depth = 0
@@ -131,19 +151,21 @@ def search(tree, player, max_depth, search_time=30, new=False, verbose=False):
     beta = inf
 
     ### DEEP COPY TREE VON ALTER ITERATION
-
-    tree_copy = copy.deepcopy(tree)
-
+    savetree=copy.deepcopy(player.tree)
+    tree_copy = copy.deepcopy(player.tree)
+    run=0
     if verbose:
         print("search initiated with time to run: " + str(time_left))
-    while (depth <= max_depth and time_left > time_expected_next_run ): # Erhöhe Tiefe so lange wie Fertigstellung der Ebene noch realistisch
-
-        tree = copy.deepcopy(tree_copy) # lade backup
+    while (time_left>=0 and time_left> time_expected_next_run ): # Erhöhe Tiefe so lange wie Fertigstellung der Ebene noch realistisch
+       
 
         time_start = time.time()
+        savetree=copy.deepcopy(player.tree)#ergebnis der letzten iteration speichern
+        #player.tree.reset()#values resetten
+        player.tree=copy.deepcopy(tree_copy) # lade backup
         ### Suche
         if not new:
-            best_val = a_b_search(tree.root, player, depth)
+            best_val = a_b_search(player.tree.root, player, depth,depth)
         else:
             if depth > 0: # aspiration window suche um besten wert aus der letzten Tiefeniteration
                 best_val, aw_failed_left, aw_failed_right = a_b_search_aspiration_window(root_node, player, best_val, depth)
@@ -151,28 +173,34 @@ def search(tree, player, max_depth, search_time=30, new=False, verbose=False):
                     print("     aspiration bounds failed [left/right]: " + str(aw_failed_left) + " / " + str(aw_failed_right))
             else: # kein aspiration window, da kein Anhaltswert aus letzter Iteration verfügbar
                 best_val = a_b_search_principal_variation(root_node, player, depth, alpha, beta)
-
+    
 
         time_stop = time.time()
         time_last_run = time_stop - time_start # benötigte Zeit für letzten Durchlauf
 
         time_left -= time_last_run # Zeit bis Abbruch
-        time_expected_next_run = time_expected_next(time_last_run) # Zeit, die voraussichtlich für nächste Ebene benötigt wird
+        time_expected_next_run = time_expected_next(time_last_run,depth) # Zeit, die voraussichtlich für nächste Ebene benötigt wird
+        print(time_last_run)
         if verbose:
             print("  depth : " + str(depth) + " took " + str(time_last_run) + " to complete.")
             print("  best value found: " + str(best_val))
             print("  time left: " + str(time_left) + ". next estimate: " + str(time_expected_next_run))
         depth += 1
+        
 
 
     if verbose:
-        print("search completed at depth: " + str(depth) + " with total time left: " + str(time_left))
+        print("search completed at depth: " + str(depth) + "and"+str(len(player.tree.nodes))+"moves with total time left: " + str(time_left))
         print("best value found: " + str(best_val))
 
     #if depth!=max_depth+1:#suche ist nicht komplett durchgegangen
+    
     depth-=1
+    if player.tree.root.value==None:
+        player.tree=savetree#letzte Suche unvolstaendig
+        depth-=1
     #tree.root=root_node
-    return depth, tree#best_val
+    return depth, player.tree#best_val
 
 
 
@@ -242,23 +270,33 @@ def a_b_search_bak(node, depth=0, ismax=True):
 
 
 # alpha beta
-def a_b_search(node, player, depth=0, alpha=-inf, beta=inf,ismax=True):
-#    print(node)
+def a_b_search(node, player, depth=0,height=0, alpha=-inf, beta=inf,ismax=True):
+    #    print(node)
 #    print(player)
 #    print(depth)
-    if depth==0 or len(node.children)==0:
+    global buildtime
+    if depth==0:
         if node.value == None:
             node.value , node.hash= utility(node.b, player,node.h)
             #print(depth, player, node.value)
         return node.value
     #player.__switch__()
+    #moves generieren
+    start=time.time()
+    if len(node.children)<=0:
+        tiefe=height-depth
+        if (tiefe)%2==0:
+            moves_to_node(player.tree,node,player.current,h=tiefe,index=node.index,tt=player.tt)
+        else:
+            moves_to_node(player.tree,node,-player.current,h=tiefe,index=node.index,tt=player.tt)#anderer spieler am zug
+    buildtime+=time.time()-start
     if ismax:
         val=alpha
-
+        
         for child in node.children:
             #print(a_b_search(child, -player, depth-1, -beta, -alpha,))
 
-            val = max(val, a_b_search(child, player, depth-1, val,beta,False))
+            val = max(val, a_b_search(child, player, depth-1,height, val,beta,False))
             #node.value = vals
 
 
@@ -272,7 +310,7 @@ def a_b_search(node, player, depth=0, alpha=-inf, beta=inf,ismax=True):
         for child in node.children:
             #print(a_b_search(child, -player, depth-1, -beta, -alpha,))
 
-            val = min(val, a_b_search(child, player, depth-1, alpha,val,True))
+            val = min(val, a_b_search(child, player, depth-1,height, alpha,val,True))
             #node.value = vals
 
             if (alpha >= val):
@@ -280,17 +318,17 @@ def a_b_search(node, player, depth=0, alpha=-inf, beta=inf,ismax=True):
         node.value = val
         return val
 """
-function negamax(node, depth, α, β, color) is
+function negamax(node, depth, a, b, color) is
     if depth = 0 or node is a terminal node then
-        return color × the heuristic value of node
+        return color x the heuristic value of node
 
     childNodes := generateMoves(node)
     childNodes := orderMoves(childNodes)
-    value := −∞
+    value := −inf
     foreach child in childNodes do
-        value := max(value, −negamax(child, depth − 1, −β, −α, −color))
-        α := max(α, value)
-        if α ≥ β then
+        value := max(value, −negamax(child, depth − 1, −b, −a, −color))
+        a := max(a, value)
+        if a >= b then
             break (* cut-off *)
     return value
 """
@@ -385,7 +423,56 @@ def a_b_search_aspiration_window(node, player, expected_value, depth=0, widening
 
 
 
+def null_move(node, player, depth=0,height=0, alpha=-inf, beta=inf,ismax=True):
+    #    print(node)
+#    print(player)
+#    print(depth)
+    global buildtime
+    if buildtime<0:
+        return 0
+    if depth==0:
+        if node.value == None:
+            node.value , node.hash= utility(node.b, player,node.h)
+            #print(depth, player, node.value)
+        
+        return node.value
+    #player.__switch__()
+    #moves generieren
+    start=time.time()
+    if len(node.children)<=0:
+        tiefe=height-depth
+        if (tiefe)%2==0:
+            moves_to_node(player.tree,node,player.current,h=tiefe,index=node.index,tt=player.tt)
+        else:
+            moves_to_node(player.tree,node,-player.current,h=tiefe,index=node.index,tt=player.tt)#anderer spieler am zug
+    buildtime+=time.time()-start
+    if ismax:
+        val=alpha
+        
+        for child in node.children:
+            #print(a_b_search(child, -player, depth-1, -beta, -alpha,))
 
+            val = max(val, a_b_search(child, player, depth-1,height, val,beta,False))
+            #node.value = vals
+
+
+            if (val >= beta):
+                break
+        node.value = val
+        return val
+    else:
+        val=beta
+
+        for child in node.children:
+            #print(a_b_search(child, -player, depth-1, -beta, -alpha,))
+
+            val = min(val, a_b_search(child, player, depth-1,height, alpha,val,True))
+            #node.value = vals
+
+            if (alpha >= val):
+                break
+        node.value = val
+        return val
 
 def bench_tree_search_list(tree_dict_list, tree_height=None, search_time=15, search_mode='search', verbose=True):
     if verbose:
