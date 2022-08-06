@@ -10,7 +10,7 @@ bibssbr=["1","2","3","4","5","6","7","8"]
 
 
 def make_move(b_old, bb_from, bb_to):
-    # Zuggenerator funktioniert!
+
     b_new = copy.deepcopy(b_old) # Tiefkopie wegen call-by-reference
     #if (bb_from | bb_to).any():
     for bb_key, bb in b_old.items():
@@ -30,17 +30,9 @@ def make_move(b_old, bb_from, bb_to):
 
 
 def make_move_pawn_to_queen(b_old, bb_from, bb_to):
-    # Zuggenerator funktioniert!
-    b_new = copy.deepcopy(b_old) # Tiefkopie wegen call-by-reference
-    #if (bb_from | bb_to).any():
-    for bb_key, bb in b_old.items():
-        #print(bb_key)
-        #print("FROM")
-        #print(b_new[bb_key])
-        if (bb & bb_to).any() : # falls gegnerische figur auf ziel auf bitboard verhanden
-            b_new[bb_key] = bb  ^ bb_to # update bitboard: Schlag: Feld auf bb_to verschwindet
-
-
+    
+    b_new = make_move(b_old, bb_from, bb_to)
+    
     b_new['p'] = b_new['p'] ^ bb_to # entferne Bauern nachträglich wieder
     b_new['q'] = b_new['q'] ^ bb_to # setze Dame
     #print("TO")
