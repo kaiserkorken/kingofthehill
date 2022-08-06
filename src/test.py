@@ -1,7 +1,5 @@
-from email import message
 from player import *
 from movegen_verbose import generate_moves_verbose
-from tt import *
     
 def teste(player, FEN, value=0, search=False, zug=False, utility=False, tree=False, tiefe=False, turn=False,
               baum=False, tt=False):

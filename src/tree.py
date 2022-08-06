@@ -1,5 +1,4 @@
 # from anytree import NodeMixin, RenderTree
-import numpy as np
 # class knoten(object):  # Just an example of a base class
 #     foo=0
 

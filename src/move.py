@@ -9,9 +9,6 @@ Created on Wed Jun 15 16:59:04 2022
 """
 
 from bitboard import *
-import copy
-import time
-
 from movegen import *
 
 

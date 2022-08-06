@@ -3,7 +3,6 @@ from player import *
 #from json import *
 import asyncio
 from websockets import connect
-import time
 
 #play=0
 

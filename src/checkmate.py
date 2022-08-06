@@ -1,4 +1,3 @@
-from bitboard import FENtoBit, BittoFEN
 def checkmate(bitboard,player):
     counter = 0
     sss = bitboard#FENtoBit(BittoFEN(bitboard))

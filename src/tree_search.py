@@ -1,8 +1,8 @@
 import time
-import numpy as np
 import random
 import copy
 
+from utility import *
 from tree import *
 from bitboard import *
 from treebuild import *
@@ -130,15 +130,12 @@ def time_expected_next(time_last_run, depth=0):
         return 1# ca. 1 s for first iteration
     time_exponent = 5  # Exponent mit der benötigte Zeit ansteigt
     time_expected = time_last_run*time_exponent
+    #Ebene 1-4
     #0.07
     #1.6
     #4.4
     #33
-    #time_expected = time_last_run/time_exponent**depth
-    # 2 -> y
-    # 1= x + 70* y
-    # 70*y =x
-
+   
     return time_expected
 
 ### Hauptsuchroutine. Wählt taktisch verschiedene Suchverfahren

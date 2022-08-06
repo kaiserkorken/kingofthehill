@@ -1,6 +1,5 @@
 from movegen import generate_moves
 from movegen_verbose import generate_moves_verbose
-from utility import utility
 from tt import *
 import time
 

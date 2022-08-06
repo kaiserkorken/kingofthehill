@@ -1,5 +1,4 @@
 from bitboard import *
-from tt import ttable
 import time
 
 
